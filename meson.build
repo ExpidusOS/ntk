@@ -41,38 +41,44 @@ nuklear_cargs = [
   '-DNK_INCLUDE_STANDARD_IO=1',
   '-DNK_INCLUDE_STANDARD_VARARGS=1',
   '-DNK_MEMSET=memset',
-  '-DNK_MEMCPY=memcpy'
+  '-DNK_MEMCPY=memcpy',
+  '-DNK_DTOA=nk_dtoa'
 ]
-nuklear_lib = static_library('nuklear', [
-    'deps/nuklear/src/nuklear_combo.c', 'deps/nuklear/src/nuklear_menu.c',
-    'deps/nuklear/src/nuklear_group.c', 'deps/nuklear/src/nuklear_progress.c',
-    'deps/nuklear/src/nuklear_util.c', 'deps/nuklear/src/nuklear_slider.c',
-    'deps/nuklear/src/nuklear_window.c', 'deps/nuklear/src/nuklear_math.c',
-    'deps/nuklear/src/nuklear_property.c', 'deps/nuklear/src/nuklear_toggle.c',
-    'deps/nuklear/src/nuklear_page_element.c', 'deps/nuklear/src/nuklear_color.c',
-    'deps/nuklear/src/nuklear_vertex.c', 'deps/nuklear/src/nuklear_tree.c',
-    'deps/nuklear/src/nuklear_font.c', 'deps/nuklear/src/nuklear_chart.c',
-    'deps/nuklear/src/nuklear_widget.c', 'deps/nuklear/src/nuklear_string.c',
-    'deps/nuklear/src/nuklear_input.c', 'deps/nuklear/src/nuklear_pool.c',
-    'deps/nuklear/src/nuklear_buffer.c', 'deps/nuklear/src/nuklear_color_picker.c',
-    'deps/nuklear/src/nuklear_draw.c', 'deps/nuklear/src/nuklear_context.c',
-    'deps/nuklear/src/nuklear_table.c', 'deps/nuklear/src/nuklear_contextual.c',
-    'deps/nuklear/src/nuklear_edit.c', 'deps/nuklear/src/nuklear_utf8.c',
-    'deps/nuklear/src/nuklear_scrollbar.c', 'deps/nuklear/src/nuklear_panel.c',
-    'deps/nuklear/src/nuklear_list_view.c', 'deps/nuklear/src/nuklear_text.c',
-    'deps/nuklear/src/nuklear_9slice.c', 'deps/nuklear/src/nuklear_text_editor.c',
-    'deps/nuklear/src/nuklear_popup.c', 'deps/nuklear/src/nuklear_tooltip.c',
-    'deps/nuklear/src/nuklear_selectable.c', 'deps/nuklear/src/nuklear_button.c',
-    'deps/nuklear/src/nuklear_image.c', 'deps/nuklear/src/nuklear_style.c',
-    'deps/nuklear/src/nuklear_layout.c'
-  ],
-  c_args: nuklear_cargs)
-nuklear = declare_dependency(link_with: nuklear_lib,
+nuklear_src = [
+  'deps/nuklear/src/nuklear_combo.c', 'deps/nuklear/src/nuklear_menu.c',
+  'deps/nuklear/src/nuklear_group.c', 'deps/nuklear/src/nuklear_progress.c',
+  'deps/nuklear/src/nuklear_util.c', 'deps/nuklear/src/nuklear_slider.c',
+  'deps/nuklear/src/nuklear_window.c', 'deps/nuklear/src/nuklear_math.c',
+  'deps/nuklear/src/nuklear_property.c', 'deps/nuklear/src/nuklear_toggle.c',
+  'deps/nuklear/src/nuklear_page_element.c', 'deps/nuklear/src/nuklear_color.c',
+  'deps/nuklear/src/nuklear_vertex.c', 'deps/nuklear/src/nuklear_tree.c',
+  'deps/nuklear/src/nuklear_font.c', 'deps/nuklear/src/nuklear_chart.c',
+  'deps/nuklear/src/nuklear_widget.c', 'deps/nuklear/src/nuklear_string.c',
+  'deps/nuklear/src/nuklear_input.c', 'deps/nuklear/src/nuklear_pool.c',
+  'deps/nuklear/src/nuklear_buffer.c', 'deps/nuklear/src/nuklear_color_picker.c',
+  'deps/nuklear/src/nuklear_draw.c', 'deps/nuklear/src/nuklear_context.c',
+  'deps/nuklear/src/nuklear_table.c', 'deps/nuklear/src/nuklear_contextual.c',
+  'deps/nuklear/src/nuklear_edit.c', 'deps/nuklear/src/nuklear_utf8.c',
+  'deps/nuklear/src/nuklear_scrollbar.c', 'deps/nuklear/src/nuklear_panel.c',
+  'deps/nuklear/src/nuklear_list_view.c', 'deps/nuklear/src/nuklear_text.c',
+  'deps/nuklear/src/nuklear_9slice.c', 'deps/nuklear/src/nuklear_text_editor.c',
+  'deps/nuklear/src/nuklear_popup.c', 'deps/nuklear/src/nuklear_tooltip.c',
+  'deps/nuklear/src/nuklear_selectable.c', 'deps/nuklear/src/nuklear_button.c',
+  'deps/nuklear/src/nuklear_image.c', 'deps/nuklear/src/nuklear_style.c',
+  'deps/nuklear/src/nuklear_layout.c', 'deps/nk_utils.c'
+]
+nuklear_deps = [meson.get_compiler('c').find_library('m')]
+nuklear_shlib = shared_library('nuklear', nuklear_src,
+  dependencies: nuklear_deps,
+  c_args: nuklear_cargs,
+  install: true)
+nuklear = declare_dependency(link_with: nuklear_shlib,
+  dependencies: nuklear_deps,
   compile_args: nuklear_cargs,
   include_directories: include_directories('deps/nuklear'))
 
-libntk_src = ['src/lib/context.c', 'src/lib/error.c', 'src/lib/renderer.c']
-libntk_headers = ['include/ntk/ntk.h', 'include/ntk/context.h', 'include/ntk/error.h', 'include/ntk/renderer.h']
+libntk_src = ['src/lib/context.c', 'src/lib/error.c', 'src/lib/font.c', 'src/lib/renderer.c']
+libntk_headers = ['include/ntk/ntk.h', 'include/ntk/context.h', 'include/ntk/error.h', 'include/ntk/font.h', 'include/ntk/renderer.h']
 
 libntk_inc = include_directories('include')
 libntk_deps = [gobject, pango, nuklear]
@@ -84,6 +90,9 @@ libntk_shlib = shared_library('ntk', libntk_src, libntk_enums,
   include_directories: libntk_inc,
   dependencies: libntk_deps,
   install: true)
+libntk = declare_dependency(link_with: libntk_shlib,
+  include_directories: libntk_inc,
+  dependencies: libntk_deps)
 libntk_gir = gnome.generate_gir(libntk_shlib,
   dependencies: [libntk_deps],
   namespace: 'Ntk',
@@ -95,3 +104,5 @@ libntk_vapi = gnome.generate_vapi('Ntk-@0@'.format(shortver.split('-')[0]),
   packages: ['pango'],
   sources: libntk_gir[0],
   install: true)
+
+subdir('renderers')

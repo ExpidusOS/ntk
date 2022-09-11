@@ -11,6 +11,8 @@ G_DECLARE_FINAL_TYPE(NtkContext, ntk_context, NTK, CONTEXT, GObject);
 
 struct _NtkContext {
 	GObject parent_instance;
+
+	/*< private >*/
 	struct _NtkContextPrivate* priv;
 };
 
