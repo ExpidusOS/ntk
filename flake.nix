@@ -49,6 +49,8 @@
 							glib
 							gtk4
 							vala
+							libdrm
+							libglvnd
 						];
 					};
 				});

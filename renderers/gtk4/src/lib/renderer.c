@@ -29,15 +29,18 @@ static NtkRendererType ntk_renderer_gtk4_renderer_get_render_type(NtkRenderer* r
 	return NTK_RENDERER_TYPE_VERTEX;
 }
 
-static gboolean ntk_renderer_gtk4_renderer_render_command(NtkRenderer* renderer, struct nk_command* cmd, GError** error) {
+static gboolean ntk_renderer_gtk4_renderer_render_command(NtkRenderer* renderer, const struct nk_command* cmd, GError** error) {
 	NtkRendererGtk4Renderer* self = NTK_RENDERER_GTK4_RENDERER(renderer);
 	NtkRendererGtk4RendererPrivate* priv = NTK_RENDERER_GTK4_RENDERER_PRIVATE(self);
 	return TRUE;
 }
 
-static gboolean ntk_renderer_gtk4_renderer_render_vertex(NtkRenderer* renderer, struct nk_draw_command* cmd, GError** error) {
+static gboolean ntk_renderer_gtk4_renderer_render_vertex(NtkRenderer* renderer, NtkRendererVertexCommand* cmd, GError** error) {
 	NtkRendererGtk4Renderer* self = NTK_RENDERER_GTK4_RENDERER(renderer);
 	NtkRendererGtk4RendererPrivate* priv = NTK_RENDERER_GTK4_RENDERER_PRIVATE(self);
+
+	if (priv->draw_context == NULL) {
+	}
 	return TRUE;
 }
 
@@ -74,24 +77,7 @@ static void ntk_renderer_gtk4_renderer_finalize(GObject* obj) {
 	G_OBJECT_CLASS(obj)->finalize(obj);
 }
 
-static void ntk_renderer_gtk4_renderer_set_property(GObject* obj, guint prop_id, GValue* value, GParamSpec* pspec) {
-	NtkRendererGtk4Renderer* self = NTK_RENDERER_GTK4_RENDERER(obj);
-	NtkRendererGtk4RendererPrivate* priv = NTK_RENDERER_GTK4_RENDERER_PRIVATE(self);
-
-	switch (prop_id) {
-		case PROP_SNAPSHOT:
-			g_value_set_object(value, priv->snapshot);
-			break;
-		case PROP_DRAW_CONTEXT:
-			g_value_set_object(value, priv->draw_context);
-			break;
-		default:
-			G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, prop_id, pspec);
-			break;
-	}
-}
-
-static void ntk_renderer_gtk4_renderer_get_property(GObject* obj, guint prop_id, const GValue* value, GParamSpec* pspec) {
+static void ntk_renderer_gtk4_renderer_set_property(GObject* obj, guint prop_id, const GValue* value, GParamSpec* pspec) {
 	NtkRendererGtk4Renderer* self = NTK_RENDERER_GTK4_RENDERER(obj);
 	NtkRendererGtk4RendererPrivate* priv = NTK_RENDERER_GTK4_RENDERER_PRIVATE(self);
 
@@ -101,6 +87,23 @@ static void ntk_renderer_gtk4_renderer_get_property(GObject* obj, guint prop_id,
 			break;
 		case PROP_DRAW_CONTEXT:
 			priv->draw_context = g_value_dup_object(value);
+			break;
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, prop_id, pspec);
+			break;
+	}
+}
+
+static void ntk_renderer_gtk4_renderer_get_property(GObject* obj, guint prop_id, GValue* value, GParamSpec* pspec) {
+	NtkRendererGtk4Renderer* self = NTK_RENDERER_GTK4_RENDERER(obj);
+	NtkRendererGtk4RendererPrivate* priv = NTK_RENDERER_GTK4_RENDERER_PRIVATE(self);
+
+	switch (prop_id) {
+		case PROP_SNAPSHOT:
+			g_value_set_object(value, priv->snapshot);
+			break;
+		case PROP_DRAW_CONTEXT:
+			g_value_set_object(value, priv->draw_context);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, prop_id, pspec);
@@ -121,8 +124,8 @@ static void ntk_renderer_gtk4_renderer_class_init(NtkRendererGtk4RendererClass* 
 	object_class->constructed = ntk_renderer_gtk4_renderer_constructed;
 	object_class->finalize = ntk_renderer_gtk4_renderer_finalize;
 
-	object_class->set_property = (GObjectSetPropertyFunc)ntk_renderer_gtk4_renderer_set_property;
-	object_class->get_property = (GObjectGetPropertyFunc)ntk_renderer_gtk4_renderer_get_property;
+	object_class->set_property = ntk_renderer_gtk4_renderer_set_property;
+	object_class->get_property = ntk_renderer_gtk4_renderer_get_property;
 
 	obj_props[PROP_SNAPSHOT] = g_param_spec_object("snapshot", "Gtk4 Snapshot", "The Gtk4 Snapshot to render onto.", GTK_TYPE_SNAPSHOT, G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 	obj_props[PROP_DRAW_CONTEXT] = g_param_spec_object("draw-context", "Gdk Draw Context", "The (optional) Gdk drawing context to utilize with the snapshot.", GDK_TYPE_DRAW_CONTEXT, G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
@@ -132,6 +135,14 @@ static void ntk_renderer_gtk4_renderer_class_init(NtkRendererGtk4RendererClass* 
 
 static void ntk_renderer_gtk4_renderer_init(NtkRendererGtk4Renderer* self) {
 	self->priv = ntk_renderer_gtk4_renderer_get_instance_private(self);
+}
+
+NtkRenderer* ntk_renderer_gtk4_renderer_new() {
+	return NTK_RENDERER(g_object_new(NTK_RENDERER_GTK4_TYPE_RENDERER, NULL));
+}
+
+NtkRendererGtk4Renderer* ntk_renderer_gtk4_renderer_new_with_snapshot(GtkSnapshot* snapshot, GdkDrawContext* draw_context) {
+	return NTK_RENDERER_GTK4_RENDERER(g_object_new(NTK_RENDERER_GTK4_TYPE_RENDERER, "snapshot", snapshot, "draw-context", draw_context, NULL));
 }
 
 GtkSnapshot* ntk_renderer_gtk4_renderer_get_snapshot(NtkRendererGtk4Renderer* self) {

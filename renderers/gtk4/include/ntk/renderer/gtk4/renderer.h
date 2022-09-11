@@ -20,7 +20,7 @@ struct _NtkRendererGtk4Renderer {
 /**
  * ntk_renderer_gtk4_renderer_new: (constructor)
  */
-NtkRendererGtk4Renderer* ntk_renderer_gtk4_renderer_new();
+NtkRenderer* ntk_renderer_gtk4_renderer_new();
 
 /**
  * ntk_renderer_gtk4_renderer_new_with_snapshot: (constructor)

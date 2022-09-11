@@ -10,22 +10,49 @@ G_BEGIN_DECLS
 #define NTK_TYPE_RENDERER ntk_renderer_get_type()
 G_DECLARE_INTERFACE(NtkRenderer, ntk_renderer, NTK, RENDERER, GObject);
 
+/**
+ * NtkRendererType:
+ *
+ * Since: 0.1.0
+ */
 typedef enum { /*< flags,prefix=NTK_RENDERER_TYPE,since=0.1.0 >*/
 	NTK_RENDERER_TYPE_COMMAND = 0,
 	NTK_RENDERER_TYPE_VERTEX = 1
 } NtkRendererType;
 
+typedef struct nk_command NtkRendererDrawCommand;
+
+typedef struct {
+	const struct nk_draw_command* cmd;
+	struct nk_buffer cmds;
+	struct nk_buffer verts;
+	struct nk_buffer idx;
+} NtkRendererVertexCommand;
+
+typedef struct {
+	int is_vertex:1;
+	union {
+		const NtkRendererDrawCommand* draw;
+		NtkRendererVertexCommand vertex;
+	};
+} NtkRendererCommand;
+
+/**
+ * NtkRenderer:
+ *
+ * Since: 0.1.0
+ */
 struct _NtkRendererInterface {
 	GTypeInterface parent_iface;
 
 	NtkRendererType (*get_render_type)(NtkRenderer* self);
-	gboolean (*render_command)(NtkRenderer* self, struct nk_command* cmd, GError** error);
-	gboolean (*render_vertex)(NtkRenderer* self, struct nk_draw_command* cmd, GError** error);
+	gboolean (*render_command)(NtkRenderer* self, const NtkRendererDrawCommand* cmd, GError** error);
+	gboolean (*render_vertex)(NtkRenderer* self, NtkRendererVertexCommand* cmd, GError** error);
 	struct nk_user_font* (*get_font)(NtkRenderer* self, PangoFontDescription* desc, GError** error);
 };
 
 NtkRendererType ntk_renderer_get_render_type(NtkRenderer* self);
-gboolean ntk_renderer_draw(NtkRenderer* self, struct nk_command* cmd, struct nk_draw_command* draw_cmd, GError** error);
+gboolean ntk_renderer_draw(NtkRenderer* self, NtkRendererCommand* cmd, GError** error);
 struct nk_user_font* ntk_renderer_get_font(NtkRenderer* self, PangoFontDescription* desc, GError** error);
 
 G_END_DECLS

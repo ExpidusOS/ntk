@@ -2,5 +2,6 @@
 #define __NTK_RENDERER_GTK4_H_ 1
 
 #include "gtk4/renderer.h"
+#include "gtk4/widget.h"
 
 #endif

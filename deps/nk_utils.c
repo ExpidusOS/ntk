@@ -4,6 +4,8 @@
 
 #define NK_FLOAT_PRECISION 0.00000000000001
 
+int nk_ifloord(double x);
+
 char* nk_dtoa(char* s, double n) {
     int useExp = 0;
     int digit = 0, m = 0, m1 = 0;
@@ -79,4 +81,15 @@ char* nk_dtoa(char* s, double n) {
     }
     *(c) = '\0';
     return s;
+}
+
+float nk_inv_sqrt(float n) {
+	float x2;
+	const float threehalfs = 1.5f;
+	union {nk_uint i; float f;} conv = {0};
+	conv.f = n;
+	x2 = n * 0.5f;
+	conv.i = 0x5f375A84 - (conv.i >> 1);
+	conv.f = conv.f * (threehalfs - (x2 * conv.f * conv.f));
+	return conv.f;
 }

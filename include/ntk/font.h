@@ -4,6 +4,11 @@
 #include <pango/pango.h>
 #include <nuklear.h>
 
+/**
+ * NtkPangoLayoutFont:
+ *
+ * Since: 0.1.0
+ */
 typedef struct nk_user_font NtkPangoLayoutFont;
 
 /**

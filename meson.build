@@ -37,12 +37,16 @@ conf_data.set('SOURCEDIR', meson.current_source_dir())
 
 nuklear_cargs = [
   '-DNK_INCLUDE_DEFAULT_ALLOCATOR=1',
+  '-DNK_INCLUDE_VERTEX_BUFFER_OUTPUT=1',
   '-DNK_INCLUDE_FIXED_TYPES=1',
   '-DNK_INCLUDE_STANDARD_IO=1',
   '-DNK_INCLUDE_STANDARD_VARARGS=1',
   '-DNK_MEMSET=memset',
   '-DNK_MEMCPY=memcpy',
-  '-DNK_DTOA=nk_dtoa'
+  '-DNK_DTOA=nk_dtoa',
+  '-DNK_COS=cos',
+  '-DNK_SIN=sin',
+  '-DNK_INV_SQRT=nk_inv_sqrt'
 ]
 nuklear_src = [
   'deps/nuklear/src/nuklear_combo.c', 'deps/nuklear/src/nuklear_menu.c',
@@ -77,6 +81,9 @@ nuklear = declare_dependency(link_with: nuklear_shlib,
   compile_args: nuklear_cargs,
   include_directories: include_directories('deps/nuklear'))
 
+configure_file(input: 'src/Ntk.metadata.in', output: 'Ntk-@0@.metadata'.format(shortver.split('-')[0]),
+  configuration: conf_data)
+
 libntk_src = ['src/lib/context.c', 'src/lib/error.c', 'src/lib/font.c', 'src/lib/renderer.c']
 libntk_headers = ['include/ntk/ntk.h', 'include/ntk/context.h', 'include/ntk/error.h', 'include/ntk/font.h', 'include/ntk/renderer.h']
 
@@ -101,6 +108,7 @@ libntk_gir = gnome.generate_gir(libntk_shlib,
   header: 'ntk/ntk.h',
   install: true)
 libntk_vapi = gnome.generate_vapi('Ntk-@0@'.format(shortver.split('-')[0]),
+  metadata_dirs: [meson.current_build_dir()],
   packages: ['pango'],
   sources: libntk_gir[0],
   install: true)
