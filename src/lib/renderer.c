@@ -20,6 +20,16 @@ static void ntk_renderer_class_init(NtkRendererClass* klass) {
 static void ntk_renderer_init(NtkRenderer* self) {}
 
 void ntk_renderer_request_draw(NtkRenderer* self, int width, int height) {
+	g_return_if_fail(NTK_IS_RENDERER(self));
+
+	if (width < 1) {
+		g_warning("ntk_renderer_request_draw called with a width of less than 1 pixel.");
+	}
+
+	if (height < 1) {
+		g_warning("ntk_renderer_request_draw called with a height of less than 1 pixel.");
+	}
+
 	g_signal_emit(self, obj_sigs[SIG_REQUEST_DRAW], 0, width, height);
 }
 
@@ -27,8 +37,6 @@ NtkRendererType ntk_renderer_get_render_type(NtkRenderer* self) {
 	NtkRendererClass* klass;
 	g_return_val_if_fail(NTK_IS_RENDERER(self), -1);
 	klass = NTK_RENDERER_CLASS(self);
-
-	printf("%p %p %p\n", self, klass, klass->get_render_type);
 
 	g_return_val_if_fail(klass->get_render_type != NULL, -1);
 	return klass->get_render_type(self);
