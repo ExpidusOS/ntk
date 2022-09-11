@@ -36,7 +36,7 @@ void ntk_renderer_request_draw(NtkRenderer* self, int width, int height) {
 NtkRendererType ntk_renderer_get_render_type(NtkRenderer* self) {
 	NtkRendererClass* klass;
 	g_return_val_if_fail(NTK_IS_RENDERER(self), -1);
-	klass = NTK_RENDERER_CLASS(self);
+	klass = NTK_RENDERER_GET_CLASS(self);
 
 	g_return_val_if_fail(klass->get_render_type != NULL, -1);
 	return klass->get_render_type(self);
@@ -46,7 +46,7 @@ gboolean ntk_renderer_draw(NtkRenderer* self, NtkRendererCommand* cmd, GError** 
 	NtkRendererClass* klass;
 	g_return_val_if_fail(NTK_IS_RENDERER(self), FALSE);
 	g_return_val_if_fail(error == NULL || *error == NULL, FALSE);
-	klass = NTK_RENDERER_CLASS(self);
+	klass = NTK_RENDERER_GET_CLASS(self);
 
 	NtkRendererType type = ntk_renderer_get_render_type(self);
 	if (type < 0) {
@@ -84,7 +84,7 @@ struct nk_user_font* ntk_renderer_get_font(NtkRenderer* self, PangoFontDescripti
 	g_return_val_if_fail(NTK_IS_RENDERER(self), FALSE);
 	g_return_val_if_fail(desc != NULL, FALSE);
 	g_return_val_if_fail(error == NULL || *error == NULL, FALSE);
-	klass = NTK_RENDERER_CLASS(self);
+	klass = NTK_RENDERER_GET_CLASS(self);
 
 	if (klass->get_font == NULL) {
 		ntk_error_set_bad_renderer(error, "the render type does not implement get_font", self);
