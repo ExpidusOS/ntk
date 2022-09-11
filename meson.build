@@ -1,4 +1,4 @@
-project('ntk', 'c', license: 'GPL-3.0-only', version: '0.1.0-prealpha')
+project('ntk', 'vala', 'c', license: 'GPL-3.0-only', version: '0.1.0-prealpha')
 
 gnome = import('gnome')
 pkg = import('pkgconfig')
@@ -22,6 +22,8 @@ if git.found()
 	endif
 endif
 
+add_project_arguments(['--vapidir', meson.current_build_dir()], language: 'vala')
+
 gobject = dependency('gobject-2.0')
 pango = dependency('pango')
 
@@ -32,6 +34,7 @@ conf_data.set('DATADIR', datadir)
 conf_data.set('LIBDIR', libdir)
 conf_data.set('LIBEXECDIR', libexecdir)
 conf_data.set('VERSION', longver)
+conf_data.set('SMALL_VERSION', shortver.split('-')[0])
 conf_data.set('BUILDDIR', meson.current_build_dir())
 conf_data.set('SOURCEDIR', meson.current_source_dir())
 
@@ -81,7 +84,9 @@ nuklear = declare_dependency(link_with: nuklear_shlib,
   compile_args: nuklear_cargs,
   include_directories: include_directories('deps/nuklear'))
 
-configure_file(input: 'src/Ntk.metadata.in', output: 'Ntk-@0@.metadata'.format(shortver.split('-')[0]),
+configure_file(input: 'src/Ntk.vapi.in', output: 'Ntk-@0@.vapi'.format(shortver.split('-')[0]),
+  configuration: conf_data)
+configure_file(input: 'src/Ntk.deps.in', output: 'Ntk-@0@.deps'.format(shortver.split('-')[0]),
   configuration: conf_data)
 
 libntk_src = ['src/lib/context.c', 'src/lib/error.c', 'src/lib/font.c', 'src/lib/renderer.c']
@@ -106,11 +111,6 @@ libntk_gir = gnome.generate_gir(libntk_shlib,
   nsversion: shortver.split('-')[0],
   sources: [libntk_src, libntk_enums, libntk_headers],
   header: 'ntk/ntk.h',
-  install: true)
-libntk_vapi = gnome.generate_vapi('Ntk-@0@'.format(shortver.split('-')[0]),
-  metadata_dirs: [meson.current_build_dir()],
-  packages: ['pango'],
-  sources: libntk_gir[0],
   install: true)
 
 subdir('renderers')

@@ -1,7 +1,12 @@
 gtk4 = dependency('gtk4', required: false)
 
 if gtk4.found()
-  configure_file(input: 'src/NtkRendererGtk4.metadata.in', output: 'NtkRendererGtk4-@0@.metadata'.format(shortver.split('-')[0]),
+  libtokyo = dependency('tokyo-gtk4', required: false)
+  libadwaita = dependency('libadwaita-1', required: libtokyo.found())
+
+  configure_file(input: 'src/NtkRendererGtk4.vapi.in', output: 'NtkRendererGtk4-@0@.vapi'.format(shortver.split('-')[0]),
+    configuration: conf_data)
+  configure_file(input: 'src/NtkRendererGtk4.deps.in', output: 'NtkRendererGtk4-@0@.deps'.format(shortver.split('-')[0]),
     configuration: conf_data)
 
   libntk_renderer_gtk4_src = ['src/lib/renderer.c', 'src/lib/widget.c']
@@ -20,13 +25,20 @@ if gtk4.found()
     sources: [libntk_renderer_gtk4_src, libntk_renderer_gtk4_headers],
     header: 'ntk/renderer/gtk4.h',
     install: true)
-  libntk_renderer_gtk4_vapi = gnome.generate_vapi('NtkRendererGtk4-@0@'.format(shortver.split('-')[0]),
-    packages: ['Ntk-@0@'.format(shortver.split('-')[0]), 'gtk4'],
-    metadata_dirs: [meson.current_build_dir()],
-    sources: libntk_renderer_gtk4_gir[0],
-    install: true,
-    gir_dirs: meson.project_build_root())
   libntk_renderer_gtk4 = declare_dependency(link_with: libntk_renderer_gtk4_shlib,
     dependencies: libntk_renderer_gtk4_deps,
     include_directories: libntk_renderer_gtk4_inc)
+
+  if libtokyo.found()
+    executable('ntk-gtk4-example-basic', ['src/examples/basic/main.vala'],
+      vala_args: ['--vapidir', meson.current_build_dir()],
+      dependencies: [
+        libtokyo,
+        libadwaita,
+        libntk_renderer_gtk4,
+        meson.get_compiler('vala').find_library('NtkRendererGtk4-@0@'.format(shortver.split('-')[0]), dirs: meson.current_build_dir()),
+        meson.get_compiler('vala').find_library('Ntk-@0@'.format(shortver.split('-')[0]), dirs: meson.project_build_root()),
+        meson.get_compiler('vala').find_library('nuklear', dirs: join_paths(meson.project_source_root(), 'vapi'))
+      ])
+  endif
 endif

@@ -22,7 +22,7 @@ static GParamSpec* obj_props[N_PROPERTIES] = { NULL, };
 static guint obj_sigs[N_SIGNALS] = { 0 };
 
 static void ntk_context_constructed(GObject* obj) {
-	G_OBJECT_CLASS(obj)->constructed(obj);
+	G_OBJECT_CLASS(ntk_context_parent_class)->constructed(obj);
 
 	NtkContext* self = NTK_CONTEXT(obj);
 	NtkContextPrivate* priv = NTK_CONTEXT_PRIVATE(self);
@@ -51,7 +51,7 @@ static void ntk_context_finalize(GObject* obj) {
 
 	g_clear_object(&priv->renderer);
 
-	G_OBJECT_CLASS(obj)->finalize(obj);
+	G_OBJECT_CLASS(ntk_context_parent_class)->finalize(obj);
 }
 
 static void ntk_context_set_property(GObject* obj, guint prop_id, const GValue* value, GParamSpec* pspec) {

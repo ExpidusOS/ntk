@@ -2,24 +2,43 @@
 #include <ntk/renderer.h>
 #include "error-priv.h"
 
-G_DEFINE_INTERFACE(NtkRenderer, ntk_renderer, G_TYPE_OBJECT);
+G_DEFINE_TYPE(NtkRenderer, ntk_renderer, G_TYPE_OBJECT);
 
-static void ntk_renderer_default_init(NtkRendererInterface* iface) {}
+enum {
+	SIG_REQUEST_DRAW,
+	N_SIGNALS
+};
+
+static guint obj_sigs[N_SIGNALS] = { 0 };
+
+static void ntk_renderer_class_init(NtkRendererClass* klass) {
+	GObjectClass* object_class = G_OBJECT_CLASS(klass);
+
+	obj_sigs[SIG_REQUEST_DRAW] = g_signal_new("request-draw", G_OBJECT_CLASS_TYPE(object_class), G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL, G_TYPE_NONE, 2, G_TYPE_INT, G_TYPE_INT);
+}
+
+static void ntk_renderer_init(NtkRenderer* self) {}
+
+void ntk_renderer_request_draw(NtkRenderer* self, int width, int height) {
+	g_signal_emit(self, obj_sigs[SIG_REQUEST_DRAW], 0, width, height);
+}
 
 NtkRendererType ntk_renderer_get_render_type(NtkRenderer* self) {
-	NtkRendererInterface* iface;
+	NtkRendererClass* klass;
 	g_return_val_if_fail(NTK_IS_RENDERER(self), -1);
-	iface = NTK_RENDERER_GET_IFACE(self);
+	klass = NTK_RENDERER_CLASS(self);
 
-	g_return_val_if_fail(iface->get_render_type != NULL, -1);
-	return iface->get_render_type(self);
+	printf("%p %p %p\n", self, klass, klass->get_render_type);
+
+	g_return_val_if_fail(klass->get_render_type != NULL, -1);
+	return klass->get_render_type(self);
 }
 
 gboolean ntk_renderer_draw(NtkRenderer* self, NtkRendererCommand* cmd, GError** error) {
-	NtkRendererInterface* iface;
+	NtkRendererClass* klass;
 	g_return_val_if_fail(NTK_IS_RENDERER(self), FALSE);
 	g_return_val_if_fail(error == NULL || *error == NULL, FALSE);
-	iface = NTK_RENDERER_GET_IFACE(self);
+	klass = NTK_RENDERER_CLASS(self);
 
 	NtkRendererType type = ntk_renderer_get_render_type(self);
 	if (type < 0) {
@@ -29,23 +48,23 @@ gboolean ntk_renderer_draw(NtkRenderer* self, NtkRendererCommand* cmd, GError** 
 
 	switch (type) {
 		case NTK_RENDERER_TYPE_COMMAND:
-			if (iface->render_command == NULL) {
+			if (klass->render_command == NULL) {
 				ntk_error_set_bad_renderer(error, "the render type does not implement render_command", self);
 				return FALSE;
 			}
 
 			g_return_val_if_fail(cmd != NULL, FALSE);
 			g_return_val_if_fail(cmd->is_vertex, FALSE);
-			return iface->render_command(self, cmd->draw, error);
+			return klass->render_command(self, cmd->draw, error);
 		case NTK_RENDERER_TYPE_VERTEX:
-			if (iface->render_vertex == NULL) {
+			if (klass->render_vertex == NULL) {
 				ntk_error_set_bad_renderer(error, "the render type does not implement render_vertex", self);
 				return FALSE;
 			}
 
 			g_return_val_if_fail(cmd != NULL, FALSE);
 			g_return_val_if_fail(!cmd->is_vertex, FALSE);
-			return iface->render_vertex(self, &cmd->vertex, error);
+			return klass->render_vertex(self, &cmd->vertex, error);
 	}
 
 	ntk_error_set_bad_renderer(error, "reached end of draw function and no action was taken", self);
@@ -53,15 +72,15 @@ gboolean ntk_renderer_draw(NtkRenderer* self, NtkRendererCommand* cmd, GError** 
 }
 
 struct nk_user_font* ntk_renderer_get_font(NtkRenderer* self, PangoFontDescription* desc, GError** error) {
-	NtkRendererInterface* iface;
+	NtkRendererClass* klass;
 	g_return_val_if_fail(NTK_IS_RENDERER(self), FALSE);
 	g_return_val_if_fail(desc != NULL, FALSE);
 	g_return_val_if_fail(error == NULL || *error == NULL, FALSE);
-	iface = NTK_RENDERER_GET_IFACE(self);
+	klass = NTK_RENDERER_CLASS(self);
 
-	if (iface->get_font == NULL) {
+	if (klass->get_font == NULL) {
 		ntk_error_set_bad_renderer(error, "the render type does not implement get_font", self);
 		return FALSE;
 	}
-	return iface->get_font(self, desc, error);
+	return klass->get_font(self, desc, error);
 }

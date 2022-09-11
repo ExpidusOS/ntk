@@ -1,0 +1,71 @@
+[CCode (cprefix = "Ntk", gir_namespace = "Ntk", gir_version = "@SMALL_VERSION@", lower_case_cprefix = "ntk_")]
+namespace Ntk {
+	[CCode (cheader_filename = "ntk/ntk.h", type_id = "ntk_context_get_type ()")]
+	[Version (since = "0.1.0")]
+	public class Context : GLib.Object {
+		public Ntk.Renderer renderer { get; construct; }
+
+		public Context (Ntk.Renderer renderer);
+
+		public bool render () throws GLib.Error;
+		public signal void rendered ();
+	}
+
+	[CCode (cheader_filename = "ntk/ntk.h", has_type_id = false)]
+	[Compact]
+	[Version (since = "0.1.0")]
+	public struct PangoLayoutFont : Nk.UserFont {}
+
+	[CCode (cheader_filename = "ntk/ntk.h", has_type_id = false)]
+	[Compact]
+	[Version (since = "0.1.0")]
+	public struct RendererDrawCommand : Nk.Command {}
+
+	[CCode (cheader_filename = "ntk/ntk.h", type_cname = "NtkRendererInterface", type_id = "ntk_renderer_get_type ()")]
+	[Version (since = "0.1.0")]
+	public abstract class Renderer : GLib.Object {
+		public signal void request_draw(int width, int height);
+
+		public Nk.UserFont get_font(Pango.FontDescription desc) throws GLib.Error;
+		public bool draw (Ntk.RendererCommand cmd) throws GLib.Error;
+
+		public abstract Ntk.RendererType get_render_type ();
+
+		[NoWrapper]
+		public abstract bool render_command (Ntk.RendererDrawCommand cmd) throws GLib.Error;
+
+		[NoWrapper]
+		public abstract bool render_vertex (Ntk.RendererVertexCommand cmd) throws GLib.Error;
+	}
+
+	[CCode (cheader_filename = "ntk/ntk.h", has_type_id = false)]
+	[Version (since = "0.1.0")]
+	public struct RendererCommand {
+		public int is_vertex;
+		public weak Ntk.RendererDrawCommand draw;
+		public Ntk.RendererVertexCommand vertex;
+	}
+
+	[CCode (cheader_filename = "ntk/ntk.h", has_type_id = false)]
+	[Version (since = "0.1.0")]
+	public struct RendererVertexCommand {
+		public void* cmd;
+		public void* cmds;
+		public void* verts;
+		public void* idx;
+	}
+
+	[CCode (cheader_filename = "ntk/ntk.h", cprefix = "NTK_RENDERER_TYPE_", has_type_id = false)]
+	[Version (since = "0.1.0")]
+	public enum RendererType {
+		COMMAND,
+		VERTEX
+	}
+
+	[CCode (cheader_filename = "ntk/ntk.h", cprefix = "NTK_ERROR_", has_type_id = false)]
+	[Version (since = "0.1.0")]
+	public errordomain Error {
+		BAD_RENDERER,
+		NUKLEAR_FAIL
+	}
+}

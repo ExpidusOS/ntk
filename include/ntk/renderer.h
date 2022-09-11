@@ -8,7 +8,7 @@
 G_BEGIN_DECLS
 
 #define NTK_TYPE_RENDERER ntk_renderer_get_type()
-G_DECLARE_INTERFACE(NtkRenderer, ntk_renderer, NTK, RENDERER, GObject);
+G_DECLARE_DERIVABLE_TYPE(NtkRenderer, ntk_renderer, NTK, RENDERER, GObject);
 
 /**
  * NtkRendererType:
@@ -42,8 +42,8 @@ typedef struct {
  *
  * Since: 0.1.0
  */
-struct _NtkRendererInterface {
-	GTypeInterface parent_iface;
+struct _NtkRendererClass {
+	GObjectClass parent_class;
 
 	NtkRendererType (*get_render_type)(NtkRenderer* self);
 	gboolean (*render_command)(NtkRenderer* self, const NtkRendererDrawCommand* cmd, GError** error);
@@ -51,6 +51,7 @@ struct _NtkRendererInterface {
 	struct nk_user_font* (*get_font)(NtkRenderer* self, PangoFontDescription* desc, GError** error);
 };
 
+void ntk_renderer_request_draw(NtkRenderer* self, int width, int height);
 NtkRendererType ntk_renderer_get_render_type(NtkRenderer* self);
 gboolean ntk_renderer_draw(NtkRenderer* self, NtkRendererCommand* cmd, GError** error);
 struct nk_user_font* ntk_renderer_get_font(NtkRenderer* self, PangoFontDescription* desc, GError** error);

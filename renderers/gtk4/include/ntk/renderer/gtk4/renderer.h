@@ -8,10 +8,10 @@
 G_BEGIN_DECLS
 
 #define NTK_RENDERER_GTK4_TYPE_RENDERER ntk_renderer_gtk4_renderer_get_type()
-G_DECLARE_FINAL_TYPE(NtkRendererGtk4Renderer, ntk_renderer_gtk4_renderer, NTK_RENDERER_GTK4, RENDERER, GObject);
+G_DECLARE_FINAL_TYPE(NtkRendererGtk4Renderer, ntk_renderer_gtk4_renderer, NTK_RENDERER_GTK4, RENDERER, NtkRenderer);
 
 struct _NtkRendererGtk4Renderer {
-	GObject parent_instance;
+	NtkRenderer parent_instance;
 
 	/*< private >*/
 	struct _NtkRendererGtk4RendererPrivate* priv;

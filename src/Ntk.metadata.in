@@ -1,7 +1,0 @@
-*.unref skip
-*.free skip
-
-Context base_type="GLib.Object"
-Context.renderer skip
-
-PangoLayoutFont struct

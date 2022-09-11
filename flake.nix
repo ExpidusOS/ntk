@@ -1,7 +1,12 @@
 {
 	description = "Nuklear Toolkit";
 
-	outputs = { self, nixpkgs, ... }:
+	inputs.libtokyo = {
+    url = github:ExpidusOS/libtokyo;
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+
+	outputs = { self, libtokyo, nixpkgs, ... }:
 		let
 			supportedSystems = [
 				"aarch64-linux"
@@ -39,6 +44,7 @@
 			devShells = forAllSystems (system:
 				let
 					pkgs = nixpkgsFor.${system};
+					tokyo = libtokyo.packages.${system}.gtk4;
 				in {
 					default = pkgs.mkShell {
 						buildInputs = with pkgs; [
@@ -48,7 +54,9 @@
 							pkg-config
 							glib
 							gtk4
+							tokyo
 							vala
+							libadwaita
 							libdrm
 							libglvnd
 						];

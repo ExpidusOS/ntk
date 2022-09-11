@@ -1,0 +1,7 @@
+[CCode (cprefix = "NtkRendererEGL", gir_namespace = "NtkRendererEGL", gir_version = "@SMALL_VERSION@", lower_case_cprefix = "ntk_renderer_egl_")]
+namespace NtkRendererEGL {
+	[CCode (cheader_filename = "ntk/renderer/egl.h", type_id = "ntk_renderer_egl_renderer_get_type ()")]
+	public class Renderer : Ntk.Renderer {
+		public Renderer ();
+	}
+}

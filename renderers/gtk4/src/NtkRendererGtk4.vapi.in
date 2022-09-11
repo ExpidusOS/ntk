@@ -1,0 +1,19 @@
+[CCode (cprefix = "NtkRendererGtk4", gir_namespace = "NtkRendererGtk4", gir_version = "@SMALL_VERSION@", lower_case_cprefix = "ntk_renderer_gtk4_")]
+namespace NtkRendererGtk4 {
+	[CCode (cheader_filename = "ntk/renderer/gtk4.h", type_id = "ntk_renderer_gtk4_renderer_get_type ()")]
+	[Version (since = "0.1.0")]
+	public class Renderer : Ntk.Renderer {
+		public Gtk.Snapshot snapshot { get; construct; }
+
+		public Renderer();
+		public Renderer.with_snapshot(Gtk.Snapshot? snapshot, Gdk.DrawContext? draw_ctx = null);
+	}
+
+	[CCode (cheader_filename = "ntk/renderer/gtk4.h", type_id = "ntk_renderer_gtk4_widget_get_type ()")]
+	[Version (since = "0.1.0")]
+	public class Widget : Gtk.Widget, Gtk.Buildable {
+		public Ntk.Renderer renderer { get; }
+
+		public Widget();
+	}
+}

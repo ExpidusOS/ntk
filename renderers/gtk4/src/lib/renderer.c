@@ -14,11 +14,7 @@ enum {
 
 static GParamSpec* obj_props[N_PROPERTIES] = { NULL, };
 
-static void ntk_renderer_gtk4_renderer_interface_init(NtkRendererInterface* iface);
-
-G_DEFINE_TYPE_WITH_CODE(NtkRendererGtk4Renderer, ntk_renderer_gtk4_renderer, G_TYPE_OBJECT,
-		G_ADD_PRIVATE(NtkRendererGtk4Renderer)
-		G_IMPLEMENT_INTERFACE(NTK_TYPE_RENDERER, ntk_renderer_gtk4_renderer_interface_init));
+G_DEFINE_TYPE_WITH_PRIVATE(NtkRendererGtk4Renderer, ntk_renderer_gtk4_renderer, NTK_TYPE_RENDERER);
 
 static NtkRendererType ntk_renderer_gtk4_renderer_get_render_type(NtkRenderer* renderer) {
 	NtkRendererGtk4Renderer* self = NTK_RENDERER_GTK4_RENDERER(renderer);
@@ -53,7 +49,7 @@ static struct nk_user_font* ntk_renderer_gtk4_renderer_get_font(NtkRenderer* ren
 }
 
 static void ntk_renderer_gtk4_renderer_constructed(GObject* obj) {
-	G_OBJECT_CLASS(obj)->constructed(obj);
+	G_OBJECT_CLASS(ntk_renderer_gtk4_renderer_parent_class)->constructed(obj);
 
 	NtkRendererGtk4Renderer* self = NTK_RENDERER_GTK4_RENDERER(obj);
 	NtkRendererGtk4RendererPrivate* priv = NTK_RENDERER_GTK4_RENDERER_PRIVATE(self);
@@ -64,6 +60,20 @@ static void ntk_renderer_gtk4_renderer_constructed(GObject* obj) {
 		g_debug("Creating a new GTK Snapshot for %p", self);
 
 		priv->snapshot = gtk_snapshot_new();
+
+		GdkRGBA red, green, yellow, blue;
+		gdk_rgba_parse(&red, "red");
+		gdk_rgba_parse(&green, "green");
+		gdk_rgba_parse(&yellow, "yellow");
+		gdk_rgba_parse(&blue, "blue");
+
+		float w = 100;
+		float h = 100;
+
+		gtk_snapshot_append_color(priv->snapshot, &red, &GRAPHENE_RECT_INIT(0, 0, w, h));
+  	gtk_snapshot_append_color(priv->snapshot, &green, &GRAPHENE_RECT_INIT(w, 0, w, h));
+  	gtk_snapshot_append_color(priv->snapshot, &yellow, &GRAPHENE_RECT_INIT(0, h, w, h));
+  	gtk_snapshot_append_color(priv->snapshot, &blue, &GRAPHENE_RECT_INIT(w, h, w, h));
 	}
 }
 
@@ -74,7 +84,7 @@ static void ntk_renderer_gtk4_renderer_finalize(GObject* obj) {
 	g_clear_object(&priv->pango_ctx);
 	g_clear_object(&priv->snapshot);
 
-	G_OBJECT_CLASS(obj)->finalize(obj);
+	G_OBJECT_CLASS(ntk_renderer_gtk4_renderer_parent_class)->finalize(obj);
 }
 
 static void ntk_renderer_gtk4_renderer_set_property(GObject* obj, guint prop_id, const GValue* value, GParamSpec* pspec) {
@@ -111,15 +121,9 @@ static void ntk_renderer_gtk4_renderer_get_property(GObject* obj, guint prop_id,
 	}
 }
 
-static void ntk_renderer_gtk4_renderer_interface_init(NtkRendererInterface* iface) {
-	iface->get_render_type = ntk_renderer_gtk4_renderer_get_render_type;
-	iface->render_command = ntk_renderer_gtk4_renderer_render_command;
-	iface->render_vertex = ntk_renderer_gtk4_renderer_render_vertex;
-	iface->get_font = ntk_renderer_gtk4_renderer_get_font;
-}
-
 static void ntk_renderer_gtk4_renderer_class_init(NtkRendererGtk4RendererClass* klass) {
 	GObjectClass* object_class = G_OBJECT_CLASS(klass);
+	NtkRendererClass* renderer_class = NTK_RENDERER_CLASS(klass);
 
 	object_class->constructed = ntk_renderer_gtk4_renderer_constructed;
 	object_class->finalize = ntk_renderer_gtk4_renderer_finalize;
@@ -131,6 +135,11 @@ static void ntk_renderer_gtk4_renderer_class_init(NtkRendererGtk4RendererClass* 
 	obj_props[PROP_DRAW_CONTEXT] = g_param_spec_object("draw-context", "Gdk Draw Context", "The (optional) Gdk drawing context to utilize with the snapshot.", GDK_TYPE_DRAW_CONTEXT, G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 
 	g_object_class_install_properties(object_class, N_PROPERTIES, obj_props);
+
+	renderer_class->get_render_type = ntk_renderer_gtk4_renderer_get_render_type;
+	renderer_class->render_command = ntk_renderer_gtk4_renderer_render_command;
+	renderer_class->render_vertex = ntk_renderer_gtk4_renderer_render_vertex;
+	renderer_class->get_font = ntk_renderer_gtk4_renderer_get_font;
 }
 
 static void ntk_renderer_gtk4_renderer_init(NtkRendererGtk4Renderer* self) {
