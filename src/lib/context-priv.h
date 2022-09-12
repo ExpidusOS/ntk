@@ -6,6 +6,7 @@
 
 typedef struct _NtkContextPrivate {
 	gboolean inited;
+  gboolean is_drawing;
 	struct nk_context nk;
 	NtkRenderer* renderer;
 	PangoFontDescription* font_desc;

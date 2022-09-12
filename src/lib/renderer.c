@@ -9,7 +9,7 @@ G_DEFINE_TYPE_WITH_PRIVATE(NtkRenderer, ntk_renderer, G_TYPE_OBJECT);
 
 enum {
 	SIG_REQUEST_DRAW,
-	SIG_DRAW,
+	SIG_RENDERED,
 	N_SIGNALS
 };
 
@@ -19,7 +19,7 @@ static void ntk_renderer_class_init(NtkRendererClass* klass) {
 	GObjectClass* object_class = G_OBJECT_CLASS(klass);
 
 	obj_sigs[SIG_REQUEST_DRAW] = g_signal_new("request-draw", G_OBJECT_CLASS_TYPE(object_class), G_SIGNAL_RUN_FIRST, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
-	obj_sigs[SIG_DRAW] = g_signal_new("draw", G_OBJECT_CLASS_TYPE(object_class), G_SIGNAL_RUN_LAST, 0, NULL, NULL, g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 1, G_TYPE_POINTER);
+	obj_sigs[SIG_RENDERED] = g_signal_new("rendered", G_OBJECT_CLASS_TYPE(object_class), G_SIGNAL_RUN_LAST, 0, NULL, NULL, g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 1, G_TYPE_POINTER);
 }
 
 static void ntk_renderer_init(NtkRenderer* self) {
@@ -96,7 +96,7 @@ gboolean ntk_renderer_draw(NtkRenderer* self, NtkRendererCommand* cmd, GError** 
 			g_return_val_if_fail(cmd != NULL, FALSE);
 			g_return_val_if_fail(!cmd->is_vertex, FALSE);
 			result = klass->render_command(self, cmd->draw, error);
-			g_signal_emit(self, obj_sigs[SIG_DRAW], 0, cmd);
+			g_signal_emit(self, obj_sigs[SIG_RENDERED], 0, cmd);
 			return result;
 		case NTK_RENDERER_TYPE_VERTEX:
 			if (klass->render_vertex == NULL) {
@@ -107,7 +107,7 @@ gboolean ntk_renderer_draw(NtkRenderer* self, NtkRendererCommand* cmd, GError** 
 			g_return_val_if_fail(cmd != NULL, FALSE);
 			g_return_val_if_fail(cmd->is_vertex, FALSE);
 			result = klass->render_vertex(self, &cmd->vertex, error);
-			g_signal_emit(self, obj_sigs[SIG_DRAW], 0, cmd);
+			g_signal_emit(self, obj_sigs[SIG_RENDERED], 0, cmd);
 			return result;
 	}
 

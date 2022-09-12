@@ -10,8 +10,7 @@ namespace NtkExampleCairoBasic {
       var renderer = new NtkRendererCairo.Renderer(1024, 768);
       var ntk = new Ntk.Context(renderer);
 
-      ntk.rendered.connect(() => {
-        renderer.request_draw();
+      renderer.rendered.connect(() => {
         renderer.surface.write_to_png("cairo-basic.png");
       });
 

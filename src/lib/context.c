@@ -146,6 +146,9 @@ gboolean ntk_context_render(NtkContext* self, NtkContextDrawCallback callback, g
 		return FALSE;
 	}
 
+  if (priv->is_drawing) return TRUE;
+  priv->is_drawing = TRUE;
+
   if (callback != NULL) callback(self, &priv->nk, callback_target);
 
 	switch (type) {
@@ -156,6 +159,7 @@ gboolean ntk_context_render(NtkContext* self, NtkContextDrawCallback callback, g
 				g_debug("Rendering context without vertexes");
 				nk_foreach(cmd->draw, &priv->nk) {
 					if (!ntk_renderer_draw(priv->renderer, cmd, error)) {
+            priv->is_drawing = FALSE;
 						g_free(cmd);
 						return FALSE;
 					}
@@ -178,6 +182,7 @@ gboolean ntk_context_render(NtkContext* self, NtkContextDrawCallback callback, g
 
 				nk_draw_foreach(cmd->vertex.cmd, &priv->nk, &cmd->vertex.cmds) {
 					if (!ntk_renderer_draw(priv->renderer, cmd, error)) {
+            priv->is_drawing = FALSE;
 						return FALSE;
 					}
 				}
@@ -192,5 +197,8 @@ gboolean ntk_context_render(NtkContext* self, NtkContextDrawCallback callback, g
 	
 	g_signal_emit(self, obj_sigs[SIG_RENDERED], 0);
 	nk_clear(&priv->nk);
+
+  ntk_renderer_request_draw(priv->renderer);
+  priv->is_drawing = FALSE;
 	return TRUE;
 }

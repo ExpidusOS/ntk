@@ -31,6 +31,9 @@ namespace Ntk {
 	public abstract class Renderer : GLib.Object {
 		public signal void request_draw();
 
+    [NoWrapper]
+    public signal void rendered(Ntk.RendererCommand cmd);
+
 		public Nk.UserFont get_font(Pango.FontDescription desc) throws GLib.Error;
 		public bool draw (Ntk.RendererCommand cmd) throws GLib.Error;
 

@@ -12,7 +12,7 @@ if gtk4.found()
   libntk_renderer_gtk4_src = ['src/lib/renderer.c', 'src/lib/widget.c']
   libntk_renderer_gtk4_headers = ['include/ntk/renderer/gtk4.h', 'include/ntk/renderer/gtk4/renderer.h', 'include/ntk/renderer/gtk4/widget.h']
   libntk_renderer_gtk4_inc = include_directories('include')
-  libntk_renderer_gtk4_deps = [gtk4, libntk]
+  libntk_renderer_gtk4_deps = [gtk4, libntk, libntk_renderer_cairo]
   libntk_renderer_gtk4_shlib = shared_library('ntk-renderer-gtk4', libntk_renderer_gtk4_src,
     include_directories: libntk_renderer_gtk4_inc,
     version: shortver.split('-')[0],
