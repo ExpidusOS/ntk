@@ -64,6 +64,11 @@ static void ntk_renderer_gtk4_widget_get_property(GObject* obj, guint prop_id, G
 	}
 }
 
+static void ntk_renderer_gtk4_widget_compute_expand(GtkWidget* widget, gboolean* hexpand, gboolean* vexpand) {
+	*hexpand = TRUE;
+	*vexpand = TRUE;
+}
+
 static void ntk_renderer_gtk4_widget_snapshot(GtkWidget* widget, GtkSnapshot* snapshot) {
 	NtkRendererGtk4Widget* self = NTK_RENDERER_GTK4_WIDGET(widget);
 	NtkRendererGtk4WidgetPrivate* priv = NTK_RENDERER_GTK4_WIDGET_PRIVATE(self);
@@ -77,10 +82,14 @@ static void ntk_renderer_gtk4_widget_snapshot(GtkWidget* widget, GtkSnapshot* sn
 	g_object_get(priv->renderer, "snapshot", &rendering_snapshot, NULL);
 	g_assert(rendering_snapshot != NULL);
 
-	GdkPaintable* paintable = gtk_snapshot_to_paintable(rendering_snapshot, NULL);
+	GdkRGBA black;
+	gdk_rgba_parse(&black, "#000000");
+	gtk_snapshot_append_color(snapshot, &black, &GRAPHENE_RECT_INIT(0, 0, width, height));
+
+	/* GdkPaintable* paintable = gtk_snapshot_to_paintable(rendering_snapshot, NULL);
 	g_assert(paintable != NULL);
 	gdk_paintable_snapshot(paintable, snapshot, width, height);
-	g_object_unref(paintable);
+	g_object_unref(paintable); */
 }
 
 static void ntk_renderer_gtk4_widget_interface_init(GtkBuildableIface* iface) {
@@ -98,6 +107,7 @@ static void ntk_renderer_gtk4_widget_class_init(NtkRendererGtk4WidgetClass* klas
 	obj_props[PROP_RENDERER] = g_param_spec_object("renderer", "Ntk Renderer", "The Ntk Renderer to render with.", NTK_TYPE_RENDERER, G_PARAM_READABLE);
 	g_object_class_install_properties(object_class, N_PROPERTIES, obj_props);
 
+	widget_class->compute_expand = ntk_renderer_gtk4_widget_compute_expand;
 	widget_class->snapshot = ntk_renderer_gtk4_widget_snapshot;
 }
 

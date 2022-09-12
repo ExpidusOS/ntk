@@ -60,20 +60,6 @@ static void ntk_renderer_gtk4_renderer_constructed(GObject* obj) {
 		g_debug("Creating a new GTK Snapshot for %p", self);
 
 		priv->snapshot = gtk_snapshot_new();
-
-		GdkRGBA red, green, yellow, blue;
-		gdk_rgba_parse(&red, "red");
-		gdk_rgba_parse(&green, "green");
-		gdk_rgba_parse(&yellow, "yellow");
-		gdk_rgba_parse(&blue, "blue");
-
-		float w = 100;
-		float h = 100;
-
-		gtk_snapshot_append_color(priv->snapshot, &red, &GRAPHENE_RECT_INIT(0, 0, w, h));
-  	gtk_snapshot_append_color(priv->snapshot, &green, &GRAPHENE_RECT_INIT(w, 0, w, h));
-  	gtk_snapshot_append_color(priv->snapshot, &yellow, &GRAPHENE_RECT_INIT(0, h, w, h));
-  	gtk_snapshot_append_color(priv->snapshot, &blue, &GRAPHENE_RECT_INIT(w, h, w, h));
 	}
 }
 

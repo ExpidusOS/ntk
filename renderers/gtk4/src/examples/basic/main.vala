@@ -9,13 +9,19 @@ namespace NtkExampleGtkBasic {
 
 		construct {
 			this.widget = new NtkRendererGtk4.Widget();
+			this.widget.set_hexpand(true);
+			this.widget.set_vexpand(true);
 			this.get_box().append(this.widget);
 
 			this.ntk = new Ntk.Context(this.widget.renderer);
 
-			this.widget.renderer.request_draw.connect(() => {
+			this.ntk.rendered.connect(() => {
+				this.widget.queue_draw();
+			});
+
+			this.widget.renderer.request_draw.connect((width, height) => {
 				try {
-					this.ntk.render();
+					this.ntk.render(width, height);
 				} catch (GLib.Error e) {}
 			});
 		}

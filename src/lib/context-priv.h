@@ -5,8 +5,10 @@
 #include <ntk/renderer.h>
 
 typedef struct _NtkContextPrivate {
+	gboolean inited;
 	struct nk_context nk;
 	NtkRenderer* renderer;
+	PangoFontDescription* font_desc;
 } NtkContextPrivate;
 
 #endif

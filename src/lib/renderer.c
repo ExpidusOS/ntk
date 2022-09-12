@@ -6,6 +6,7 @@ G_DEFINE_TYPE(NtkRenderer, ntk_renderer, G_TYPE_OBJECT);
 
 enum {
 	SIG_REQUEST_DRAW,
+	SIG_DRAW,
 	N_SIGNALS
 };
 
@@ -14,7 +15,8 @@ static guint obj_sigs[N_SIGNALS] = { 0 };
 static void ntk_renderer_class_init(NtkRendererClass* klass) {
 	GObjectClass* object_class = G_OBJECT_CLASS(klass);
 
-	obj_sigs[SIG_REQUEST_DRAW] = g_signal_new("request-draw", G_OBJECT_CLASS_TYPE(object_class), G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL, G_TYPE_NONE, 2, G_TYPE_INT, G_TYPE_INT);
+	obj_sigs[SIG_REQUEST_DRAW] = g_signal_new("request-draw", G_OBJECT_CLASS_TYPE(object_class), G_SIGNAL_RUN_FIRST, 0, NULL, NULL, NULL, G_TYPE_NONE, 2, G_TYPE_INT, G_TYPE_INT);
+	obj_sigs[SIG_DRAW] = g_signal_new("draw", G_OBJECT_CLASS_TYPE(object_class), G_SIGNAL_RUN_LAST, 0, NULL, NULL, g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 1, G_TYPE_POINTER);
 }
 
 static void ntk_renderer_init(NtkRenderer* self) {}
@@ -54,6 +56,8 @@ gboolean ntk_renderer_draw(NtkRenderer* self, NtkRendererCommand* cmd, GError** 
 		return FALSE;
 	}
 
+	gboolean result = FALSE;
+
 	switch (type) {
 		case NTK_RENDERER_TYPE_COMMAND:
 			if (klass->render_command == NULL) {
@@ -63,7 +67,9 @@ gboolean ntk_renderer_draw(NtkRenderer* self, NtkRendererCommand* cmd, GError** 
 
 			g_return_val_if_fail(cmd != NULL, FALSE);
 			g_return_val_if_fail(cmd->is_vertex, FALSE);
-			return klass->render_command(self, cmd->draw, error);
+			result = klass->render_command(self, cmd->draw, error);
+			g_signal_emit(self, obj_sigs[SIG_DRAW], 0, cmd);
+			return result;
 		case NTK_RENDERER_TYPE_VERTEX:
 			if (klass->render_vertex == NULL) {
 				ntk_error_set_bad_renderer(error, "the render type does not implement render_vertex", self);
@@ -72,7 +78,9 @@ gboolean ntk_renderer_draw(NtkRenderer* self, NtkRendererCommand* cmd, GError** 
 
 			g_return_val_if_fail(cmd != NULL, FALSE);
 			g_return_val_if_fail(!cmd->is_vertex, FALSE);
-			return klass->render_vertex(self, &cmd->vertex, error);
+			result = klass->render_vertex(self, &cmd->vertex, error);
+			g_signal_emit(self, obj_sigs[SIG_DRAW], 0, cmd);
+			return result;
 	}
 
 	ntk_error_set_bad_renderer(error, "reached end of draw function and no action was taken", self);

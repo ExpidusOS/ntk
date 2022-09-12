@@ -5,10 +5,10 @@ namespace Ntk {
 	public class Context : GLib.Object {
 		public Ntk.Renderer renderer { get; construct; }
 
-		public Context (Ntk.Renderer renderer);
+		public Context(Ntk.Renderer renderer);
 
-		public bool render () throws GLib.Error;
-		public signal void rendered ();
+		public bool render(int width, int height) throws GLib.Error;
+		public signal void rendered(int width, int height);
 	}
 
 	[CCode (cheader_filename = "ntk/ntk.h", has_type_id = false)]

@@ -5,6 +5,8 @@
 
 typedef struct _NtkRendererGtk4WidgetPrivate {
 	NtkRenderer* renderer;
+	int width;
+	int height;
 } NtkRendererGtk4WidgetPrivate;
 
 #endif
