@@ -15,7 +15,6 @@ enum {
 };
 
 enum {
-  SIG_RENDERING,
 	SIG_RENDERED,
 	N_SIGNALS
 };
@@ -123,7 +122,6 @@ static void ntk_context_class_init(NtkContextClass* klass) {
 	obj_props[PROP_FONT_DESCRIPTION] = g_param_spec_boxed("font-description", "Pango Font Description", "The description of the font to utilize.", PANGO_TYPE_FONT_DESCRIPTION, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 	g_object_class_install_properties(object_class, N_PROPERTIES, obj_props);
 
-  obj_sigs[SIG_RENDERING] = g_signal_new("rendering", G_OBJECT_CLASS_TYPE(object_class), G_SIGNAL_RUN_FIRST, 0, NULL, NULL, NULL, G_TYPE_NONE, 1, G_TYPE_POINTER);
 	obj_sigs[SIG_RENDERED] = g_signal_new("rendered", G_OBJECT_CLASS_TYPE(object_class), G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
 }
 
@@ -135,13 +133,7 @@ NtkContext* ntk_context_new(NtkRenderer* renderer) {
 	return NTK_CONTEXT(g_object_new(NTK_TYPE_CONTEXT, "renderer", renderer, NULL));
 }
 
-NtkRenderer* ntk_context_get_renderer(NtkContext* self) {
-	g_return_val_if_fail(NTK_IS_CONTEXT(self), NULL);
-	NtkContextPrivate* priv = NTK_CONTEXT_PRIVATE(self);
-	return priv->renderer;
-}
-
-gboolean ntk_context_render(NtkContext* self, GError** error) {
+gboolean ntk_context_render(NtkContext* self, NtkContextDrawCallback callback, gpointer callback_target, GError** error) {
 	g_return_val_if_fail(NTK_IS_CONTEXT(self), FALSE);
 	g_return_val_if_fail(error == NULL || *error == NULL, FALSE);
 
@@ -154,7 +146,7 @@ gboolean ntk_context_render(NtkContext* self, GError** error) {
 		return FALSE;
 	}
 
-  g_signal_emit(self, obj_sigs[SIG_RENDERING], 0, &priv->nk);
+  if (callback != NULL) callback(self, &priv->nk, callback_target);
 
 	switch (type) {
 		case NTK_RENDERER_TYPE_COMMAND:

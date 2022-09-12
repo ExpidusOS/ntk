@@ -21,7 +21,8 @@ namespace NtkExampleGtkBasic {
 
 			this.widget.renderer.request_draw.connect(() => {
 				try {
-					this.ntk.render();
+					this.ntk.render((ntk, nk) => {
+          });
 				} catch (GLib.Error e) {}
 			});
 		}

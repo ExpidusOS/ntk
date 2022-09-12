@@ -21,14 +21,14 @@ struct _NtkContext {
 	struct _NtkContextPrivate* priv;
 };
 
+typedef void (*NtkContextDrawCallback)(NtkContext* context, struct nk_context* nuklear, gpointer user_data);
+
 /**
  * ntk_context_new: (construct)
  */
 NtkContext* ntk_context_new(NtkRenderer* renderer);
 
-NtkRenderer* ntk_context_get_renderer(NtkContext* self);
-
-gboolean ntk_context_render(NtkContext* self, GError** error);
+gboolean ntk_context_render(NtkContext* self, NtkContextDrawCallback callback, gpointer callback_target, GError** error);
 
 G_END_DECLS
 

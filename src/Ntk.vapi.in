@@ -1,15 +1,18 @@
 [CCode (cprefix = "Ntk", gir_namespace = "Ntk", gir_version = "@SMALL_VERSION@", lower_case_cprefix = "ntk_")]
 namespace Ntk {
+  [CCode(has_target = true)]
+	[Version (since = "0.1.0")]
+  public delegate void ContextDrawCallback(Context ctx, Nk.Context* nuklear);
+
 	[CCode (cheader_filename = "ntk/ntk.h", type_id = "ntk_context_get_type ()")]
 	[Version (since = "0.1.0")]
 	public class Context : GLib.Object {
+    [NoAccessorMethod]
 		public Ntk.Renderer renderer { get; construct; }
 
 		public Context(Ntk.Renderer renderer);
 
-		public bool render() throws GLib.Error;
-
-    public signal void rendering(Nk.Context* nk);
+		public bool render(ContextDrawCallback callback) throws GLib.Error;
 		public signal void rendered();
 	}
 
