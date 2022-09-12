@@ -122,12 +122,12 @@ static gboolean ntk_renderer_cairo_renderer_render_command(NtkRenderer* renderer
     case NK_COMMAND_CIRCLE:
       {
         struct nk_command_circle* c = (struct nk_command_circle*)cmd;
-        double r = (c->w < c->h ? c->w : c->h) / 2;
+        double r = (c->w < c->h ? c->w: c->h) / 2;
 
         cairo_set_source_rgba(priv->cr, c->color.r / 255.0, c->color.g / 255.0, c->color.b / 255.0, c->color.a / 255.0);
         cairo_set_line_width(priv->cr, c->line_thickness);
         cairo_new_sub_path(priv->cr);
-        cairo_arc(priv->cr, c->x, c->y, r, 0, 2 * M_PI);
+        cairo_arc(priv->cr, c->x + r, c->y + r, r, 0, 2 * M_PI);
         cairo_close_path(priv->cr);
         cairo_paint(priv->cr);
       }
@@ -139,7 +139,7 @@ static gboolean ntk_renderer_cairo_renderer_render_command(NtkRenderer* renderer
 
         cairo_set_source_rgba(priv->cr, c->color.r / 255.0, c->color.g / 255.0, c->color.b / 255.0, c->color.a / 255.0);
         cairo_new_sub_path(priv->cr);
-        cairo_arc(priv->cr, c->x, c->y, r, 0, 2 * M_PI);
+        cairo_arc(priv->cr, c->x + r, c->y + r, r, 0, 2 * M_PI);
         cairo_close_path(priv->cr);
         cairo_fill(priv->cr);
       }
