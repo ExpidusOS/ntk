@@ -24,6 +24,7 @@ endif
 
 add_project_arguments(['--vapidir', meson.current_build_dir()], language: 'vala')
 
+glib = [dependency('glib-2.0'), dependency('gio-2.0')]
 gobject = dependency('gobject-2.0')
 pango = dependency('pango')
 
@@ -93,7 +94,7 @@ libntk_src = ['src/lib/context.c', 'src/lib/error.c', 'src/lib/font.c', 'src/lib
 libntk_headers = ['include/ntk/ntk.h', 'include/ntk/context.h', 'include/ntk/error.h', 'include/ntk/font.h', 'include/ntk/renderer.h', 'include/ntk/utils.h']
 
 libntk_inc = include_directories('include')
-libntk_deps = [gobject, pango, nuklear]
+libntk_deps = [glib, gobject, pango, nuklear]
 
 libntk_enums = gnome.mkenums('ntk-enums', sources: libntk_headers)
 

@@ -32,4 +32,14 @@ if cairo.found()
   libntk_renderer_cairo = declare_dependency(link_with: libntk_renderer_cairo_shlib,
     dependencies: libntk_renderer_cairo_deps,
     include_directories: libntk_renderer_cairo_inc)
+
+  executable('ntk-cairo-example-basic', ['src/examples/basic/main.vala'],
+    vala_args: ['--vapidir', meson.current_build_dir()],
+    dependencies: [
+      glib,
+      libntk_renderer_cairo,
+      meson.get_compiler('vala').find_library('NtkRendererCairo-@0@'.format(shortver.split('-')[0]), dirs: meson.current_build_dir()),
+      meson.get_compiler('vala').find_library('Ntk-@0@'.format(shortver.split('-')[0]), dirs: meson.project_build_root()),
+      meson.get_compiler('vala').find_library('nuklear', dirs: join_paths(meson.project_source_root(), 'vapi'))
+    ])
 endif

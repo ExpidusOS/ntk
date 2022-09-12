@@ -28,14 +28,14 @@ NtkRenderer* ntk_renderer_cairo_renderer_new(int width, int height);
 NtkRenderer* ntk_renderer_cairo_renderer_new_for_surface(cairo_surface_t* surf);
 
 /**
- * ntk_renderer_gtk4_renderer_set_surface: (set-property surface)
+ * ntk_renderer_cairo_renderer_set_surface: (set-property surface)
  * @self: an #NtkRendererCairoRenderer
  * @value: The surface
  */
 void ntk_renderer_cairo_renderer_set_surface(NtkRendererCairoRenderer* self, cairo_surface_t* value);
 
 /**
- * ntk_renderer_gtk4_renderer_get_surface: (get-property surface)
+ * ntk_renderer_cairo_renderer_get_surface: (get-property surface)
  * @self: an #NtkRendererCairoRenderer
  * Returns: (not nullable) (transfer none): The Cairo Surface being used.
  */

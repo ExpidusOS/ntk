@@ -80,7 +80,7 @@ static void ntk_renderer_gtk4_widget_snapshot(GtkWidget* widget, GtkSnapshot* sn
 	ntk_renderer_request_draw(priv->renderer);
 
 	NtkRendererGtk4Renderer* renderer = NTK_RENDERER_GTK4_RENDERER(priv->renderer);
-	ntk_renderer_gtk4_renderer_snapshot(renderer, snapshot);
+	ntk_renderer_gtk4_renderer_snapshot_to(renderer, snapshot);
 }
 
 static void ntk_renderer_gtk4_widget_interface_init(GtkBuildableIface* iface) {

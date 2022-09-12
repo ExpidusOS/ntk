@@ -22,7 +22,7 @@ struct _NtkRendererGtk4Renderer {
  */
 NtkRenderer* ntk_renderer_gtk4_renderer_new();
 
-void ntk_renderer_gtk4_renderer_snapshot(NtkRendererGtk4Renderer* self, GtkSnapshot* snapshot);
+void ntk_renderer_gtk4_renderer_snapshot_to(NtkRendererGtk4Renderer* self, GtkSnapshot* snapshot);
 
 G_END_DECLS
 

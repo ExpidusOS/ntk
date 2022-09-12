@@ -38,7 +38,7 @@ static gboolean ntk_renderer_cairo_renderer_render_command(NtkRenderer* renderer
 				struct nk_command_rect_filled* c = (struct nk_command_rect_filled*)cmd;
 				double degrees = M_PI / 180.0;
 
-				cairo_set_source_rgba(priv->cr, c->color.r / 255, c->color.g / 255, c->color.b / 255, c->color.a / 255);
+				cairo_set_source_rgba(priv->cr, c->color.r / 255.0, c->color.g / 255.0, c->color.b / 255.0, c->color.a / 255.0);
 
 				if (c->rounding == 0) {
 					cairo_rectangle(priv->cr, c->x, c->y, c->w, c->h);
@@ -186,8 +186,8 @@ static void ntk_renderer_cairo_renderer_class_init(NtkRendererCairoRendererClass
 	object_class->set_property = ntk_renderer_cairo_renderer_set_property;
 	object_class->get_property = ntk_renderer_cairo_renderer_get_property;
 
-	obj_props[PROP_WIDTH] = g_param_spec_int("width", "Width", "The width to render at.", 0, 0, 0, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
-	obj_props[PROP_HEIGHT] = g_param_spec_int("height", "Height", "The height to render at.", 0, 0, 0, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+	obj_props[PROP_WIDTH] = g_param_spec_int("width", "Width", "The width to render at.", 0, G_MAXINT, 0, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+	obj_props[PROP_HEIGHT] = g_param_spec_int("height", "Height", "The height to render at.", 0, G_MAXINT, 0, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
 #ifdef CAIRO_HAS_GOBJECT_FUNCTIONS
 	obj_props[PROP_SURFACE] = g_param_spec_boxed("surface", "Cairo Surface", "The Cairo surface to render onto", CAIRO_GOBJECT_TYPE_SURFACE, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);

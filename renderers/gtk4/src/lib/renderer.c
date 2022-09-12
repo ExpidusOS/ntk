@@ -86,7 +86,7 @@ NtkRenderer* ntk_renderer_gtk4_renderer_new() {
 	return NTK_RENDERER(g_object_new(NTK_RENDERER_GTK4_TYPE_RENDERER, NULL));
 }
 
-void ntk_renderer_gtk4_renderer_snapshot(NtkRendererGtk4Renderer* self, GtkSnapshot* snapshot) {
+void ntk_renderer_gtk4_renderer_snapshot_to(NtkRendererGtk4Renderer* self, GtkSnapshot* snapshot) {
 	g_return_if_fail(NTK_RENDERER_GTK4_IS_RENDERER(self));
 	NtkRendererGtk4RendererPrivate* priv = NTK_RENDERER_GTK4_RENDERER_PRIVATE(self);
 
