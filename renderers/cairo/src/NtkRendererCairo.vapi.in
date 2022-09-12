@@ -3,6 +3,8 @@ namespace NtkRendererCairo {
 	[CCode (cheader_filename = "ntk/renderer/cairo.h", type_id = "ntk_renderer_cairo_renderer_get_type ()")]
 	[Version (since = "0.1.0")]
 	public class Renderer : Ntk.Renderer {
+    public int width { get; set construct; }
+    public int height { get; set construct; }
 		public Cairo.Surface surface { get; set construct; }
 
 		public Renderer(int width, int height);

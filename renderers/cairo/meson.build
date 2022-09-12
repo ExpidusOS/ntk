@@ -1,6 +1,7 @@
 cairo = dependency('cairo', required: false)
 
 if cairo.found()
+  pangocairo = dependency('pangocairo')
   cairo_gobject = dependency('cairo-gobject', required: false)
 
   configure_file(input: 'src/NtkRendererCairo.vapi.in', output: 'NtkRendererCairo-@0@.vapi'.format(shortver.split('-')[0]),
@@ -11,7 +12,7 @@ if cairo.found()
   libntk_renderer_cairo_src = ['src/lib/renderer.c']
   libntk_renderer_cairo_headers = ['include/ntk/renderer/cairo.h', 'include/ntk/renderer/cairo/renderer.h']
   libntk_renderer_cairo_inc = include_directories('include')
-  libntk_renderer_cairo_deps = [cairo, libntk]
+  libntk_renderer_cairo_deps = [cairo, libntk, pangocairo]
 
   if cairo_gobject.found()
     libntk_renderer_cairo_deps += [cairo_gobject]

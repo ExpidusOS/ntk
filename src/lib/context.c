@@ -15,6 +15,7 @@ enum {
 };
 
 enum {
+  SIG_RENDERING,
 	SIG_RENDERED,
 	N_SIGNALS
 };
@@ -122,6 +123,7 @@ static void ntk_context_class_init(NtkContextClass* klass) {
 	obj_props[PROP_FONT_DESCRIPTION] = g_param_spec_boxed("font-description", "Pango Font Description", "The description of the font to utilize.", PANGO_TYPE_FONT_DESCRIPTION, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 	g_object_class_install_properties(object_class, N_PROPERTIES, obj_props);
 
+  obj_sigs[SIG_RENDERING] = g_signal_new("rendering", G_OBJECT_CLASS_TYPE(object_class), G_SIGNAL_RUN_FIRST, 0, NULL, NULL, NULL, G_TYPE_NONE, 1, G_TYPE_POINTER);
 	obj_sigs[SIG_RENDERED] = g_signal_new("rendered", G_OBJECT_CLASS_TYPE(object_class), G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
 }
 
@@ -152,19 +154,7 @@ gboolean ntk_context_render(NtkContext* self, GError** error) {
 		return FALSE;
 	}
 
-	if (nk_begin(&priv->nk, "Show", nk_rect(50, 50, 220, 220), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_CLOSABLE)) {
-		nk_layout_row_static(&priv->nk, 30, 80, 1);
-
-		if (nk_button_label(&priv->nk, "button")) {
-		}
-
-		nk_layout_row_dynamic(&priv->nk, 30, 2);
-
-		nk_option_label(&priv->nk, "easy", TRUE);
-		nk_option_label(&priv->nk, "hard", FALSE);
-	}
-
-	nk_end(&priv->nk);
+  g_signal_emit(self, obj_sigs[SIG_RENDERING], 0, &priv->nk);
 
 	switch (type) {
 		case NTK_RENDERER_TYPE_COMMAND:
@@ -173,7 +163,6 @@ gboolean ntk_context_render(NtkContext* self, GError** error) {
 				cmd->is_vertex = 0;
 				g_debug("Rendering context without vertexes");
 				nk_foreach(cmd->draw, &priv->nk) {
-					g_debug("Sending a draw command (%d) to renderer %p", cmd->draw->type, priv->renderer);
 					if (!ntk_renderer_draw(priv->renderer, cmd, error)) {
 						g_free(cmd);
 						return FALSE;
@@ -196,7 +185,6 @@ gboolean ntk_context_render(NtkContext* self, GError** error) {
 				nk_convert(&priv->nk, &cmd->vertex.cmds, &cmd->vertex.verts, &cmd->vertex.idx, &cfg);
 
 				nk_draw_foreach(cmd->vertex.cmd, &priv->nk, &cmd->vertex.cmds) {
-					g_debug("Sending a vertex draw command to renderer %p", priv->renderer);
 					if (!ntk_renderer_draw(priv->renderer, cmd, error)) {
 						return FALSE;
 					}

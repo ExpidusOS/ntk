@@ -8,6 +8,8 @@ namespace Ntk {
 		public Context(Ntk.Renderer renderer);
 
 		public bool render() throws GLib.Error;
+
+    public signal void rendering(Nk.Context* nk);
 		public signal void rendered();
 	}
 

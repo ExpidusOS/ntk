@@ -28,6 +28,34 @@ NtkRenderer* ntk_renderer_cairo_renderer_new(int width, int height);
 NtkRenderer* ntk_renderer_cairo_renderer_new_for_surface(cairo_surface_t* surf);
 
 /**
+ * ntk_renderer_cairo_renderer_set_width: (set-property width)
+ * @self: an #NtkRendererCairoRenderer
+ * @value: The width to render at
+ */
+void ntk_renderer_cairo_renderer_set_width(NtkRendererCairoRenderer* self, int value);
+
+/**
+ * ntk_renderer_cairo_renderer_get_width: (get-property width)
+ * @self: an #NtkRendererCairoRenderer
+ * Returns: The height the renderer is outputting at
+ */
+int ntk_renderer_cairo_renderer_get_width(NtkRendererCairoRenderer* self);
+
+/**
+ * ntk_renderer_cairo_renderer_set_height: (set-property height)
+ * @self: an #NtkRendererCairoRenderer
+ * @value: The width to render at
+ */
+void ntk_renderer_cairo_renderer_set_height(NtkRendererCairoRenderer* self, int value);
+
+/**
+ * ntk_renderer_cairo_renderer_get_height: (get-property height)
+ * @self: an #NtkRendererCairoRenderer
+ * Returns: The height the renderer is outputting at
+ */
+int ntk_renderer_cairo_renderer_get_height(NtkRendererCairoRenderer* self);
+
+/**
  * ntk_renderer_cairo_renderer_set_surface: (set-property surface)
  * @self: an #NtkRendererCairoRenderer
  * @value: The surface

@@ -340,44 +340,44 @@ namespace Nk {
 	public struct Context {
 		public Input input;
 		public Style style;
+
+  	[CCode(cname = "nk_begin")]
+	  public bool begin(string title, Rect bounds, Flags flags);
+
+  	[CCode(cname = "nk_end")]
+	  public void end();
+
+  	[CCode(cname = "nk_clear")]
+	  public void clear();
+
+  	[CCode(cname = "nk_layout_row_static")]
+	  public void layout_row_static(float height, int item_width, int cols);
+
+  	[CCode(cname = "nk_layout_row_dynamic")]
+	  public void layout_row_dynamic(float height, int cols);
+
+  	[CCode(cname = "nk_layout_row_begin")]
+	  public void layout_row_begin(LayoutFormat fmt, float row_height, int cols);
+
+  	[CCode(cname = "nk_layout_row_end")]
+	  public void layout_row_end();
+
+  	[CCode(cname = "nk_layout_row_push")]
+	  public void layout_row_push(float val);
+
+  	[CCode(cname = "nk_label")]
+	  public void label(string title, Nk.Flags align);
+
+  	[CCode(cname = "nk_slider_float")]
+	  public void slider_float(float min, float* val, float max, float step);
+
+  	[CCode(cname = "nk_button_label")]
+	  public bool button_label(string title);
+
+  	[CCode(cname = "nk_option_label")]
+	  public bool option_label(string title, bool active);
 	}
 
 	[CCode(cname = "nk_init_default")]
 	public bool init_default(out Context ctx, UserFont* font);
-
-	[CCode(cname = "nk_clear")]
-	public void clear(ref Context ctx);
-
-	[CCode(cname = "nk_begin")]
-	public bool begin(ref Context ctx, string title, Rect bounds, Flags flags);
-
-	[CCode(cname = "nk_end")]
-	public void end(ref Context ctx);
-
-	[CCode(cname = "nk_layout_row_static")]
-	public void layout_row_static(ref Context ctx, float height, int item_width, int cols);
-
-	[CCode(cname = "nk_layout_row_dynamic")]
-	public void layout_row_dynamic(ref Context ctx, float height, int cols);
-
-	[CCode(cname = "nk_layout_row_begin")]
-	public void layout_row_begin(ref Context ctx, LayoutFormat fmt, float row_height, int cols);
-
-	[CCode(cname = "nk_layout_row_end")]
-	public void layout_row_end(ref Context ctx);
-
-	[CCode(cname = "nk_layout_row_push")]
-	public void layout_row_push(ref Context ctx, float val);
-
-	[CCode(cname = "nk_label")]
-	public void label(ref Context ctx, string title, Nk.Flags align);
-
-	[CCode(cname = "nk_slider_float")]
-	public void slider_float(ref Context ctx, float min, float* val, float max, float step);
-
-	[CCode(cname = "nk_button_label")]
-	public bool button_label(ref Context ctx, string title);
-
-	[CCode(cname = "nk_option_label")]
-	public bool option_label(ref Context ctx, string title, bool active);
 }
