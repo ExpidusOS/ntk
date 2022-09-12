@@ -22,19 +22,7 @@ struct _NtkRendererGtk4Renderer {
  */
 NtkRenderer* ntk_renderer_gtk4_renderer_new();
 
-/**
- * ntk_renderer_gtk4_renderer_new_with_snapshot: (constructor)
- * @snapshot: (nullable): The GTK Snapshot to render onto.
- * @draw_context: (nullable): The Gdk draw context to render with.
- */
-NtkRendererGtk4Renderer* ntk_renderer_gtk4_renderer_new_with_snapshot(GtkSnapshot* snapshot, GdkDrawContext* draw_context);
-
-/**
- * ntk_renderer_gtk4_renderer_get_snapshot: (get-property snapshot)
- * @self: an #NtkRendererGtk4Renderer
- * Returns: (not nullable) (transfer none): The snapshot used to render onto.
- */
-GtkSnapshot* ntk_renderer_gtk4_renderer_get_snapshot(NtkRendererGtk4Renderer* self);
+void ntk_renderer_gtk4_renderer_snapshot(NtkRendererGtk4Renderer* self, GtkSnapshot* snapshot);
 
 G_END_DECLS
 

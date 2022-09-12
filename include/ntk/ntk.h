@@ -5,5 +5,6 @@
 #include "error.h"
 #include "font.h"
 #include "renderer.h"
+#include "utils.h"
 
 #endif

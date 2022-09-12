@@ -76,20 +76,11 @@ static void ntk_renderer_gtk4_widget_snapshot(GtkWidget* widget, GtkSnapshot* sn
 	int width = gtk_widget_get_width(widget);
 	int height = gtk_widget_get_height(widget);
 
-	ntk_renderer_request_draw(priv->renderer, width, height);
+	ntk_renderer_set_size(priv->renderer, width, height);
+	ntk_renderer_request_draw(priv->renderer);
 
-	GtkSnapshot* rendering_snapshot = NULL;
-	g_object_get(priv->renderer, "snapshot", &rendering_snapshot, NULL);
-	g_assert(rendering_snapshot != NULL);
-
-	GdkRGBA black;
-	gdk_rgba_parse(&black, "#000000");
-	gtk_snapshot_append_color(snapshot, &black, &GRAPHENE_RECT_INIT(0, 0, width, height));
-
-	/* GdkPaintable* paintable = gtk_snapshot_to_paintable(rendering_snapshot, NULL);
-	g_assert(paintable != NULL);
-	gdk_paintable_snapshot(paintable, snapshot, width, height);
-	g_object_unref(paintable); */
+	NtkRendererGtk4Renderer* renderer = NTK_RENDERER_GTK4_RENDERER(priv->renderer);
+	ntk_renderer_gtk4_renderer_snapshot(renderer, snapshot);
 }
 
 static void ntk_renderer_gtk4_widget_interface_init(GtkBuildableIface* iface) {

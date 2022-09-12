@@ -49,9 +49,13 @@ struct _NtkRendererClass {
 	gboolean (*render_command)(NtkRenderer* self, const NtkRendererDrawCommand* cmd, GError** error);
 	gboolean (*render_vertex)(NtkRenderer* self, NtkRendererVertexCommand* cmd, GError** error);
 	struct nk_user_font* (*get_font)(NtkRenderer* self, PangoFontDescription* desc, GError** error);
+	void (*set_size)(NtkRenderer* self, int width, int height);
+	void (*get_size)(NtkRenderer* self, int* width, int* height);
 };
 
-void ntk_renderer_request_draw(NtkRenderer* self, int width, int height);
+void ntk_renderer_request_draw(NtkRenderer* self);
+void ntk_renderer_set_size(NtkRenderer* self, int width, int height);
+void ntk_renderer_get_size(NtkRenderer* self, int* width, int* height);
 NtkRendererType ntk_renderer_get_render_type(NtkRenderer* self);
 gboolean ntk_renderer_draw(NtkRenderer* self, NtkRendererCommand* cmd, GError** error);
 struct nk_user_font* ntk_renderer_get_font(NtkRenderer* self, PangoFontDescription* desc, GError** error);

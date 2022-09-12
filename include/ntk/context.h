@@ -28,7 +28,7 @@ NtkContext* ntk_context_new(NtkRenderer* renderer);
 
 NtkRenderer* ntk_context_get_renderer(NtkContext* self);
 
-gboolean ntk_context_render(NtkContext* self, int width, int height, GError** error);
+gboolean ntk_context_render(NtkContext* self, GError** error);
 
 G_END_DECLS
 

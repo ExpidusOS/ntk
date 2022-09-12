@@ -1,8 +1,11 @@
 #define G_LOG_DOMAIN "NtkRenderer"
 #include <ntk/renderer.h>
 #include "error-priv.h"
+#include "renderer-priv.h"
 
-G_DEFINE_TYPE(NtkRenderer, ntk_renderer, G_TYPE_OBJECT);
+#define NTK_RENDERER_PRIVATE(self) (ntk_renderer_get_instance_private(self))
+
+G_DEFINE_TYPE_WITH_PRIVATE(NtkRenderer, ntk_renderer, G_TYPE_OBJECT);
 
 enum {
 	SIG_REQUEST_DRAW,
@@ -15,24 +18,49 @@ static guint obj_sigs[N_SIGNALS] = { 0 };
 static void ntk_renderer_class_init(NtkRendererClass* klass) {
 	GObjectClass* object_class = G_OBJECT_CLASS(klass);
 
-	obj_sigs[SIG_REQUEST_DRAW] = g_signal_new("request-draw", G_OBJECT_CLASS_TYPE(object_class), G_SIGNAL_RUN_FIRST, 0, NULL, NULL, NULL, G_TYPE_NONE, 2, G_TYPE_INT, G_TYPE_INT);
+	obj_sigs[SIG_REQUEST_DRAW] = g_signal_new("request-draw", G_OBJECT_CLASS_TYPE(object_class), G_SIGNAL_RUN_FIRST, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
 	obj_sigs[SIG_DRAW] = g_signal_new("draw", G_OBJECT_CLASS_TYPE(object_class), G_SIGNAL_RUN_LAST, 0, NULL, NULL, g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 1, G_TYPE_POINTER);
 }
 
-static void ntk_renderer_init(NtkRenderer* self) {}
+static void ntk_renderer_init(NtkRenderer* self) {
+}
 
-void ntk_renderer_request_draw(NtkRenderer* self, int width, int height) {
+void ntk_renderer_request_draw(NtkRenderer* self) {
 	g_return_if_fail(NTK_IS_RENDERER(self));
+	g_signal_emit(self, obj_sigs[SIG_REQUEST_DRAW], 0);
+}
 
-	if (width < 1) {
-		g_warning("ntk_renderer_request_draw called with a width of less than 1 pixel.");
+void ntk_renderer_set_size(NtkRenderer* self, int width, int height) {
+	NtkRendererClass* klass;
+	g_return_if_fail(NTK_IS_RENDERER(self));
+	klass = NTK_RENDERER_GET_CLASS(self);
+
+	if (klass->set_size != NULL) {
+		klass->set_size(self, width, height);
+	} else {
+		NtkRendererPrivate* priv = NTK_RENDERER_PRIVATE(self);
+
+		priv->width = width;
+		priv->height = height;
 	}
+}
 
-	if (height < 1) {
-		g_warning("ntk_renderer_request_draw called with a height of less than 1 pixel.");
+void ntk_renderer_get_size(NtkRenderer* self, int* width, int* height) {
+	NtkRendererClass* klass;
+	g_return_if_fail(NTK_IS_RENDERER(self));
+	klass = NTK_RENDERER_GET_CLASS(self);
+
+	if (klass->get_size != NULL) {
+		int tmp = 0;
+		if (!width) width = &tmp;
+		if (!height) height = &tmp;
+		klass->get_size(self, width, height);
+	} else {
+		NtkRendererPrivate* priv = NTK_RENDERER_PRIVATE(self);
+
+		if (width) *width = priv->width;
+		if (height) *height = priv->height;
 	}
-
-	g_signal_emit(self, obj_sigs[SIG_REQUEST_DRAW], 0, width, height);
 }
 
 NtkRendererType ntk_renderer_get_render_type(NtkRenderer* self) {
@@ -66,7 +94,7 @@ gboolean ntk_renderer_draw(NtkRenderer* self, NtkRendererCommand* cmd, GError** 
 			}
 
 			g_return_val_if_fail(cmd != NULL, FALSE);
-			g_return_val_if_fail(cmd->is_vertex, FALSE);
+			g_return_val_if_fail(!cmd->is_vertex, FALSE);
 			result = klass->render_command(self, cmd->draw, error);
 			g_signal_emit(self, obj_sigs[SIG_DRAW], 0, cmd);
 			return result;
@@ -77,7 +105,7 @@ gboolean ntk_renderer_draw(NtkRenderer* self, NtkRendererCommand* cmd, GError** 
 			}
 
 			g_return_val_if_fail(cmd != NULL, FALSE);
-			g_return_val_if_fail(!cmd->is_vertex, FALSE);
+			g_return_val_if_fail(cmd->is_vertex, FALSE);
 			result = klass->render_vertex(self, &cmd->vertex, error);
 			g_signal_emit(self, obj_sigs[SIG_DRAW], 0, cmd);
 			return result;

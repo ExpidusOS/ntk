@@ -44,9 +44,9 @@ static void ntk_context_constructed(GObject* obj) {
 		g_debug("Initializing Nuklear");
 		if (!nk_init_default(&priv->nk, font)) {
 			g_critical("Failed to initialize Nuklear");
+		} else {
+			priv->inited = TRUE;
 		}
-
-		priv->inited = TRUE;
 	}
 }
 
@@ -122,7 +122,7 @@ static void ntk_context_class_init(NtkContextClass* klass) {
 	obj_props[PROP_FONT_DESCRIPTION] = g_param_spec_boxed("font-description", "Pango Font Description", "The description of the font to utilize.", PANGO_TYPE_FONT_DESCRIPTION, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 	g_object_class_install_properties(object_class, N_PROPERTIES, obj_props);
 
-	obj_sigs[SIG_RENDERED] = g_signal_new("rendered", G_OBJECT_CLASS_TYPE(object_class), G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL, G_TYPE_NONE, 2, G_TYPE_INT, G_TYPE_INT);
+	obj_sigs[SIG_RENDERED] = g_signal_new("rendered", G_OBJECT_CLASS_TYPE(object_class), G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
 }
 
 static void ntk_context_init(NtkContext* self) {
@@ -139,7 +139,7 @@ NtkRenderer* ntk_context_get_renderer(NtkContext* self) {
 	return priv->renderer;
 }
 
-gboolean ntk_context_render(NtkContext* self, int width, int height, GError** error) {
+gboolean ntk_context_render(NtkContext* self, GError** error) {
 	g_return_val_if_fail(NTK_IS_CONTEXT(self), FALSE);
 	g_return_val_if_fail(error == NULL || *error == NULL, FALSE);
 
@@ -152,6 +152,20 @@ gboolean ntk_context_render(NtkContext* self, int width, int height, GError** er
 		return FALSE;
 	}
 
+	if (nk_begin(&priv->nk, "Show", nk_rect(50, 50, 220, 220), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_CLOSABLE)) {
+		nk_layout_row_static(&priv->nk, 30, 80, 1);
+
+		if (nk_button_label(&priv->nk, "button")) {
+		}
+
+		nk_layout_row_dynamic(&priv->nk, 30, 2);
+
+		nk_option_label(&priv->nk, "easy", TRUE);
+		nk_option_label(&priv->nk, "hard", FALSE);
+	}
+
+	nk_end(&priv->nk);
+
 	switch (type) {
 		case NTK_RENDERER_TYPE_COMMAND:
 			{
@@ -159,7 +173,7 @@ gboolean ntk_context_render(NtkContext* self, int width, int height, GError** er
 				cmd->is_vertex = 0;
 				g_debug("Rendering context without vertexes");
 				nk_foreach(cmd->draw, &priv->nk) {
-					g_debug("Sending a %d draw command to renderer %p", cmd->draw->type, priv->renderer);
+					g_debug("Sending a draw command (%d) to renderer %p", cmd->draw->type, priv->renderer);
 					if (!ntk_renderer_draw(priv->renderer, cmd, error)) {
 						g_free(cmd);
 						return FALSE;
@@ -196,7 +210,7 @@ gboolean ntk_context_render(NtkContext* self, int width, int height, GError** er
 			break;
 	}
 	
-	g_signal_emit(self, obj_sigs[SIG_RENDERED], 0, width, height);
+	g_signal_emit(self, obj_sigs[SIG_RENDERED], 0);
 	nk_clear(&priv->nk);
 	return TRUE;
 }

@@ -6,7 +6,8 @@ namespace NtkRendererGtk4 {
 		public Gtk.Snapshot snapshot { get; construct; }
 
 		public Renderer();
-		public Renderer.with_snapshot(Gtk.Snapshot? snapshot, Gdk.DrawContext? draw_ctx = null);
+
+		public void snapshot(Gtk.Snapshot snapshot);
 	}
 
 	[CCode (cheader_filename = "ntk/renderer/gtk4.h", type_id = "ntk_renderer_gtk4_widget_get_type ()")]

@@ -7,8 +7,8 @@ namespace Ntk {
 
 		public Context(Ntk.Renderer renderer);
 
-		public bool render(int width, int height) throws GLib.Error;
-		public signal void rendered(int width, int height);
+		public bool render() throws GLib.Error;
+		public signal void rendered();
 	}
 
 	[CCode (cheader_filename = "ntk/ntk.h", has_type_id = false)]
@@ -24,12 +24,15 @@ namespace Ntk {
 	[CCode (cheader_filename = "ntk/ntk.h", type_cname = "NtkRendererInterface", type_id = "ntk_renderer_get_type ()")]
 	[Version (since = "0.1.0")]
 	public abstract class Renderer : GLib.Object {
-		public signal void request_draw(int width, int height);
+		public signal void request_draw();
 
 		public Nk.UserFont get_font(Pango.FontDescription desc) throws GLib.Error;
 		public bool draw (Ntk.RendererCommand cmd) throws GLib.Error;
 
 		public abstract Ntk.RendererType get_render_type ();
+
+		public virtual void set_size(int width, int height);
+		public virtual void get_size(out int width, out int height);
 
 		[NoWrapper]
 		public abstract bool render_command (Ntk.RendererDrawCommand cmd) throws GLib.Error;

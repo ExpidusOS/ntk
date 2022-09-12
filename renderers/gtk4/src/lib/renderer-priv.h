@@ -4,10 +4,12 @@
 #include <ntk/renderer/gtk4/renderer.h>
 
 typedef struct _NtkRendererGtk4RendererPrivate {
-	GtkSnapshot* snapshot;
-	GdkDrawContext* draw_context;
-
 	PangoContext* pango_ctx;
+	int width;
+	int height;
+
+	cairo_surface_t* surf;
+	cairo_t* cr;
 } NtkRendererGtk4RendererPrivate;
 
 #endif
