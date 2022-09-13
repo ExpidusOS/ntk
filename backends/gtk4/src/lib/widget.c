@@ -24,13 +24,19 @@ static void ntk_gtk4_widget_constructed(GObject* obj) {
 	NtkGtk4Widget* self = NTK_GTK4_WIDGET(obj);
 	NtkGtk4WidgetPrivate* priv = NTK_GTK4_WIDGET_PRIVATE(self);
 
+  gtk_widget_set_focusable(GTK_WIDGET(obj), TRUE);
+
 	priv->renderer = ntk_gtk4_renderer_new();
+  priv->im_context = gtk_im_multicontext_new();
+  gtk_im_context_set_client_widget(priv->im_context, GTK_WIDGET(obj));
+  gtk_im_context_set_use_preedit(priv->im_context, TRUE);
 
 	priv->controller_gclick = gtk_gesture_click_new();
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(priv->controller_gclick), 0);
 	gtk_widget_add_controller(GTK_WIDGET(self), GTK_EVENT_CONTROLLER(priv->controller_gclick));
 
   priv->controller_key = gtk_event_controller_key_new();
+  gtk_event_controller_key_set_im_context(GTK_EVENT_CONTROLLER_KEY(priv->controller_key), priv->im_context);
 	gtk_widget_add_controller(GTK_WIDGET(self), priv->controller_key);
 
   priv->controller_scroll = gtk_event_controller_scroll_new(GTK_EVENT_CONTROLLER_SCROLL_DISCRETE | GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES);
@@ -68,6 +74,7 @@ static void ntk_gtk4_widget_finalize(GObject* obj) {
 		priv->controller_motion = NULL;
 	}
 
+  g_clear_object(&priv->im_context);
 	g_clear_object(&priv->renderer);
 
 	G_OBJECT_CLASS(ntk_gtk4_widget_parent_class)->finalize(obj);
@@ -120,6 +127,27 @@ static void ntk_gtk4_widget_snapshot(GtkWidget* widget, GtkSnapshot* snapshot) {
 	ntk_gtk4_renderer_snapshot_to(renderer, snapshot);
 }
 
+static void ntk_gtk4_widget_map(GtkWidget* widget) {
+	GTK_WIDGET_CLASS(ntk_gtk4_widget_parent_class)->map(widget);
+
+	NtkGtk4Widget* self = NTK_GTK4_WIDGET(widget);
+	NtkGtk4WidgetPrivate* priv = NTK_GTK4_WIDGET_PRIVATE(self);
+
+  GtkWidget* toplevel = GTK_WIDGET(gtk_widget_get_root(widget));
+  g_assert(toplevel != NULL);
+
+  double x;
+  double y;
+  gtk_widget_translate_coordinates(widget, toplevel, 0, 0, &x, &y);
+
+  GdkRectangle area;
+  area.x = llroundf(x);
+  area.y = llroundf(y);
+  area.width = 0;
+  area.height = 0;
+  gtk_im_context_set_cursor_location(priv->im_context, &area);
+}
+
 static void ntk_gtk4_widget_interface_init(GtkBuildableIface* iface) {
 }
 
@@ -137,6 +165,7 @@ static void ntk_gtk4_widget_class_init(NtkGtk4WidgetClass* klass) {
 
 	widget_class->compute_expand = ntk_gtk4_widget_compute_expand;
 	widget_class->snapshot = ntk_gtk4_widget_snapshot;
+  widget_class->map = ntk_gtk4_widget_map;
 }
 
 static void ntk_gtk4_widget_init(NtkGtk4Widget* self) {

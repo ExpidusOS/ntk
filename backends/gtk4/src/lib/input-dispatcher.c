@@ -1,4 +1,4 @@
-#define G_LOG_DOMAN "NtkGtk4InputDispatcher"
+#define G_LOG_DOMAIN "NtkGtk4InputDispatcher"
 #include <ntk/backend/gtk4/input-dispatcher.h>
 #include "input-dispatcher-priv.h"
 #include <math.h>
@@ -61,9 +61,36 @@ static void ntk_gtk4_input_dispatcher_handle_key_pressed(GtkEventControllerKey* 
   if (state & GDK_SHIFT_MASK) ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_SHIFT, 1);
   if (state & GDK_CONTROL_MASK) ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_CTRL, 1);
 
-  printf("%d\n", keyval);
+  switch (keyval) {
+    case GDK_KEY_Delete:
+      ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_DEL, 1);
+      break;
+    case GDK_KEY_Return:
+      ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_ENTER, 1);
+      break;
+    case GDK_KEY_Tab:
+      ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_TAB, 1);
+      break;
+    case GDK_KEY_BackSpace:
+      ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_BACKSPACE, 1);
+      break;
+    case GDK_KEY_Up:
+      ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_UP, 1);
+      break;
+    case GDK_KEY_Down:
+      ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_DOWN, 1);
+      break;
+    case GDK_KEY_Left:
+      ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_LEFT, 1);
+      break;
+    case GDK_KEY_Right:
+      ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_RIGHT, 1);
+      break;
+  }
 
-  // TODO: handle GtkIMContext
+  GtkIMContext* im_context = gtk_event_controller_key_get_im_context(key);
+  if (im_context != NULL) gtk_im_context_focus_in(im_context);
+  else ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_UNICODE, gdk_keyval_to_unicode(keyval));
 }
 
 static void ntk_gtk4_input_dispatcher_handle_key_released(GtkEventControllerKey* key, guint keyval, guint keycode, GdkModifierType state, gpointer data) {
@@ -73,9 +100,43 @@ static void ntk_gtk4_input_dispatcher_handle_key_released(GtkEventControllerKey*
   if (state & GDK_SHIFT_MASK) ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_SHIFT, 0);
   if (state & GDK_CONTROL_MASK) ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_CTRL, 0);
 
-  printf("%d\n", keyval);
+  switch (keyval) {
+    case GDK_KEY_Delete:
+      ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_DEL, 0);
+      break;
+    case GDK_KEY_Return:
+      ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_ENTER, 0);
+      break;
+    case GDK_KEY_Tab:
+      ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_TAB, 0);
+      break;
+    case GDK_KEY_BackSpace:
+      ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_BACKSPACE, 0);
+      break;
+    case GDK_KEY_Up:
+      ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_UP, 0);
+      break;
+    case GDK_KEY_Down:
+      ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_DOWN, 0);
+      break;
+    case GDK_KEY_Left:
+      ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_LEFT, 0);
+      break;
+    case GDK_KEY_Right:
+      ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_RIGHT, 0);
+      break;
+  }
 
-  // TODO: handle GtkIMContext
+  GtkIMContext* im_context = gtk_event_controller_key_get_im_context(key);
+  if (im_context != NULL) gtk_im_context_focus_out(im_context);
+}
+
+static void ntk_gtk4_input_dispatcher_handle_im_commit(GtkIMContext* im_context, char* str, gpointer data) {
+  NtkGtk4InputDispatcher* self = NTK_GTK4_INPUT_DISPATCHER(data);
+  g_return_if_fail(NTK_GTK4_IS_INPUT_DISPATCHER(self));
+
+  ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_ASCII, str, strlen(str));
+  gtk_im_context_reset(im_context);
 }
 
 static void ntk_gtk4_input_dispatcher_handle_scroll(GtkEventControllerScroll* scroll, double dx, double dy, gpointer data) {
@@ -114,7 +175,8 @@ static void ntk_gtk4_input_dispatcher_connect_controllers(NtkGtk4InputDispatcher
     if (g_hash_table_contains(priv->handlers, name)) continue;
 
     GList* sigs = NULL;
-#define ATTACH_SIGNAL(name, handler) sigs = g_list_append(sigs, GINT_TO_POINTER(g_signal_connect(controller, name, G_CALLBACK(handler), self)))
+#define _ATTACH_SIGNAL(obj, name, handler) sigs = g_list_append(sigs, GINT_TO_POINTER(g_signal_connect(obj, name, G_CALLBACK(handler), self)))
+#define ATTACH_SIGNAL(name, handler) _ATTACH_SIGNAL(controller, name, handler)
 
     if (GTK_IS_GESTURE_CLICK(controller)) {
       g_debug("Attached gesture click");
@@ -126,6 +188,15 @@ static void ntk_gtk4_input_dispatcher_connect_controllers(NtkGtk4InputDispatcher
 
       ATTACH_SIGNAL("key-pressed", ntk_gtk4_input_dispatcher_handle_key_pressed);
       ATTACH_SIGNAL("key-released", ntk_gtk4_input_dispatcher_handle_key_released);
+
+      GtkIMContext* im_context = gtk_event_controller_key_get_im_context(GTK_EVENT_CONTROLLER_KEY(controller));
+      if (im_context != NULL) {
+#define ATTACH_IM_SIGNAL(name, handler) _ATTACH_SIGNAL(im_context, name, handler)
+
+        ATTACH_IM_SIGNAL("commit", ntk_gtk4_input_dispatcher_handle_im_commit);
+
+#undef ATTACH_IM_SIGNAL
+      }
     } else if (GTK_IS_EVENT_CONTROLLER_SCROLL(controller)) {
       g_debug("Attached scroll");
 
@@ -137,6 +208,7 @@ static void ntk_gtk4_input_dispatcher_connect_controllers(NtkGtk4InputDispatcher
     }
 
 #undef ATTACH_SIGNAL
+#undef _ATTACH_SIGNAL
 
     if (sigs != NULL) g_hash_table_insert(priv->handlers, g_strdup(name), sigs);
   }

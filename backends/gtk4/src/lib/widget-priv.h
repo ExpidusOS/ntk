@@ -8,6 +8,8 @@ typedef struct _NtkGtk4WidgetPrivate {
 	int width;
 	int height;
 
+  GtkIMContext* im_context;
+
 	GtkGesture* controller_gclick;
   GtkEventController* controller_key;
   GtkEventController* controller_scroll;
