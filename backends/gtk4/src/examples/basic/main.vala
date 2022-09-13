@@ -1,7 +1,7 @@
 namespace NtkExampleGtkBasic {
   public class Window : TokyoGtk.ApplicationWindow {
     private NtkGtk4.Widget widget;
-		private Ntk.InputDispatcher input;
+    private Ntk.InputDispatcher input;
     private Ntk.Context ntk;
 
     public Window(Gtk.Application app) {
@@ -14,9 +14,9 @@ namespace NtkExampleGtkBasic {
       this.widget.set_vexpand(true);
       this.get_box().append(this.widget);
 
-			this.input = new NtkGtk4.InputDispatcher(this.widget);
+      this.input = new NtkGtk4.InputDispatcher(this.widget);
       this.ntk = new Ntk.Context(this.widget.renderer);
-			this.input.attach(this.ntk);
+      this.input.attach(this.ntk);
 
       this.ntk.rendered.connect(() => {
         this.widget.queue_draw();
