@@ -12,10 +12,10 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE(NtkEGLRenderer, ntk_egl_renderer, NTK_EGL, RENDERER, NtkRenderer);
 
 struct _NtkEGLRenderer {
-	NtkRenderer parent_instance;
+  NtkRenderer parent_instance;
 
-	/*< private >*/
-	struct _NtkEGLRendererPrivate* priv;
+  /*< private >*/
+  struct _NtkEGLRendererPrivate* priv;
 };
 
 /**

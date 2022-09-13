@@ -11,10 +11,10 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE(NtkGtk4InputDispatcher, ntk_gtk4_input_dispatcher, NTK_GTK4, INPUT_DISPATCHER, NtkInputDispatcher);
 
 struct _NtkGtk4InputDispatcher {
-	NtkInputDispatcher parent_instance;
+  NtkInputDispatcher parent_instance;
 
-	/*< private >*/
-	struct _NtkGtk4InputDispatcherPrivate* priv;
+  /*< private >*/
+  struct _NtkGtk4InputDispatcherPrivate* priv;
 };
 
 /**

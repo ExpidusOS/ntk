@@ -11,10 +11,10 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE(NtkGtk4Renderer, ntk_gtk4_renderer, NTK_GTK4, RENDERER, NtkRenderer);
 
 struct _NtkGtk4Renderer {
-	NtkRenderer parent_instance;
+  NtkRenderer parent_instance;
 
-	/*< private >*/
-	struct _NtkGtk4RendererPrivate* priv;
+  /*< private >*/
+  struct _NtkGtk4RendererPrivate* priv;
 };
 
 /**

@@ -4,9 +4,9 @@
 #include <ntk/backend/egl/renderer.h>
 
 typedef struct _NtkEGLRendererPrivate {
-	EGLDisplay* egl_display;
+  EGLDisplay* egl_display;
 
-	PangoContext* pango_ctx;
+  PangoContext* pango_ctx;
 } NtkEGLRendererPrivate;
 
 #endif

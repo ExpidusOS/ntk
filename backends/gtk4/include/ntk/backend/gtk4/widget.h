@@ -16,10 +16,10 @@ G_DECLARE_FINAL_TYPE(NtkGtk4Widget, ntk_gtk4_widget, NTK_GTK4, WIDGET, GtkWidget
  * Since: 0.1.0
  */
 struct _NtkGtk4Widget {
-	GtkWidget parent_instance;
+  GtkWidget parent_instance;
 
-	/*< private >*/
-	struct _NtkGtk4WidgetPrivate* priv;
+  /*< private >*/
+  struct _NtkGtk4WidgetPrivate* priv;
 };
 
 GtkWidget* ntk_gtk4_widget_new();

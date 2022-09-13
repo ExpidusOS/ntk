@@ -15,10 +15,10 @@ G_DECLARE_FINAL_TYPE(NtkContext, ntk_context, NTK, CONTEXT, GObject);
  * Since: 0.1.0
  */
 struct _NtkContext {
-	GObject parent_instance;
+  GObject parent_instance;
 
-	/*< private >*/
-	struct _NtkContextPrivate* priv;
+  /*< private >*/
+  struct _NtkContextPrivate* priv;
 };
 
 typedef void (*NtkContextDrawCallback)(NtkContext* context, struct nk_context* nuklear, gpointer user_data);

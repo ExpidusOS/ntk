@@ -11,10 +11,10 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE(NtkCairoRenderer, ntk_cairo_renderer, NTK_CAIRO, RENDERER, NtkRenderer);
 
 struct _NtkCairoRenderer {
-	NtkRenderer parent_instance;
+  NtkRenderer parent_instance;
 
-	/*< private >*/
-	struct _NtkCairoRendererPrivate* priv;
+  /*< private >*/
+  struct _NtkCairoRendererPrivate* priv;
 };
 
 /**

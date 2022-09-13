@@ -16,25 +16,25 @@ G_DECLARE_DERIVABLE_TYPE(NtkRenderer, ntk_renderer, NTK, RENDERER, GObject);
  * Since: 0.1.0
  */
 typedef enum { /*< flags,prefix=NTK_RENDERER_TYPE,since=0.1.0 >*/
-	NTK_RENDERER_TYPE_COMMAND = 0,
-	NTK_RENDERER_TYPE_VERTEX = 1
+  NTK_RENDERER_TYPE_COMMAND = 0,
+  NTK_RENDERER_TYPE_VERTEX = 1
 } NtkRendererType;
 
 typedef struct nk_command NtkRendererDrawCommand;
 
 typedef struct {
-	const struct nk_draw_command* cmd;
-	struct nk_buffer cmds;
-	struct nk_buffer verts;
-	struct nk_buffer idx;
+  const struct nk_draw_command* cmd;
+  struct nk_buffer cmds;
+  struct nk_buffer verts;
+  struct nk_buffer idx;
 } NtkRendererVertexCommand;
 
 typedef struct {
-	int is_vertex:1;
-	union {
-		const NtkRendererDrawCommand* draw;
-		NtkRendererVertexCommand vertex;
-	};
+  int is_vertex:1;
+  union {
+    const NtkRendererDrawCommand* draw;
+    NtkRendererVertexCommand vertex;
+  };
 } NtkRendererCommand;
 
 /**
@@ -43,14 +43,14 @@ typedef struct {
  * Since: 0.1.0
  */
 struct _NtkRendererClass {
-	GObjectClass parent_class;
+  GObjectClass parent_class;
 
-	NtkRendererType (*get_render_type)(NtkRenderer* self);
-	gboolean (*render_command)(NtkRenderer* self, const NtkRendererDrawCommand* cmd, GError** error);
-	gboolean (*render_vertex)(NtkRenderer* self, NtkRendererVertexCommand* cmd, GError** error);
-	struct nk_user_font* (*get_font)(NtkRenderer* self, PangoFontDescription* desc, GError** error);
-	void (*set_size)(NtkRenderer* self, int width, int height);
-	void (*get_size)(NtkRenderer* self, int* width, int* height);
+  NtkRendererType (*get_render_type)(NtkRenderer* self);
+  gboolean (*render_command)(NtkRenderer* self, const NtkRendererDrawCommand* cmd, GError** error);
+  gboolean (*render_vertex)(NtkRenderer* self, NtkRendererVertexCommand* cmd, GError** error);
+  struct nk_user_font* (*get_font)(NtkRenderer* self, PangoFontDescription* desc, GError** error);
+  void (*set_size)(NtkRenderer* self, int width, int height);
+  void (*get_size)(NtkRenderer* self, int* width, int* height);
 };
 
 void ntk_renderer_request_draw(NtkRenderer* self);
