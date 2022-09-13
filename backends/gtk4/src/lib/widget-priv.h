@@ -9,6 +9,9 @@ typedef struct _NtkGtk4WidgetPrivate {
 	int height;
 
 	GtkGesture* controller_gclick;
+  GtkEventController* controller_key;
+  GtkEventController* controller_scroll;
+  GtkEventController* controller_motion;
 } NtkGtk4WidgetPrivate;
 
 #endif

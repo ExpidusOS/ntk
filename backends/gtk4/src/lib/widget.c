@@ -29,6 +29,15 @@ static void ntk_gtk4_widget_constructed(GObject* obj) {
 	priv->controller_gclick = gtk_gesture_click_new();
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(priv->controller_gclick), 0);
 	gtk_widget_add_controller(GTK_WIDGET(self), GTK_EVENT_CONTROLLER(priv->controller_gclick));
+
+  priv->controller_key = gtk_event_controller_key_new();
+	gtk_widget_add_controller(GTK_WIDGET(self), priv->controller_key);
+
+  priv->controller_scroll = gtk_event_controller_scroll_new(GTK_EVENT_CONTROLLER_SCROLL_DISCRETE | GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES);
+	gtk_widget_add_controller(GTK_WIDGET(self), priv->controller_scroll);
+
+  priv->controller_motion = gtk_event_controller_motion_new();
+	gtk_widget_add_controller(GTK_WIDGET(self), priv->controller_motion);
 }
 
 static void ntk_gtk4_widget_finalize(GObject* obj) {
@@ -39,6 +48,24 @@ static void ntk_gtk4_widget_finalize(GObject* obj) {
 		gtk_widget_remove_controller(GTK_WIDGET(self), GTK_EVENT_CONTROLLER(priv->controller_gclick));
 		g_object_unref(priv->controller_gclick);
 		priv->controller_gclick = NULL;
+	}
+
+	if (priv->controller_key != NULL) {
+		gtk_widget_remove_controller(GTK_WIDGET(self), priv->controller_key);
+		g_object_unref(priv->controller_key);
+		priv->controller_key = NULL;
+	}
+
+	if (priv->controller_scroll != NULL) {
+		gtk_widget_remove_controller(GTK_WIDGET(self), priv->controller_scroll);
+		g_object_unref(priv->controller_scroll);
+		priv->controller_scroll = NULL;
+	}
+
+	if (priv->controller_motion != NULL) {
+		gtk_widget_remove_controller(GTK_WIDGET(self), priv->controller_motion);
+		g_object_unref(priv->controller_motion);
+		priv->controller_motion = NULL;
 	}
 
 	g_clear_object(&priv->renderer);

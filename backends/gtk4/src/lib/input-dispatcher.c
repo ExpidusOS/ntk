@@ -54,6 +54,47 @@ static void ntk_gtk4_input_dispatcher_handle_gesture_click_released(GtkGestureCl
   }
 }
 
+static void ntk_gtk4_input_dispatcher_handle_key_pressed(GtkEventControllerKey* key, guint keyval, guint keycode, GdkModifierType state, gpointer data) {
+  NtkGtk4InputDispatcher* self = NTK_GTK4_INPUT_DISPATCHER(data);
+  g_return_if_fail(NTK_GTK4_IS_INPUT_DISPATCHER(self));
+
+  if (state & GDK_SHIFT_MASK) ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_SHIFT, 1);
+  if (state & GDK_CONTROL_MASK) ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_CTRL, 1);
+
+  printf("%d\n", keyval);
+
+  // TODO: handle GtkIMContext
+}
+
+static void ntk_gtk4_input_dispatcher_handle_key_released(GtkEventControllerKey* key, guint keyval, guint keycode, GdkModifierType state, gpointer data) {
+  NtkGtk4InputDispatcher* self = NTK_GTK4_INPUT_DISPATCHER(data);
+  g_return_if_fail(NTK_GTK4_IS_INPUT_DISPATCHER(self));
+
+  if (state & GDK_SHIFT_MASK) ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_SHIFT, 0);
+  if (state & GDK_CONTROL_MASK) ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_CTRL, 0);
+
+  printf("%d\n", keyval);
+
+  // TODO: handle GtkIMContext
+}
+
+static void ntk_gtk4_input_dispatcher_handle_scroll(GtkEventControllerScroll* scroll, double dx, double dy, gpointer data) {
+  NtkGtk4InputDispatcher* self = NTK_GTK4_INPUT_DISPATCHER(data);
+  g_return_if_fail(NTK_GTK4_IS_INPUT_DISPATCHER(self));
+
+  ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_SCROLL, dx, dy);
+}
+
+static void ntk_gtk4_input_dispatcher_handle_motion(GtkEventControllerMotion* motion, double dx, double dy, gpointer data) {
+  NtkGtk4InputDispatcher* self = NTK_GTK4_INPUT_DISPATCHER(data);
+  g_return_if_fail(NTK_GTK4_IS_INPUT_DISPATCHER(self));
+
+  int rx = llround(dx);
+  int ry = llround(dy);
+
+  ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_MOTION, rx, ry);
+}
+
 static void ntk_gtk4_input_dispatcher_connect_controllers(NtkGtk4InputDispatcher* self) {
   g_return_if_fail(NTK_GTK4_IS_INPUT_DISPATCHER(self));
   NtkGtk4InputDispatcherPrivate* priv = NTK_GTK4_INPUT_DISPATCHER_PRIVATE(self);
@@ -73,11 +114,26 @@ static void ntk_gtk4_input_dispatcher_connect_controllers(NtkGtk4InputDispatcher
     if (g_hash_table_contains(priv->handlers, name)) continue;
 
     GList* sigs = NULL;
-#define ATTACH_SIGNAL(controller, name, handler) sigs = g_list_append(sigs, GINT_TO_POINTER(g_signal_connect(controller, name, G_CALLBACK(handler), self)))
+#define ATTACH_SIGNAL(name, handler) sigs = g_list_append(sigs, GINT_TO_POINTER(g_signal_connect(controller, name, G_CALLBACK(handler), self)))
 
     if (GTK_IS_GESTURE_CLICK(controller)) {
-      ATTACH_SIGNAL(GTK_GESTURE_CLICK(controller), "pressed", ntk_gtk4_input_dispatcher_handle_gesture_click_pressed);
-      ATTACH_SIGNAL(GTK_GESTURE_CLICK(controller), "released", ntk_gtk4_input_dispatcher_handle_gesture_click_released);
+      g_debug("Attached gesture click");
+
+      ATTACH_SIGNAL("pressed", ntk_gtk4_input_dispatcher_handle_gesture_click_pressed);
+      ATTACH_SIGNAL("released", ntk_gtk4_input_dispatcher_handle_gesture_click_released);
+    } else if (GTK_IS_EVENT_CONTROLLER_KEY(controller)) {
+      g_debug("Attached key");
+
+      ATTACH_SIGNAL("key-pressed", ntk_gtk4_input_dispatcher_handle_key_pressed);
+      ATTACH_SIGNAL("key-released", ntk_gtk4_input_dispatcher_handle_key_released);
+    } else if (GTK_IS_EVENT_CONTROLLER_SCROLL(controller)) {
+      g_debug("Attached scroll");
+
+      ATTACH_SIGNAL("scroll", ntk_gtk4_input_dispatcher_handle_scroll);
+    } else if (GTK_IS_EVENT_CONTROLLER_MOTION(controller)) {
+      g_debug("Attached motion");
+
+      ATTACH_SIGNAL("motion", ntk_gtk4_input_dispatcher_handle_motion);
     }
 
 #undef ATTACH_SIGNAL
