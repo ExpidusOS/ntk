@@ -11,6 +11,11 @@ G_BEGIN_DECLS
 #define NTK_TYPE_INPUT_DISPATCHER ntk_input_dispatcher_get_type()
 G_DECLARE_DERIVABLE_TYPE(NtkInputDispatcher, ntk_input_dispatcher, NTK, INPUT_DISPATCHER, GObject);
 
+/**
+ * NtkInputDispatcherEventType:
+ *
+ * Since: 0.1.0
+ */
 typedef enum {
   NTK_INPUT_DISPATCHER_TYPE_NONE = 0,
   NTK_INPUT_DISPATCHER_TYPE_MOTION,
@@ -22,6 +27,11 @@ typedef enum {
   NTK_INPUT_DISPATCHER_TYPE_UNICODE
 } NtkInputDispatcherEventType;
 
+/**
+ * NtkInputDispatcherEvent:
+ *
+ * Since: 0.1.0
+ */
 typedef struct {
   NtkInputDispatcherEventType type;
 
@@ -84,7 +94,7 @@ void ntk_input_dispatcher_detach(NtkInputDispatcher* self);
  *
  * Waits for the dispatcher to get an event
  */
-void ntk_input_dispatcher_wait(NtkInputDispatcher* self);
+void ntk_input_dispatcher_wait(NtkInputDispatcher* self, NtkInputDispatcherEvent* event);
 
 /**
  * ntk_input_dispatcher_trigger:

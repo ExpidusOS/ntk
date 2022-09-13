@@ -114,4 +114,4 @@ libntk_gir = gnome.generate_gir(libntk_shlib,
   header: 'ntk/ntk.h',
   install: true)
 
-subdir('renderers')
+subdir('backends')

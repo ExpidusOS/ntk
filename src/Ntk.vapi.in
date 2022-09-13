@@ -19,12 +19,16 @@ namespace Ntk {
 	[CCode (cheader_filename = "ntk/ntk.h", has_type_id = false)]
 	[Compact]
 	[Version (since = "0.1.0")]
-	public struct PangoLayoutFont : Nk.UserFont {}
+	public abstract class InputDispatcher : GLib.Object {
+		public void attach(Context ctx);
+		public void detach();
 
-	[CCode (cheader_filename = "ntk/ntk.h", has_type_id = false)]
-	[Compact]
-	[Version (since = "0.1.0")]
-	public struct RendererDrawCommand : Nk.Command {}
+		public abstract void wait(out InputDispatcherEvent ev);
+
+		public void trigger(InputDispatcherEventType type, ...);
+		public void triggerv(InputDispatcherEventType type, va_list ap);
+		public void triggerev(InputDispatcherEvent* ev);
+	}
 
 	[CCode (cheader_filename = "ntk/ntk.h", type_cname = "NtkRendererInterface", type_id = "ntk_renderer_get_type ()")]
 	[Version (since = "0.1.0")]
@@ -50,6 +54,23 @@ namespace Ntk {
 	}
 
 	[CCode (cheader_filename = "ntk/ntk.h", has_type_id = false)]
+	[Compact]
+	[Version (since = "0.1.0")]
+	public struct PangoLayoutFont : Nk.UserFont {}
+
+	[CCode (cheader_filename = "ntk/ntk.h", has_type_id = false)]
+	[Compact]
+	[Version (since = "0.1.0")]
+	public struct InputDispatcherEvent {
+		InputDispatcherEventType type;
+	}
+
+	[CCode (cheader_filename = "ntk/ntk.h", has_type_id = false)]
+	[Compact]
+	[Version (since = "0.1.0")]
+	public struct RendererDrawCommand : Nk.Command {}
+
+	[CCode (cheader_filename = "ntk/ntk.h", has_type_id = false)]
 	[Version (since = "0.1.0")]
 	public struct RendererCommand {
 		public int is_vertex;
@@ -71,6 +92,19 @@ namespace Ntk {
 	public enum RendererType {
 		COMMAND,
 		VERTEX
+	}
+
+	[CCode (cheader_filename = "ntk/ntk.h", cprefix = "NTK_INPUT_DISPATCHER_TYPE_", has_type_id = false)]
+	[Version (since = "0.1.0")]
+	public enum InputDispatcherEventType {
+		NONE,
+		MOTION,
+		KEY,
+		BUTTON,
+		SCROLL,
+		ASCII,
+		GLYPH,
+		UNICODE
 	}
 
 	[CCode (cheader_filename = "ntk/ntk.h", cprefix = "NTK_ERROR_", has_type_id = false)]

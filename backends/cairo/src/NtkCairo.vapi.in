@@ -1,0 +1,13 @@
+[CCode (cprefix = "NtkCairo", gir_namespace = "NtkCairo", gir_version = "@SMALL_VERSION@", lower_case_cprefix = "ntk_cairo_")]
+namespace NtkCairo {
+	[CCode (cheader_filename = "ntk/backend/cairo.h", type_id = "ntk_cairo_renderer_get_type ()")]
+	[Version (since = "0.1.0")]
+	public class Renderer : Ntk.Renderer {
+    public int width { get; set construct; }
+    public int height { get; set construct; }
+		public Cairo.Surface surface { get; set construct; }
+
+		public Renderer(int width, int height);
+		public Renderer.for_surface(Cairo.Surface surf);
+	}
+}
