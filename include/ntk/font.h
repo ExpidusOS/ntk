@@ -33,7 +33,7 @@ NtkPangoLayoutFont* ntk_pango_layout_font_ref(NtkPangoLayoutFont* font);
 void ntk_pango_layout_font_unref(NtkPangoLayoutFont* font);
 
 /**
- * ntk_pango_layout_font_unref:
+ * ntk_pango_layout_font_free:
  * @font: (transfer none): The font
  */
 void ntk_pango_layout_font_free(NtkPangoLayoutFont* font);

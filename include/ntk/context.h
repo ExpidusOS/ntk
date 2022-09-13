@@ -24,7 +24,7 @@ struct _NtkContext {
 typedef void (*NtkContextDrawCallback)(NtkContext* context, struct nk_context* nuklear, gpointer user_data);
 
 /**
- * ntk_context_new: (construct)
+ * ntk_context_new: (constructor)
  */
 NtkContext* ntk_context_new(NtkRenderer* renderer);
 
