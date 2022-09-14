@@ -27,8 +27,6 @@ static void ntk_gtk4_input_dispatcher_handle_gesture_click_pressed(GtkGestureCli
   int rx = (int)x;
   int ry = (int)y;
 
-  printf("%f %f: %d %d\n", x, y, rx, ry);
-
   guint btn;
   g_object_get(gclick, "button", &btn, NULL);
 
