@@ -287,6 +287,9 @@ static void ntk_egl_renderer_class_init(NtkEGLRendererClass* klass) {
   object_class->set_property = ntk_egl_renderer_set_property;
   object_class->get_property = ntk_egl_renderer_get_property;
 
+  /**
+   * NtkEGLRenderer:egl-display: (skip)
+   */
   obj_props[PROP_EGL_DISPLAY] = g_param_spec_pointer("egl-display", "EGL Display", "The EGL Display Snapshot to render onto.", G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
   g_object_class_install_properties(object_class, N_PROPERTIES, obj_props);
 

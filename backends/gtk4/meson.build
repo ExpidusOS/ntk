@@ -6,9 +6,11 @@ if gtk4.found()
   libtokyo = dependency('tokyo-gtk4', required: gtk4_examples)
   libadwaita = dependency('libadwaita-1', required: libtokyo.found())
 
-  configure_file(input: 'src/NtkGtk4.vapi.in', output: 'NtkGtk4-@0@.vapi'.format(shortver.split('-')[0]),
-    configuration: conf_data)
   configure_file(input: 'src/NtkGtk4.deps.in', output: 'NtkGtk4-@0@.deps'.format(shortver.split('-')[0]),
+    configuration: conf_data)
+  configure_file(input: 'src/NtkGtk4.metadata.in', output: 'NtkGtk4-@0@.metadata'.format(shortver.split('-')[0]),
+    configuration: conf_data)
+  configure_file(input: 'src/NtkGtk4-custom.vala.in', output: 'NtkGtk4-@0@-custom.vala'.format(shortver.split('-')[0]),
     configuration: conf_data)
 
   libntk_gtk4_src = ['src/lib/input-dispatcher.c', 'src/lib/renderer.c', 'src/lib/widget.c']
@@ -27,20 +29,22 @@ if gtk4.found()
     sources: [libntk_gtk4_src, libntk_gtk4_headers],
     header: 'ntk/backend/gtk4.h',
     install: true)
+  libntk_gtk4_vapi = gnome.generate_vapi('NtkGtk4-@0@'.format(shortver.split('-')[0]),
+    packages: ['Ntk-@0@'.format(shortver.split('-')[0]), 'NtkCairo-@0@'.format(shortver.split('-')[0]), 'gtk4', 'cairo'],
+    sources: [libntk_gtk4_gir[0], join_paths(meson.current_build_dir(), 'NtkGtk4-@0@-custom.vala'.format(shortver.split('-')[0]))],
+    vapi_dirs: [join_paths(meson.project_source_root(), 'vapi'), meson.project_build_root(), join_paths(meson.project_build_root(), 'backends', 'cairo')],
+    install: true)
   libntk_gtk4 = declare_dependency(link_with: libntk_gtk4_shlib,
-    dependencies: libntk_gtk4_deps,
-    include_directories: libntk_gtk4_inc)
+    include_directories: libntk_gtk4_inc,
+    dependencies: [libntk_gtk4_deps])
+  pkg.generate(libntk_gtk4_shlib, description: 'GTK4 widget, input dispatcher, and renderer for NTK',
+    name: 'ntk-gtk4',
+    url: 'https://github.com/ExpidusOS/ntk',
+    version: longver)
 
   if libtokyo.found()
     executable('ntk-gtk4-example-basic', ['src/examples/basic/main.vala'],
       vala_args: ['--vapidir', meson.current_build_dir()],
-      dependencies: [
-        libtokyo,
-        libadwaita,
-        libntk_gtk4,
-        meson.get_compiler('vala').find_library('NtkGtk4-@0@'.format(shortver.split('-')[0]), dirs: meson.current_build_dir()),
-        libntk_vapi,
-        meson.get_compiler('vala').find_library('nuklear', dirs: join_paths(meson.project_source_root(), 'vapi'))
-      ])
+      dependencies: [libtokyo, libadwaita, nuklear, nuklear_vapi, libntk, libntk_vapi, libntk_gtk4, libntk_gtk4_vapi])
   endif
 endif

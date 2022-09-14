@@ -1,0 +1,8 @@
+namespace NtkCairo {
+  public class Renderer : Ntk.Renderer {
+    public Cairo.Surface surface { get; set construct; }
+
+    public Renderer(int width, int height);
+    public Renderer.for_surface(Cairo.Surface surf);
+  }
+}

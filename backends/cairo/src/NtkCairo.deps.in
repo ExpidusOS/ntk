@@ -1,1 +1,3 @@
-Ntk-@SMALL_VERSION@ cairo
+Ntk-@SMALL_VERSION@
+cairo
+pangocairo

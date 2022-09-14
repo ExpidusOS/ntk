@@ -4,7 +4,7 @@
 
 #define NTK_PANGO_FONT_PRIVATE(self) (ntk_pango_font_get_instance_private(self))
 
-G_DEFINE_TYPE_WITH_PRIVATE(NtkPangoFont, ntk_pango_font, G_TYPE_OBJECT);
+G_DEFINE_TYPE_WITH_PRIVATE(NtkPangoFont, ntk_pango_font, NTK_TYPE_FONT);
 
 enum {
   PROP_0,

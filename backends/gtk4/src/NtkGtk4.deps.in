@@ -1,1 +1,3 @@
-Ntk-@SMALL_VERSION@ NtkCairo-@SMALL_VERSION@ gtk4
+Ntk-@SMALL_VERSION@
+NtkCairo-@SMALL_VERSION@
+gtk4

@@ -122,7 +122,16 @@ static void ntk_context_class_init(NtkContextClass* klass) {
   object_class->set_property = ntk_context_set_property;
   object_class->get_property = ntk_context_get_property;
 
+  /**
+   * NtkContext:renderer: (skip)
+   *
+   * FIXME: figure out why the getter is invalid according to "g-ir-compiler"
+   */
   obj_props[PROP_RENDERER] = g_param_spec_object("renderer", "Ntk Renderer", "The Ntk Renderer to render with.", NTK_TYPE_RENDERER, G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
+
+  /**
+   * NtkContext:font-description: (type PangoFontDescription)
+   */
   obj_props[PROP_FONT_DESCRIPTION] = g_param_spec_boxed("font-description", "Pango Font Description", "The description of the font to utilize.", PANGO_TYPE_FONT_DESCRIPTION, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
   g_object_class_install_properties(object_class, N_PROPERTIES, obj_props);
 
@@ -135,6 +144,29 @@ static void ntk_context_init(NtkContext* self) {
 
 NtkContext* ntk_context_new(NtkRenderer* renderer, GError** error) {
   return g_initable_new(NTK_TYPE_CONTEXT, NULL, error, "renderer", renderer, NULL);
+}
+
+NtkRenderer* ntk_context_get_renderer(NtkContext* self) {
+  g_return_val_if_fail(NTK_IS_CONTEXT(self), NULL);
+  NtkContextPrivate* priv = NTK_CONTEXT_PRIVATE(self);
+  g_return_val_if_fail(priv != NULL, NULL);
+  return priv->renderer;
+}
+
+PangoFontDescription* ntk_context_get_font_description(NtkContext* self) {
+  g_return_val_if_fail(NTK_IS_CONTEXT(self), NULL);
+  NtkContextPrivate* priv = NTK_CONTEXT_PRIVATE(self);
+  g_return_val_if_fail(priv != NULL, NULL);
+  return priv->font_desc;
+}
+
+void ntk_context_set_font_description(NtkContext* self, PangoFontDescription* desc) {
+  g_return_if_fail(NTK_IS_CONTEXT(self));
+  NtkContextPrivate* priv = NTK_CONTEXT_PRIVATE(self);
+  g_return_if_fail(priv != NULL);
+
+  priv->font_desc = desc;
+  g_object_notify_by_pspec(G_OBJECT(self), obj_props[PROP_FONT_DESCRIPTION]);
 }
 
 gboolean ntk_context_render(NtkContext* self, NtkContextDrawCallback callback, gpointer callback_target, GError** error) {

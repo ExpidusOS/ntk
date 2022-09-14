@@ -3,11 +3,12 @@
 
 #include <glib-object.h>
 #include <pango/pango.h>
+#include <ntk/font/object.h>
 
 G_BEGIN_DECLS
 
 #define NTK_TYPE_PANGO_FONT ntk_pango_font_get_type()
-G_DECLARE_DERIVABLE_TYPE(NtkPangoFont, ntk_pango_font, NTK, PANGO_FONT, GObject);
+G_DECLARE_DERIVABLE_TYPE(NtkPangoFont, ntk_pango_font, NTK, PANGO_FONT, NtkFont);
 
 /**
  * NtkPangoFont:
@@ -15,7 +16,7 @@ G_DECLARE_DERIVABLE_TYPE(NtkPangoFont, ntk_pango_font, NTK, PANGO_FONT, GObject)
  * Since: 0.1.0
  */
 struct _NtkPangoFontClass {
-  GObjectClass parent_class;
+  NtkFontClass parent_class;
 };
 
 /**

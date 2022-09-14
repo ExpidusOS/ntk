@@ -29,6 +29,8 @@ gobject = dependency('gobject-2.0')
 pango = dependency('pango')
 libmath = meson.get_compiler('c').find_library('m', required: false)
 
+valadoc = find_program('valadoc', native: true, required: false)
+
 conf_data = configuration_data()
 conf_data.set('PREFIX', prefix)
 conf_data.set('BINDIR', bindir)
@@ -40,7 +42,7 @@ conf_data.set('SMALL_VERSION', shortver.split('-')[0])
 conf_data.set('BUILDDIR', meson.current_build_dir())
 conf_data.set('SOURCEDIR', meson.current_source_dir())
 
-nuklear_cargs = [
+nuklear_cflags = [
   '-DNK_INCLUDE_DEFAULT_FONT=1',
   '-DNK_INCLUDE_FONT_BAKING=1',
   '-DNK_INCLUDE_DEFAULT_ALLOCATOR=1',
@@ -57,19 +59,19 @@ nuklear_cargs = [
 ]
 
 if meson.get_compiler('c').has_argument('-Wno-nullability-completeness')
-  nuklear_cargs += ['-Wno-nullability-completeness']
+  nuklear_cflags += ['-Wno-nullability-completeness']
 endif
 
 if meson.get_compiler('c').has_argument('-Wno-implicit-function-declaration')
-  nuklear_cargs += ['-Wno-implicit-function-declaration']
+  nuklear_cflags += ['-Wno-implicit-function-declaration']
 endif
 
 if meson.get_compiler('c').has_argument('-Wno-expansion-to-defined')
-  nuklear_cargs += ['-Wno-expansion-to-defined']
+  nuklear_cflags += ['-Wno-expansion-to-defined']
 endif
 
 if meson.get_compiler('c').has_argument('-Wno-unused-function')
-  nuklear_cargs += ['-Wno-unused-function']
+  nuklear_cflags += ['-Wno-unused-function']
 endif
 
 nuklear_src = [
@@ -102,30 +104,45 @@ if libmath.found()
   nuklear_deps += [libmath]
 endif
 
+nuklear_version = '4.10.1'
 nuklear_shlib = shared_library('nuklear', nuklear_src,
   dependencies: nuklear_deps,
-  c_args: nuklear_cargs,
+  c_args: nuklear_cflags,
   install: true)
 nuklear = declare_dependency(link_with: nuklear_shlib,
   dependencies: nuklear_deps,
-  compile_args: nuklear_cargs,
+  compile_args: nuklear_cflags,
   include_directories: include_directories('deps/nuklear'))
+nuklear_vapi = meson.get_compiler('vala').find_library('nuklear', dirs: join_paths(meson.project_source_root(), 'vapi'))
+install_data('vapi/nuklear.vapi', install_dir: join_paths(datadir, 'vala', 'vapi'))
+install_data('deps/nuklear/nuklear.h', install_dir: join_paths(prefix, 'include', 'ntk-@0@'.format(shortver)))
 
-#configure_file(input: 'src/Ntk.vapi.in', output: 'Ntk-@0@.vapi'.format(shortver.split('-')[0]),
-#  configuration: conf_data)
-#configure_file(input: 'src/Ntk.deps.in', output: 'Ntk-@0@.deps'.format(shortver.split('-')[0]),
-#  configuration: conf_data)
+nuklear_pc_cflags = nuklear_cflags
+nuklear_pc_cflags += ['-I${includedir}/ntk-@0@'.format(shortver)]
+pkg.generate(nuklear_shlib, description: 'A minimal state immediate mode graphical user interface toolkit.',
+  name: 'nuklear',
+  url: 'https://github.com/Immediate-Mode-UI/Nuklear',
+  version: nuklear_version,
+  extra_cflags: nuklear_pc_cflags)
 
-libntk_cflags = ['-fms-extensions', '-Wno-microsoft']
+configure_file(input: 'src/Ntk.deps.in', output: 'Ntk-@0@.deps'.format(shortver.split('-')[0]),
+  configuration: conf_data)
+configure_file(input: 'src/Ntk.metadata.in', output: 'Ntk-@0@.metadata'.format(shortver.split('-')[0]),
+  configuration: conf_data)
+configure_file(input: 'src/Ntk-custom.vala.in', output: 'Ntk-@0@-custom.vala'.format(shortver.split('-')[0]),
+  configuration: conf_data)
+
+subdir('include/ntk')
 
 libntk_src = ['src/lib/context.c', 'src/lib/error.c', 'src/lib/input-dispatcher.c', 'src/lib/renderer.c', 'src/lib/utils.c',
   'src/lib/font/object.c', 'src/lib/font/user.c', 'src/lib/font/pango/layout.c', 'src/lib/font/pango/object.c']
 libntk_headers = ['include/ntk/ntk.h', 'include/ntk/context.h', 'include/ntk/error.h', 'include/ntk/font.h', 'include/ntk/input-dispatcher.h', 'include/ntk/renderer.h', 'include/ntk/utils.h',
   'include/ntk/font/object.h', 'include/ntk/font/user.h', 'include/ntk/font/pango/layout.h', 'include/ntk/font/pango/object.h']
 
-libntk_inc = include_directories('include')
+libntk_inc = [include_directories('include')]
 libntk_deps = [glib, gobject, pango, nuklear]
 
+libntk_cflags = ['-I', join_paths(meson.project_build_root(), 'include')]
 libntk_enums = gnome.mkenums('ntk-enums', sources: libntk_headers)
 
 libntk_shlib = shared_library('ntk', libntk_src, libntk_enums,
@@ -134,10 +151,6 @@ libntk_shlib = shared_library('ntk', libntk_src, libntk_enums,
   include_directories: libntk_inc,
   dependencies: libntk_deps,
   install: true)
-libntk = declare_dependency(link_with: libntk_shlib,
-  compile_args: libntk_cflags,
-  include_directories: libntk_inc,
-  dependencies: libntk_deps)
 libntk_gir = gnome.generate_gir(libntk_shlib,
   extra_args: ['--cflags-begin', libntk_cflags, '--cflags-end'],
   dependencies: [libntk_deps],
@@ -148,6 +161,15 @@ libntk_gir = gnome.generate_gir(libntk_shlib,
   install: true)
 libntk_vapi = gnome.generate_vapi('Ntk-@0@'.format(shortver.split('-')[0]),
   packages: ['nuklear', 'pango', 'gobject-2.0', 'glib-2.0', 'gio-2.0'],
-  sources: libntk_gir[0])
+  sources: [libntk_gir[0], join_paths(meson.project_build_root(), 'Ntk-@0@-custom.vala'.format(shortver.split('-')[0]))],
+  vapi_dirs: join_paths(meson.project_source_root(), 'vapi'),
+  install: true)
+libntk = declare_dependency(link_with: libntk_shlib,
+  include_directories: libntk_inc,
+  dependencies: [libntk_deps])
+pkg.generate(libntk_shlib, description: 'GObject based UI toolkit for Nuklear',
+  name: 'ntk',
+  url: 'https://github.com/ExpidusOS/ntk',
+  version: longver)
 
 subdir('backends')

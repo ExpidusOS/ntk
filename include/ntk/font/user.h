@@ -14,10 +14,16 @@ G_BEGIN_DECLS
  * Since: 0.1.0
  */
 typedef struct _NtkUserFont {
-  struct nk_user_font;
+  nk_handle userdata;
+  float height;
+  nk_text_width_f width;
+#ifdef NK_INCLUDE_VERTEX_BUFFER_OUTPUT
+  nk_query_font_glyph_f query;
+  nk_handle texture;
+#endif
 
-  struct _NtkUserFont* (*copy)(struct _NtkUserFont* self);
-  void (*free)(struct _NtkUserFont* self);
+  struct _NtkUserFont* (*impl_copy)(struct _NtkUserFont* self);
+  void (*impl_free)(struct _NtkUserFont* self);
 } NtkUserFont;
 
 GType ntk_user_font_get_type();

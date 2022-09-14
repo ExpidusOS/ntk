@@ -1,0 +1,21 @@
+namespace NtkGtk4 {
+  public class InputDispatcher : Ntk.InputDispatcher {
+    public Gtk.Widget widget { get; construct; }
+
+    public InputDispatcher(Gtk.Widget widget);
+  }
+
+  public class Renderer : Ntk.Renderer {
+    public Gtk.Snapshot snapshot { get; construct; }
+
+    public Renderer();
+
+    public void snapshot_to(Gtk.Snapshot snapshot);
+  }
+
+  public class Widget : Gtk.Widget, Gtk.Buildable {
+    public Ntk.Renderer renderer { get; }
+
+    public Widget();
+  }
+}

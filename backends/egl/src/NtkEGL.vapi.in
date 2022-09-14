@@ -1,7 +1,0 @@
-[CCode (cprefix = "NtkEGL", gir_namespace = "NtkEGL", gir_version = "@SMALL_VERSION@", lower_case_cprefix = "ntk_egl_")]
-namespace NtkEGL {
-  [CCode (cheader_filename = "ntk/backend/egl.h", type_id = "ntk_egl_renderer_get_type ()")]
-  public class Renderer : Ntk.Renderer {
-    public Renderer () throws GLib.Error;
-  }
-}
