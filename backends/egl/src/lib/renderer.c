@@ -108,6 +108,7 @@ static EGLDeviceEXT ntk_egl_renderer_get_egl_device_from_drm(NtkEGLRenderer* sel
   }
 
   free(devices);
+  return EGL_NO_DEVICE_EXT;
 }
 
 static NtkRendererType ntk_egl_renderer_get_render_type(NtkRenderer* renderer) {

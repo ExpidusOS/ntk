@@ -39,7 +39,7 @@ if gtk4.found()
         libadwaita,
         libntk_gtk4,
         meson.get_compiler('vala').find_library('NtkGtk4-@0@'.format(shortver.split('-')[0]), dirs: meson.current_build_dir()),
-        meson.get_compiler('vala').find_library('Ntk-@0@'.format(shortver.split('-')[0]), dirs: meson.project_build_root()),
+        libntk_vapi,
         meson.get_compiler('vala').find_library('nuklear', dirs: join_paths(meson.project_source_root(), 'vapi'))
       ])
   endif

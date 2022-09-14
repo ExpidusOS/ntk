@@ -37,7 +37,7 @@ if egl.found()
         declare_dependency(link_with: libntk_egl_shlib,
           include_directories: libntk_egl_inc),
         meson.get_compiler('vala').find_library('NtkEGL-@0@'.format(shortver.split('-')[0]), dirs: meson.current_build_dir()),
-        meson.get_compiler('vala').find_library('Ntk-@0@'.format(shortver.split('-')[0]), dirs: meson.project_build_root()),
+        libntk_vapi,
         meson.get_compiler('vala').find_library('nuklear', dirs: join_paths(meson.project_source_root(), 'vapi'))
       ])
   endif

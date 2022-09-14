@@ -43,7 +43,7 @@ if cairo.found()
         glib,
         libntk_cairo,
         meson.get_compiler('vala').find_library('NtkCairo-@0@'.format(shortver.split('-')[0]), dirs: meson.current_build_dir()),
-        meson.get_compiler('vala').find_library('Ntk-@0@'.format(shortver.split('-')[0]), dirs: meson.project_build_root()),
+        libntk_vapi,
         meson.get_compiler('vala').find_library('nuklear', dirs: join_paths(meson.project_source_root(), 'vapi'))
       ])
   endif

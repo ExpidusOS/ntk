@@ -54,6 +54,12 @@ namespace Ntk {
 		public abstract bool render_vertex (Ntk.RendererVertexCommand cmd) throws GLib.Error;
 	}
 
+  [CCode (cheader_filename = "ntk/ntk.h", type_cname = "NtkPangoFont", type_id = "ntk_pango_font_get_type ()")]
+  [Version (since = "0.1.0")]
+  public abstract class PangoFont : GLib.Object {
+    public Pango.FontDescription description { get; set construct; }
+  }
+
 	[CCode (cheader_filename = "ntk/ntk.h", has_type_id = false)]
 	[Compact]
 	[Version (since = "0.1.0")]

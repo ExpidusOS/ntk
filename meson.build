@@ -111,13 +111,17 @@ nuklear = declare_dependency(link_with: nuklear_shlib,
   compile_args: nuklear_cargs,
   include_directories: include_directories('deps/nuklear'))
 
-configure_file(input: 'src/Ntk.vapi.in', output: 'Ntk-@0@.vapi'.format(shortver.split('-')[0]),
-  configuration: conf_data)
-configure_file(input: 'src/Ntk.deps.in', output: 'Ntk-@0@.deps'.format(shortver.split('-')[0]),
-  configuration: conf_data)
+#configure_file(input: 'src/Ntk.vapi.in', output: 'Ntk-@0@.vapi'.format(shortver.split('-')[0]),
+#  configuration: conf_data)
+#configure_file(input: 'src/Ntk.deps.in', output: 'Ntk-@0@.deps'.format(shortver.split('-')[0]),
+#  configuration: conf_data)
 
-libntk_src = ['src/lib/context.c', 'src/lib/error.c', 'src/lib/input-dispatcher.c', 'src/lib/renderer.c', 'src/lib/utils.c', 'src/lib/font/pango/layout.c']
-libntk_headers = ['include/ntk/ntk.h', 'include/ntk/context.h', 'include/ntk/error.h', 'include/ntk/font.h', 'include/ntk/input-dispatcher.h', 'include/ntk/renderer.h', 'include/ntk/utils.h', 'include/ntk/font/pango/layout.h']
+libntk_cflags = ['-fms-extensions', '-Wno-microsoft']
+
+libntk_src = ['src/lib/context.c', 'src/lib/error.c', 'src/lib/input-dispatcher.c', 'src/lib/renderer.c', 'src/lib/utils.c',
+  'src/lib/font/object.c', 'src/lib/font/user.c', 'src/lib/font/pango/layout.c', 'src/lib/font/pango/object.c']
+libntk_headers = ['include/ntk/ntk.h', 'include/ntk/context.h', 'include/ntk/error.h', 'include/ntk/font.h', 'include/ntk/input-dispatcher.h', 'include/ntk/renderer.h', 'include/ntk/utils.h',
+  'include/ntk/font/object.h', 'include/ntk/font/user.h', 'include/ntk/font/pango/layout.h', 'include/ntk/font/pango/object.h']
 
 libntk_inc = include_directories('include')
 libntk_deps = [glib, gobject, pango, nuklear]
@@ -125,19 +129,25 @@ libntk_deps = [glib, gobject, pango, nuklear]
 libntk_enums = gnome.mkenums('ntk-enums', sources: libntk_headers)
 
 libntk_shlib = shared_library('ntk', libntk_src, libntk_enums,
+  c_args: libntk_cflags,
   version: shortver.split('-')[0],
   include_directories: libntk_inc,
   dependencies: libntk_deps,
   install: true)
 libntk = declare_dependency(link_with: libntk_shlib,
+  compile_args: libntk_cflags,
   include_directories: libntk_inc,
   dependencies: libntk_deps)
 libntk_gir = gnome.generate_gir(libntk_shlib,
+  extra_args: ['--cflags-begin', libntk_cflags, '--cflags-end'],
   dependencies: [libntk_deps],
   namespace: 'Ntk',
   nsversion: shortver.split('-')[0],
   sources: [libntk_src, libntk_enums, libntk_headers],
   header: 'ntk/ntk.h',
   install: true)
+libntk_vapi = gnome.generate_vapi('Ntk-@0@'.format(shortver.split('-')[0]),
+  packages: ['nuklear', 'pango', 'gobject-2.0', 'glib-2.0', 'gio-2.0'],
+  sources: libntk_gir[0])
 
 subdir('backends')
