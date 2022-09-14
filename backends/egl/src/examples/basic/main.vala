@@ -1,4 +1,4 @@
-namespace NtkExampleCairoBasic {
+namespace NtkExampleEGLBasic {
   public class Application : GLib.Application {
     public Application() {
       Object(application_id: "com.expidus.ntk.example.basic", flags: GLib.ApplicationFlags.FLAGS_NONE);
@@ -7,12 +7,8 @@ namespace NtkExampleCairoBasic {
     public override void activate() {
       base.activate();
 
-      var renderer = new NtkCairo.Renderer(1024, 768);
+      var renderer = new NtkEGL.Renderer();
       var ntk = new Ntk.Context(renderer);
-
-      renderer.rendered.connect(() => {
-        renderer.surface.write_to_png("cairo-basic.png");
-      });
 
       var opt = false;
       float val = 0.55f;
@@ -55,5 +51,5 @@ namespace NtkExampleCairoBasic {
 }
 
 public static int main(string[] args) {
-  return new NtkExampleCairoBasic.Application().run(args);
+  return new NtkExampleEGLBasic.Application().run(args);
 }

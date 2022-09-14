@@ -57,7 +57,7 @@ namespace NtkExampleGtkBasic {
             nk.end();
           });
         } catch (GLib.Error e) {
-          GLib.critical("Failed to render: %s:%d: %s", e.domain.to_string(), e.code, e.message);
+          GLib.error("Failed to render: %s:%d: %s", e.domain.to_string(), e.code, e.message);
         }
       });
 

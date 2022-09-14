@@ -115,6 +115,28 @@ gboolean ntk_renderer_draw(NtkRenderer* self, NtkRendererCommand* cmd, GError** 
   return FALSE;
 }
 
+gboolean ntk_renderer_configure_vertex(NtkRenderer* self, struct nk_convert_config* cfg, GError** error) {
+  NtkRendererClass* klass;
+  g_return_val_if_fail(NTK_IS_RENDERER(self), FALSE);
+  g_return_val_if_fail(error == NULL || *error == NULL, FALSE);
+  klass = NTK_RENDERER_GET_CLASS(self);
+
+  NtkRendererType type = ntk_renderer_get_render_type(self);
+  if (type < 0) {
+    ntk_error_set_bad_renderer(error, "the render type is a non-zero number", self);
+    return FALSE;
+  }
+
+  g_return_val_if_fail(type == NTK_RENDERER_TYPE_VERTEX, FALSE);
+
+  if (klass->configure_vertex == NULL) {
+    ntk_error_set_bad_renderer(error, "the render type does not implement configure_vertex", self);
+    return FALSE;
+  }
+
+  return klass->configure_vertex(self, cfg, error);
+}
+
 struct nk_user_font* ntk_renderer_get_font(NtkRenderer* self, PangoFontDescription* desc, GError** error) {
   NtkRendererClass* klass;
   g_return_val_if_fail(NTK_IS_RENDERER(self), FALSE);

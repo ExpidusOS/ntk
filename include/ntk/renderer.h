@@ -46,6 +46,7 @@ struct _NtkRendererClass {
   GObjectClass parent_class;
 
   NtkRendererType (*get_render_type)(NtkRenderer* self);
+  gboolean (*configure_vertex)(NtkRenderer* self, struct nk_convert_config* cfg, GError** error);
   gboolean (*render_command)(NtkRenderer* self, const NtkRendererDrawCommand* cmd, GError** error);
   gboolean (*render_vertex)(NtkRenderer* self, NtkRendererVertexCommand* cmd, GError** error);
   struct nk_user_font* (*get_font)(NtkRenderer* self, PangoFontDescription* desc, GError** error);
@@ -58,6 +59,7 @@ void ntk_renderer_set_size(NtkRenderer* self, int width, int height);
 void ntk_renderer_get_size(NtkRenderer* self, int* width, int* height);
 NtkRendererType ntk_renderer_get_render_type(NtkRenderer* self);
 gboolean ntk_renderer_draw(NtkRenderer* self, NtkRendererCommand* cmd, GError** error);
+gboolean ntk_renderer_configure_vertex(NtkRenderer* self, struct nk_convert_config* cfg, GError** error);
 struct nk_user_font* ntk_renderer_get_font(NtkRenderer* self, PangoFontDescription* desc, GError** error);
 
 G_END_DECLS

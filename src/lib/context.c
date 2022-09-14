@@ -37,13 +37,13 @@ static void ntk_context_constructed(GObject* obj) {
   g_return_if_fail(priv->renderer != NULL);
   struct nk_user_font* font = ntk_renderer_get_font(priv->renderer, priv->font_desc, &error);
   if (error != NULL) {
-    g_critical("Failed to retrieve the font: %s:%d: %s", g_quark_to_string(error->domain), error->code, error->message);
+    g_error("Failed to retrieve the font: %s:%d: %s", g_quark_to_string(error->domain), error->code, error->message);
   } else {
     g_return_if_fail(font != NULL);
 
     g_debug("Initializing Nuklear");
     if (!nk_init_default(&priv->nk, font)) {
-      g_critical("Failed to initialize Nuklear");
+      g_error("Failed to initialize Nuklear");
     } else {
       priv->inited = TRUE;
     }
@@ -79,7 +79,7 @@ static void ntk_context_set_property(GObject* obj, guint prop_id, const GValue* 
         GError* error = NULL;
         struct nk_user_font* font = ntk_renderer_get_font(priv->renderer, priv->font_desc, &error);
         if (error != NULL) {
-          g_critical("Failed to retrieve the font: %s:%d: %s", g_quark_to_string(error->domain), error->code, error->message);
+          g_error("Failed to retrieve the font: %s:%d: %s", g_quark_to_string(error->domain), error->code, error->message);
         } else {
           g_return_if_fail(font != NULL);
           priv->nk.style.font = font;
@@ -174,6 +174,11 @@ gboolean ntk_context_render(NtkContext* self, NtkContextDrawCallback callback, g
         g_debug("Rendering context with vertexes");
 
         struct nk_convert_config cfg = {};
+        if (!ntk_renderer_configure_vertex(priv->renderer, &cfg, error)) {
+          priv->is_drawing = FALSE;
+          g_free(cmd);
+          return FALSE;
+        }
 
         nk_buffer_init_default(&cmd->vertex.cmds);
         nk_buffer_init_default(&cmd->vertex.verts);
@@ -183,6 +188,7 @@ gboolean ntk_context_render(NtkContext* self, NtkContextDrawCallback callback, g
         nk_draw_foreach(cmd->vertex.cmd, &priv->nk, &cmd->vertex.cmds) {
           if (!ntk_renderer_draw(priv->renderer, cmd, error)) {
             priv->is_drawing = FALSE;
+            g_free(cmd);
             return FALSE;
           }
         }

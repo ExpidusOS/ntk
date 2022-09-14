@@ -42,6 +42,7 @@ namespace Ntk {
 		public bool draw (Ntk.RendererCommand cmd) throws GLib.Error;
 
 		public abstract Ntk.RendererType get_render_type ();
+    public abstract bool configure_vertex (out Nk.ConvertConfig cfg) throws GLib.Error;
 
 		public virtual void set_size(int width, int height);
 		public virtual void get_size(out int width, out int height);

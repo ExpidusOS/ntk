@@ -40,6 +40,8 @@ conf_data.set('BUILDDIR', meson.current_build_dir())
 conf_data.set('SOURCEDIR', meson.current_source_dir())
 
 nuklear_cargs = [
+  '-DNK_INCLUDE_DEFAULT_FONT=1',
+  '-DNK_INCLUDE_FONT_BAKING=1',
   '-DNK_INCLUDE_DEFAULT_ALLOCATOR=1',
   '-DNK_INCLUDE_VERTEX_BUFFER_OUTPUT=1',
   '-DNK_INCLUDE_FIXED_TYPES=1',
