@@ -46,7 +46,11 @@
             libglvnd
           ];
 
-          darwinPackages = [];
+          darwinPackages = with pkgs; [
+            libglvnd
+            mesa
+            mesa.drivers
+          ];
 
           systemPackages = {
             aarch64-linux = linuxPackages;

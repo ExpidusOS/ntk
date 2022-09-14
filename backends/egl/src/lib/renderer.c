@@ -1,6 +1,7 @@
 #define G_LOG_DOMAIN "NtkEGLRenderer"
 #include <ntk/backend/egl/renderer.h>
 #include <ntk/font.h>
+#include <gio/gio.h>
 #include "error-priv.h"
 #include "renderer-priv.h"
 
@@ -238,12 +239,12 @@ static gboolean ntk_egl_renderer_initable_init(GInitable* initable, GCancellable
   if (HAS_EXT("EGL_EXT_device_base") || HAS_EXT("EGL_EXT_device_query")) {
     priv->exts.EXT_device_query = TRUE;
 
-    if (ntk_egl_renderer_load_proc(priv, eglQueryDeviceStringEXT, &error) == NULL) return FALSE;
-    if (ntk_egl_renderer_load_proc(priv, eglQueryDisplayAttribEXT, &error) == NULL) return FALSE;
+    if (ntk_egl_renderer_load_proc(priv, eglQueryDeviceStringEXT, error) == NULL) return FALSE;
+    if (ntk_egl_renderer_load_proc(priv, eglQueryDisplayAttribEXT, error) == NULL) return FALSE;
   }
 
   if (HAS_EXT("EGL_KHR_debug")) {
-    if (ntk_egl_renderer_load_proc(priv, eglDebugMessageControlKHR, &error) == NULL) return FALSE;
+    if (ntk_egl_renderer_load_proc(priv, eglDebugMessageControlKHR, error) == NULL) return FALSE;
 
     static const EGLAttrib debug_attribs[] = {
       EGL_DEBUG_MSG_CRITICAL_KHR, EGL_TRUE,
@@ -280,7 +281,6 @@ static void ntk_egl_renderer_class_init(NtkEGLRendererClass* klass) {
   GObjectClass* object_class = G_OBJECT_CLASS(klass);
   NtkRendererClass* renderer_class = NTK_RENDERER_CLASS(klass);
 
-  object_class->constructed = ntk_egl_renderer_constructed;
   object_class->finalize = ntk_egl_renderer_finalize;
 
   object_class->set_property = ntk_egl_renderer_set_property;

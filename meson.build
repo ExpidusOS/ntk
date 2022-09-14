@@ -52,8 +52,25 @@ nuklear_cargs = [
   '-DNK_DTOA=nk_dtoa',
   '-DNK_COS=cos',
   '-DNK_SIN=sin',
-  '-DNK_INV_SQRT=nk_inv_sqrt'
+  '-DNK_INV_SQRT=nk_inv_sqrt',
 ]
+
+if meson.get_compiler('c').has_argument('-Wno-nullability-completeness')
+  nuklear_cargs += ['-Wno-nullability-completeness']
+endif
+
+if meson.get_compiler('c').has_argument('-Wno-implicit-function-declaration')
+  nuklear_cargs += ['-Wno-implicit-function-declaration']
+endif
+
+if meson.get_compiler('c').has_argument('-Wno-expansion-to-defined')
+  nuklear_cargs += ['-Wno-expansion-to-defined']
+endif
+
+if meson.get_compiler('c').has_argument('-Wno-unused-function')
+  nuklear_cargs += ['-Wno-unused-function']
+endif
+
 nuklear_src = [
   'deps/nuklear/src/nuklear_combo.c', 'deps/nuklear/src/nuklear_menu.c',
   'deps/nuklear/src/nuklear_group.c', 'deps/nuklear/src/nuklear_progress.c',
