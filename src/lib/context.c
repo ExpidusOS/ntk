@@ -1,11 +1,16 @@
 #define G_LOG_DOMAIN "NtkContext"
 #include <ntk/context.h>
+#include <gio/gio.h>
 #include "context-priv.h"
 #include "error-priv.h"
 
 #define NTK_CONTEXT_PRIVATE(self) ((self)->priv == NULL ? ntk_context_get_instance_private(self) : (self)->priv)
 
-G_DEFINE_TYPE_WITH_PRIVATE(NtkContext, ntk_context, G_TYPE_OBJECT);
+static void ntk_context_interface_init(GInitableIface* iface);
+
+G_DEFINE_TYPE_WITH_CODE(NtkContext, ntk_context, G_TYPE_OBJECT,
+    G_ADD_PRIVATE(NtkContext)
+    G_IMPLEMENT_INTERFACE(G_TYPE_INITABLE, ntk_context_interface_init));
 
 enum {
   PROP_0,
@@ -21,34 +26,6 @@ enum {
 
 static GParamSpec* obj_props[N_PROPERTIES] = { NULL, };
 static guint obj_sigs[N_SIGNALS] = { 0 };
-
-static void ntk_context_constructed(GObject* obj) {
-  G_OBJECT_CLASS(ntk_context_parent_class)->constructed(obj);
-
-  NtkContext* self = NTK_CONTEXT(obj);
-  NtkContextPrivate* priv = NTK_CONTEXT_PRIVATE(self);
-  GError* error = NULL;
-
-  if (priv->font_desc == NULL) {
-    g_debug("Using default font");
-    priv->font_desc = pango_font_description_from_string("Droid Sans Regular 12px");
-  }
-
-  g_return_if_fail(priv->renderer != NULL);
-  struct nk_user_font* font = ntk_renderer_get_font(priv->renderer, priv->font_desc, &error);
-  if (error != NULL) {
-    g_error("Failed to retrieve the font: %s:%d: %s", g_quark_to_string(error->domain), error->code, error->message);
-  } else {
-    g_return_if_fail(font != NULL);
-
-    g_debug("Initializing Nuklear");
-    if (!nk_init_default(&priv->nk, font)) {
-      g_error("Failed to initialize Nuklear");
-    } else {
-      priv->inited = TRUE;
-    }
-  }
-}
 
 static void ntk_context_finalize(GObject* obj) {
   NtkContext* self = NTK_CONTEXT(obj);
@@ -109,10 +86,37 @@ static void ntk_context_get_property(GObject* obj, guint prop_id, GValue* value,
   }
 }
 
+static gboolean ntk_context_initable_init(GInitable* initable, GCancellable* cancellable, GError** error) {
+  NtkContext* self = NTK_CONTEXT(initable);
+  NtkContextPrivate* priv = NTK_CONTEXT_PRIVATE(self);
+
+  if (priv->font_desc == NULL) {
+    g_debug("Using default font");
+    priv->font_desc = pango_font_description_from_string("Droid Sans Regular 12px");
+  }
+
+  g_return_val_if_fail(priv->renderer != NULL, FALSE);
+  struct nk_user_font* font = ntk_renderer_get_font(priv->renderer, priv->font_desc, error);
+  if (*error != NULL) return FALSE;
+  g_return_val_if_fail(font != NULL, FALSE);
+
+  g_debug("Initializing Nuklear");
+  if (!nk_init_default(&priv->nk, font)) {
+    ntk_error_set_nuklear_fail(error, "Nuklear failed to initalize", self);
+    return FALSE;
+  }
+
+  priv->inited = TRUE;
+  return TRUE;
+}
+
+static void ntk_context_interface_init(GInitableIface* iface) {
+  iface->init = ntk_context_initable_init;
+}
+
 static void ntk_context_class_init(NtkContextClass* klass) {
   GObjectClass* object_class = G_OBJECT_CLASS(klass);
 
-  object_class->constructed = ntk_context_constructed;
   object_class->finalize = ntk_context_finalize;
 
   object_class->set_property = ntk_context_set_property;
@@ -129,8 +133,8 @@ static void ntk_context_init(NtkContext* self) {
   self->priv = ntk_context_get_instance_private(self);
 }
 
-NtkContext* ntk_context_new(NtkRenderer* renderer) {
-  return NTK_CONTEXT(g_object_new(NTK_TYPE_CONTEXT, "renderer", renderer, NULL));
+NtkContext* ntk_context_new(NtkRenderer* renderer, GError** error) {
+  return g_initable_new(NTK_TYPE_CONTEXT, NULL, error, "renderer", renderer, NULL);
 }
 
 gboolean ntk_context_render(NtkContext* self, NtkContextDrawCallback callback, gpointer callback_target, GError** error) {

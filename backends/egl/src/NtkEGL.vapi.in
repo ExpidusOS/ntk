@@ -2,6 +2,6 @@
 namespace NtkEGL {
   [CCode (cheader_filename = "ntk/backend/egl.h", type_id = "ntk_egl_renderer_get_type ()")]
   public class Renderer : Ntk.Renderer {
-    public Renderer ();
+    public Renderer () throws GLib.Error;
   }
 }

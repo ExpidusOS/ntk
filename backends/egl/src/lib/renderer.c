@@ -20,7 +20,11 @@ typedef struct {
 
 static GParamSpec* obj_props[N_PROPERTIES] = { NULL, };
 
-G_DEFINE_TYPE_WITH_PRIVATE(NtkEGLRenderer, ntk_egl_renderer, NTK_TYPE_RENDERER);
+static void ntk_egl_renderer_interface_init(GInitableIface* iface);
+
+G_DEFINE_TYPE_WITH_CODE(NtkEGLRenderer, ntk_egl_renderer, NTK_TYPE_RENDERER,
+  G_ADD_PRIVATE(NtkEGLRenderer)
+  G_IMPLEMENT_INTERFACE(G_TYPE_INITABLE, ntk_egl_renderer_interface_init));
 
 static const struct nk_draw_vertex_layout_element ntk_egl_vertex_layout[] = {
   { NK_VERTEX_POSITION, NK_FORMAT_FLOAT, NK_OFFSETOF(NtkEGLVertex, pos) },
@@ -155,91 +159,6 @@ static struct nk_user_font* ntk_egl_renderer_get_font(NtkRenderer* renderer, Pan
   return &font->handle;
 }
 
-static void ntk_egl_renderer_constructed(GObject* obj) {
-  G_OBJECT_CLASS(ntk_egl_renderer_parent_class)->constructed(obj);
-
-  NtkEGLRenderer* self = NTK_EGL_RENDERER(obj);
-  NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
-
-  nk_font_atlas_init_default(&priv->atlas);
-  nk_font_atlas_begin(&priv->atlas);
-
-  GError* error = NULL;
-
-  const char* client_exts = eglQueryString(EGL_NO_DISPLAY, EGL_EXTENSIONS);
-  if (client_exts == NULL) {
-    if (eglGetError() == EGL_BAD_DISPLAY) {
-      g_error("EGL_EXT_client_extensions isn't supported");
-    } else {
-      g_error("Failed to query EGL client extensions");
-    }
-  }
-
-#define HAS_EXT(name) ntk_egl_renderer_has_ext(client_exts, name)
-
-  g_debug("Queried extensions: %s", client_exts);
-
-  if (!HAS_EXT("EGL_EXT_platform_base")) {
-    g_error("EGL_EXT_platform_base isn't supported");
-  }
-
-  if (ntk_egl_renderer_load_proc(priv, eglGetPlatformDisplayEXT, &error) == NULL) {
-    g_error("%s:%d: %s", g_quark_to_string(error->domain), error->code, error->message);
-  }
-
-  priv->exts.KHR_platform_gbm = HAS_EXT("EGL_KHR_platform_gbm");
-  priv->exts.EXT_platform_device = HAS_EXT("EGL_EXT_platform_device");
-
-  if (HAS_EXT("EGL_EXT_device_base") || HAS_EXT("EGL_EXT_device_enumeration")) {
-    if (ntk_egl_renderer_load_proc(priv, eglQueryDevicesEXT, &error) == NULL) {
-      g_error("%s:%d: %s", g_quark_to_string(error->domain), error->code, error->message);
-    }
-  }
-
-  if (HAS_EXT("EGL_EXT_device_base") || HAS_EXT("EGL_EXT_device_query")) {
-    priv->exts.EXT_device_query = TRUE;
-
-    if (ntk_egl_renderer_load_proc(priv, eglQueryDeviceStringEXT, &error) == NULL) {
-      g_error("%s:%d: %s", g_quark_to_string(error->domain), error->code, error->message);
-    }
-
-    if (ntk_egl_renderer_load_proc(priv, eglQueryDisplayAttribEXT, &error) == NULL) {
-      g_error("%s:%d: %s", g_quark_to_string(error->domain), error->code, error->message);
-    }
-  }
-
-  if (HAS_EXT("EGL_KHR_debug")) {
-    if (ntk_egl_renderer_load_proc(priv, eglDebugMessageControlKHR, &error) == NULL) {
-      g_error("%s:%d: %s", g_quark_to_string(error->domain), error->code, error->message);
-    }
-
-    static const EGLAttrib debug_attribs[] = {
-      EGL_DEBUG_MSG_CRITICAL_KHR, EGL_TRUE,
-      EGL_DEBUG_MSG_ERROR_KHR, EGL_TRUE,
-      EGL_DEBUG_MSG_WARN_KHR, EGL_TRUE,
-      EGL_DEBUG_MSG_INFO_KHR, EGL_TRUE,
-      EGL_NONE
-		};
-
-    priv->procs.eglDebugMessageControlKHR(ntk_egl_renderer_log, debug_attribs);
-  }
-
-  if (eglBindAPI(EGL_OPENGL_ES_API) == EGL_FALSE) {
-    g_error("Failed to bind OpenGL ES API");
-  }
-
-  if (priv->exts.EXT_platform_device) {
-    g_debug("Getting DRM device");
-
-    EGLDeviceEXT dev = ntk_egl_renderer_get_egl_device_from_drm(self, &error);
-    if (dev == EGL_NO_DEVICE_EXT) {
-      g_error("%s:%d: %s", g_quark_to_string(error->domain), error->code, error->message);
-    }
-  }
-
-#undef HAS_EXT
-}
-
 static void ntk_egl_renderer_finalize(GObject* obj) {
   NtkEGLRenderer* self = NTK_EGL_RENDERER(obj);
   NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
@@ -279,6 +198,84 @@ static void ntk_egl_renderer_get_property(GObject* obj, guint prop_id, GValue* v
   }
 }
 
+static gboolean ntk_egl_renderer_initable_init(GInitable* initable, GCancellable* cancellable, GError** error) {
+  NtkEGLRenderer* self = NTK_EGL_RENDERER(initable);
+  NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
+
+  nk_font_atlas_init_default(&priv->atlas);
+  nk_font_atlas_begin(&priv->atlas);
+
+  const char* client_exts = eglQueryString(EGL_NO_DISPLAY, EGL_EXTENSIONS);
+  if (client_exts == NULL) {
+    EGLint e = eglGetError();
+    if (e == EGL_BAD_DISPLAY) {
+      ntk_egl_error_set_egl(error, "EGL_EXT_client_extensions isn't supported", e);
+      return FALSE;
+    } else {
+      ntk_egl_error_set_egl(error, "Failed to query extensions.", e);
+      return FALSE;
+    }
+  }
+
+#define HAS_EXT(name) ntk_egl_renderer_has_ext(client_exts, name)
+
+  g_debug("Queried extensions: %s", client_exts);
+
+  if (!HAS_EXT("EGL_EXT_platform_base")) {
+    ntk_egl_error_set_missing_ext(error, "extension is not supported", "EGL_EXT_platform_base");
+    return FALSE;
+  }
+
+  if (ntk_egl_renderer_load_proc(priv, eglGetPlatformDisplayEXT, error) == NULL) return FALSE;
+
+  priv->exts.KHR_platform_gbm = HAS_EXT("EGL_KHR_platform_gbm");
+  priv->exts.EXT_platform_device = HAS_EXT("EGL_EXT_platform_device");
+
+  if (HAS_EXT("EGL_EXT_device_base") || HAS_EXT("EGL_EXT_device_enumeration")) {
+    if (ntk_egl_renderer_load_proc(priv, eglQueryDevicesEXT, error) == NULL) return FALSE;
+  }
+
+  if (HAS_EXT("EGL_EXT_device_base") || HAS_EXT("EGL_EXT_device_query")) {
+    priv->exts.EXT_device_query = TRUE;
+
+    if (ntk_egl_renderer_load_proc(priv, eglQueryDeviceStringEXT, &error) == NULL) return FALSE;
+    if (ntk_egl_renderer_load_proc(priv, eglQueryDisplayAttribEXT, &error) == NULL) return FALSE;
+  }
+
+  if (HAS_EXT("EGL_KHR_debug")) {
+    if (ntk_egl_renderer_load_proc(priv, eglDebugMessageControlKHR, &error) == NULL) return FALSE;
+
+    static const EGLAttrib debug_attribs[] = {
+      EGL_DEBUG_MSG_CRITICAL_KHR, EGL_TRUE,
+      EGL_DEBUG_MSG_ERROR_KHR, EGL_TRUE,
+      EGL_DEBUG_MSG_WARN_KHR, EGL_TRUE,
+      EGL_DEBUG_MSG_INFO_KHR, EGL_TRUE,
+      EGL_NONE
+		};
+
+    priv->procs.eglDebugMessageControlKHR(ntk_egl_renderer_log, debug_attribs);
+  }
+
+  if (eglBindAPI(EGL_OPENGL_ES_API) == EGL_FALSE) {
+    ntk_egl_error_set_binding(error, "Failed to bind the OpenGL ES API");
+    return FALSE;
+  }
+
+  if (priv->exts.EXT_platform_device) {
+    g_debug("Getting DRM device");
+
+    EGLDeviceEXT dev = ntk_egl_renderer_get_egl_device_from_drm(self, error);
+    if (dev == EGL_NO_DEVICE_EXT) return FALSE;
+  }
+
+#undef HAS_EXT
+  return TRUE;
+}
+
+static void ntk_egl_renderer_interface_init(GInitableIface* iface) {
+  iface->init = ntk_egl_renderer_initable_init;
+}
+
 static void ntk_egl_renderer_class_init(NtkEGLRendererClass* klass) {
   GObjectClass* object_class = G_OBJECT_CLASS(klass);
   NtkRendererClass* renderer_class = NTK_RENDERER_CLASS(klass);
@@ -302,8 +299,8 @@ static void ntk_egl_renderer_init(NtkEGLRenderer* self) {
   self->priv = ntk_egl_renderer_get_instance_private(self);
 }
 
-NtkRenderer* ntk_egl_renderer_new() {
-  return NTK_RENDERER(g_object_new(NTK_EGL_TYPE_RENDERER, NULL));
+NtkRenderer* ntk_egl_renderer_new(GError** error) {
+  return g_initable_new(NTK_EGL_TYPE_RENDERER, NULL, error, NULL);
 }
 
 EGLDisplay* ntk_egl_renderer_get_display(NtkEGLRenderer* self) {

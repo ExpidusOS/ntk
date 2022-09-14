@@ -15,7 +15,13 @@ namespace NtkExampleGtkBasic {
       this.get_box().append(this.widget);
 
       this.input = new NtkGtk4.InputDispatcher(this.widget);
-      this.ntk = new Ntk.Context(this.widget.renderer);
+
+      try {
+        this.ntk = new Ntk.Context(this.widget.renderer);
+      } catch (GLib.Error e) {
+        GLib.error("Failed to initialize: %s:%d: %s", e.domain.to_string(), e.code, e.message);
+      }
+
       this.input.attach(this.ntk);
 
       this.ntk.rendered.connect(() => {

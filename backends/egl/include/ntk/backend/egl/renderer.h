@@ -21,7 +21,7 @@ struct _NtkEGLRenderer {
 /**
  * ntk_egl_renderer_new: (constructor)
  */
-NtkRenderer* ntk_egl_renderer_new();
+NtkRenderer* ntk_egl_renderer_new(GError** error);
 
 /**
  * ntk_egl_get_display:

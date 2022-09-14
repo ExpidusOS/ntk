@@ -10,7 +10,7 @@ namespace Ntk {
     [NoAccessorMethod]
 		public Ntk.Renderer renderer { get; construct; }
 
-		public Context(Ntk.Renderer renderer);
+		public Context(Ntk.Renderer renderer) throws GLib.Error;
 
 		public bool render(ContextDrawCallback callback) throws GLib.Error;
 		public signal void rendered();

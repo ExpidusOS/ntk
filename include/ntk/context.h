@@ -26,7 +26,7 @@ typedef void (*NtkContextDrawCallback)(NtkContext* context, struct nk_context* n
 /**
  * ntk_context_new: (constructor)
  */
-NtkContext* ntk_context_new(NtkRenderer* renderer);
+NtkContext* ntk_context_new(NtkRenderer* renderer, GError** error);
 
 gboolean ntk_context_render(NtkContext* self, NtkContextDrawCallback callback, gpointer callback_target, GError** error);
 

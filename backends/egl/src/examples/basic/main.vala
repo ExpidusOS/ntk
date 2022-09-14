@@ -7,13 +7,13 @@ namespace NtkExampleEGLBasic {
     public override void activate() {
       base.activate();
 
-      var renderer = new NtkEGL.Renderer();
-      var ntk = new Ntk.Context(renderer);
-
-      var opt = false;
-      float val = 0.55f;
-
       try {
+        var renderer = new NtkEGL.Renderer();
+        var ntk = new Ntk.Context(renderer);
+
+        var opt = false;
+        float val = 0.55f;
+
         ntk.render((ntk, nk) => {
           Nk.Rect rect = {};
           rect.x = 50;
@@ -44,7 +44,7 @@ namespace NtkExampleEGLBasic {
           nk.end();
         });
       } catch (GLib.Error e) {
-        GLib.error("Failed to render: %s:%d: %s", e.domain.to_string(), e.code, e.message);
+        GLib.error("Failed to initalize or render: %s:%d: %s", e.domain.to_string(), e.code, e.message);
       }
     }
   }
