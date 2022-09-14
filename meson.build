@@ -116,8 +116,8 @@ configure_file(input: 'src/Ntk.vapi.in', output: 'Ntk-@0@.vapi'.format(shortver.
 configure_file(input: 'src/Ntk.deps.in', output: 'Ntk-@0@.deps'.format(shortver.split('-')[0]),
   configuration: conf_data)
 
-libntk_src = ['src/lib/context.c', 'src/lib/error.c', 'src/lib/font.c', 'src/lib/input-dispatcher.c', 'src/lib/renderer.c', 'src/lib/utils.c']
-libntk_headers = ['include/ntk/ntk.h', 'include/ntk/context.h', 'include/ntk/error.h', 'include/ntk/font.h', 'include/ntk/input-dispatcher.h', 'include/ntk/renderer.h', 'include/ntk/utils.h']
+libntk_src = ['src/lib/context.c', 'src/lib/error.c', 'src/lib/input-dispatcher.c', 'src/lib/renderer.c', 'src/lib/utils.c', 'src/lib/font/pango/layout.c']
+libntk_headers = ['include/ntk/ntk.h', 'include/ntk/context.h', 'include/ntk/error.h', 'include/ntk/font.h', 'include/ntk/input-dispatcher.h', 'include/ntk/renderer.h', 'include/ntk/utils.h', 'include/ntk/font/pango/layout.h']
 
 libntk_inc = include_directories('include')
 libntk_deps = [glib, gobject, pango, nuklear]

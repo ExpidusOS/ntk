@@ -1,5 +1,7 @@
-#define G_LOG_DOMAIN "NtkFont"
+#define G_LOG_DOMAIN "NtkPangoLayoutFont"
 #include <ntk/font.h>
+
+G_DEFINE_BOXED_TYPE(NtkPangoLayoutFont, ntk_pango_layout_font, ntk_pango_layout_font_copy, ntk_pango_layout_font_free);
 
 static float ntk_pango_layout_font_get_width(nk_handle userdata, float height, const char* text, int length) {
   PangoLayout* font_layout = PANGO_LAYOUT(userdata.ptr);
@@ -29,15 +31,10 @@ NtkPangoLayoutFont* ntk_pango_layout_font_new(PangoLayout* layout, PangoFontDesc
   return font;
 }
 
-NtkPangoLayoutFont* ntk_pango_layout_font_ref(NtkPangoLayoutFont* font) {
+NtkPangoLayoutFont* ntk_pango_layout_font_copy(NtkPangoLayoutFont* font) {
   PangoLayout* layout = PANGO_LAYOUT(g_object_ref(G_OBJECT(font->userdata.ptr)));
   PangoFontDescription* font_desc = pango_font_description_copy(pango_layout_get_font_description(layout));
   return ntk_pango_layout_font_new(layout, font_desc);
-}
-
-void ntk_pango_layout_font_unref(NtkPangoLayoutFont* font) {
-  g_object_unref(font->userdata.ptr);
-  g_free(font);
 }
 
 void ntk_pango_layout_font_free(NtkPangoLayoutFont* font) {
