@@ -208,7 +208,7 @@ static void ntk_egl_renderer_constructed(GObject* obj) {
     }
   }
 
-  if (HAS_EXT("EGL_KHR_debug") && FALSE) {
+  if (HAS_EXT("EGL_KHR_debug")) {
     if (ntk_egl_renderer_load_proc(priv, eglDebugMessageControlKHR, &error) == NULL) {
       g_error("%s:%d: %s", g_quark_to_string(error->domain), error->code, error->message);
     }
