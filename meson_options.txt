@@ -1,0 +1,8 @@
+option('examples', type: 'boolean', value: true, description: 'Build the examples')
+option('cairo_examples', type: 'feature', value: 'auto', description: 'Build the Cairo examples')
+option('egl_examples', type: 'feature', value: 'auto', description: 'Build the EGL examples')
+option('gtk4_examples', type: 'feature', value: 'auto', description: 'Build the GTK4 examples')
+
+option('cairo', type: 'feature', value: 'auto', description: 'Enable the Cairo backend')
+option('egl', type: 'feature', value: 'auto', description: 'Enable the EGL backend')
+option('gtk4', type: 'feature', value: 'auto', description: 'Enable the GTK4 backend')

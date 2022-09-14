@@ -1,7 +1,9 @@
-gtk4 = dependency('gtk4', required: false)
+gtk4 = dependency('gtk4', required: get_option('gtk4'))
 
 if gtk4.found()
-  libtokyo = dependency('tokyo-gtk4', required: false)
+  gtk4_examples = get_option('gtk4_examples').require(get_option('examples'))
+
+  libtokyo = dependency('tokyo-gtk4', required: gtk4_examples)
   libadwaita = dependency('libadwaita-1', required: libtokyo.found())
 
   configure_file(input: 'src/NtkGtk4.vapi.in', output: 'NtkGtk4-@0@.vapi'.format(shortver.split('-')[0]),

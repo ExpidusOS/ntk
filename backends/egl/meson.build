@@ -1,6 +1,8 @@
-egl = dependency('egl', required: false)
+egl = dependency('egl', required: get_option('egl'))
 
 if egl.found()
+  egl_examples = get_option('egl_examples').require(get_option('examples'))
+
   configure_file(input: 'src/NtkEGL.vapi.in', output: 'NtkEGL-@0@.vapi'.format(shortver.split('-')[0]),
     configuration: conf_data)
   configure_file(input: 'src/NtkEGL.deps.in', output: 'NtkEGL-@0@.deps'.format(shortver.split('-')[0]),
@@ -26,15 +28,17 @@ if egl.found()
     dependencies: libntk_egl_deps,
     include_directories: libntk_egl_inc)
 
-  executable('ntk-egl-example-basic', ['src/examples/basic/main.vala'],
-    vala_args: ['--vapidir', meson.current_build_dir()],
-    dependencies: [
-      glib,
-      libntk,
-      declare_dependency(link_with: libntk_egl_shlib,
-        include_directories: libntk_egl_inc),
-      meson.get_compiler('vala').find_library('NtkEGL-@0@'.format(shortver.split('-')[0]), dirs: meson.current_build_dir()),
-      meson.get_compiler('vala').find_library('Ntk-@0@'.format(shortver.split('-')[0]), dirs: meson.project_build_root()),
-      meson.get_compiler('vala').find_library('nuklear', dirs: join_paths(meson.project_source_root(), 'vapi'))
-    ])
+  if not egl_examples.disabled()
+    executable('ntk-egl-example-basic', ['src/examples/basic/main.vala'],
+      vala_args: ['--vapidir', meson.current_build_dir()],
+      dependencies: [
+        glib,
+        libntk,
+        declare_dependency(link_with: libntk_egl_shlib,
+          include_directories: libntk_egl_inc),
+        meson.get_compiler('vala').find_library('NtkEGL-@0@'.format(shortver.split('-')[0]), dirs: meson.current_build_dir()),
+        meson.get_compiler('vala').find_library('Ntk-@0@'.format(shortver.split('-')[0]), dirs: meson.project_build_root()),
+        meson.get_compiler('vala').find_library('nuklear', dirs: join_paths(meson.project_source_root(), 'vapi'))
+      ])
+  endif
 endif

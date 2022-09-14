@@ -27,6 +27,7 @@ add_project_arguments(['--vapidir', meson.current_build_dir()], language: 'vala'
 glib = [dependency('glib-2.0'), dependency('gio-2.0')]
 gobject = dependency('gobject-2.0')
 pango = dependency('pango')
+libmath = meson.get_compiler('c').find_library('m', required: false)
 
 conf_data = configuration_data()
 conf_data.set('PREFIX', prefix)
@@ -94,7 +95,13 @@ nuklear_src = [
   'deps/nuklear/src/nuklear_image.c', 'deps/nuklear/src/nuklear_style.c',
   'deps/nuklear/src/nuklear_layout.c', 'deps/nk_utils.c'
 ]
-nuklear_deps = [meson.get_compiler('c').find_library('m')]
+
+nuklear_deps = []
+
+if libmath.found()
+  nuklear_deps += [libmath]
+endif
+
 nuklear_shlib = shared_library('nuklear', nuklear_src,
   dependencies: nuklear_deps,
   c_args: nuklear_cargs,

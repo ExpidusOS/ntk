@@ -1,6 +1,8 @@
-cairo = dependency('cairo', required: false)
+cairo = dependency('cairo', required: get_option('cairo'))
 
 if cairo.found()
+  cairo_examples = get_option('cairo_examples').require(get_option('examples'))
+
   pangocairo = dependency('pangocairo')
   cairo_gobject = dependency('cairo-gobject', required: false)
 
@@ -34,13 +36,15 @@ if cairo.found()
     dependencies: libntk_cairo_deps,
     include_directories: libntk_cairo_inc)
 
-  executable('ntk-cairo-example-basic', ['src/examples/basic/main.vala'],
-    vala_args: ['--vapidir', meson.current_build_dir()],
-    dependencies: [
-      glib,
-      libntk_cairo,
-      meson.get_compiler('vala').find_library('NtkCairo-@0@'.format(shortver.split('-')[0]), dirs: meson.current_build_dir()),
-      meson.get_compiler('vala').find_library('Ntk-@0@'.format(shortver.split('-')[0]), dirs: meson.project_build_root()),
-      meson.get_compiler('vala').find_library('nuklear', dirs: join_paths(meson.project_source_root(), 'vapi'))
-    ])
+  if not cairo_examples.disabled()
+    executable('ntk-cairo-example-basic', ['src/examples/basic/main.vala'],
+      vala_args: ['--vapidir', meson.current_build_dir()],
+      dependencies: [
+        glib,
+        libntk_cairo,
+        meson.get_compiler('vala').find_library('NtkCairo-@0@'.format(shortver.split('-')[0]), dirs: meson.current_build_dir()),
+        meson.get_compiler('vala').find_library('Ntk-@0@'.format(shortver.split('-')[0]), dirs: meson.project_build_root()),
+        meson.get_compiler('vala').find_library('nuklear', dirs: join_paths(meson.project_source_root(), 'vapi'))
+      ])
+  endif
 endif
