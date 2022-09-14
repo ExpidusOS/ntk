@@ -18,10 +18,10 @@ G_DECLARE_DERIVABLE_TYPE(NtkFont, ntk_font, NTK, FONT, GObject);
 struct _NtkFontClass {
   GObjectClass parent_class;
 
-  NtkUserFont* (*get_handle)(NkFont* self);
+  NtkUserFont* (*get_handle)(NtkFont* self);
 };
 
-NtkUserFont* nk_font_get_handle(NkFont* self);
+NtkUserFont* ntk_font_get_handle(NtkFont* self);
 
 G_END_DECLS
 
