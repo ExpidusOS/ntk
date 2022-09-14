@@ -24,8 +24,10 @@ static void ntk_gtk4_input_dispatcher_handle_gesture_click_pressed(GtkGestureCli
   NtkGtk4InputDispatcher* self = NTK_GTK4_INPUT_DISPATCHER(data);
   g_return_if_fail(NTK_GTK4_IS_INPUT_DISPATCHER(self));
 
-  int rx = llround(x);
-  int ry = llround(y);
+  int rx = (int)x;
+  int ry = (int)y;
+
+  printf("%f %f: %d %d\n", x, y, rx, ry);
 
   guint btn;
   g_object_get(gclick, "button", &btn, NULL);
@@ -41,8 +43,8 @@ static void ntk_gtk4_input_dispatcher_handle_gesture_click_released(GtkGestureCl
   NtkGtk4InputDispatcher* self = NTK_GTK4_INPUT_DISPATCHER(data);
   g_return_if_fail(NTK_GTK4_IS_INPUT_DISPATCHER(self));
 
-  int rx = llround(x);
-  int ry = llround(y);
+  int rx = (int)x;
+  int ry = (int)y;
 
   guint btn;
   g_object_get(gclick, "button", &btn, NULL);
@@ -150,8 +152,8 @@ static void ntk_gtk4_input_dispatcher_handle_motion(GtkEventControllerMotion* mo
   NtkGtk4InputDispatcher* self = NTK_GTK4_INPUT_DISPATCHER(data);
   g_return_if_fail(NTK_GTK4_IS_INPUT_DISPATCHER(self));
 
-  int rx = llround(dx);
-  int ry = llround(dy);
+  int rx = (int)dx;
+  int ry = (int)dy;
 
   ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_MOTION, rx, ry);
 }

@@ -141,8 +141,8 @@ static void ntk_gtk4_widget_map(GtkWidget* widget) {
   gtk_widget_translate_coordinates(widget, toplevel, 0, 0, &x, &y);
 
   GdkRectangle area;
-  area.x = llroundf(x);
-  area.y = llroundf(y);
+  area.x = (int)x;
+  area.y = (int)y;
   area.width = 0;
   area.height = 0;
   gtk_im_context_set_cursor_location(priv->im_context, &area);
