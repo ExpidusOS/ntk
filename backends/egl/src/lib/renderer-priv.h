@@ -10,7 +10,17 @@ typedef struct _NtkEGLRendererPrivate {
   struct nk_font_atlas atlas;
 
   struct {
+    gboolean KHR_platform_gbm;
+    gboolean EXT_platform_device;
+    gboolean EXT_device_query;
+  } exts;
+
+  struct {
+    PFNEGLDEBUGMESSAGECONTROLKHRPROC eglDebugMessageControlKHR;
     PFNEGLGETPLATFORMDISPLAYEXTPROC eglGetPlatformDisplayEXT;
+    PFNEGLQUERYDISPLAYATTRIBEXTPROC eglQueryDisplayAttribEXT;
+    PFNEGLQUERYDEVICESTRINGEXTPROC eglQueryDeviceStringEXT;
+    PFNEGLQUERYDEVICESEXTPROC eglQueryDevicesEXT;
   } procs;
 } NtkEGLRendererPrivate;
 

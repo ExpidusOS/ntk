@@ -108,6 +108,12 @@ namespace Nk {
 		float h;
 	}
 
+  [SimpleType]
+  [CCode(cname = "struct nk_convert_config", has_destroy_function = false)]
+  public struct ConvertConfig {
+    float global_alpha;
+  }
+
 	[SimpleType]
 	[CCode(cname = "struct nk_user_font_glyph", has_destroy_function = false)]
 	public struct UserFontGlyph {
