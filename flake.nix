@@ -32,7 +32,40 @@
         in {
           default = mkDerivation {
             name = "ntk";
-            buildInputs = with pkgs; [ cairo gtk4 ];
+            buildInputs = with pkgs; [ cairo gtk4 libglvnd ];
+          };
+
+          cairo = mkDerivation {
+            name = "ntk-cairo";
+            buildInputs = with pkgs; [ cairo ];
+          };
+
+          gtk4 = mkDerivation {
+            name = "ntk-gtk4";
+            buildInputs = with pkgs; [ gtk4 ];
+          };
+
+          gl = mkDerivation {
+            name = "ntk-gl";
+            buildInputs = with pkgs; [ libglvnd ];
+          };
+        });
+
+      mkDerivation = ({ name ? "ntk", buildInputs, system ? builtins.currentSystem }:
+        let
+          pkgs = nixpkgsFor.${system};
+        in
+        pkgs.stdenv.mkDerivation rec {
+          inherit name buildInputs;
+
+          src = self;
+          enableParallelBuilding = true;
+          nativeBuildInputs = with pkgs; [ meson vala ninja pkg-config gobject-introspection ];
+
+          meta = with pkgs.lib; {
+            homepage = "https://github.com/ExpidusOS/ntk";
+            license = with licenses; [ gpl3Only ];
+            maintainers = [ "Tristan Ross" ];
           };
         });
 

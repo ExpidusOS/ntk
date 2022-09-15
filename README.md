@@ -31,3 +31,9 @@ These dependencies must be present for the target machine to build Ntk.
 Ntk is hosted on GitHub at `ExpidusOS/ntk`, it is recommended to use `git` to clone the repository and switching
 to the ref your wishing to use. Once you have the repository clones, you must pull the submodules using `git`
 in order to build Nuklear for Ntk.
+
+### Configuration & Building
+
+Ntk uses Meson and so the extra configuration options can be found in `meson_options.txt`. Ninja can then
+be used to build Ntk and install it. However, it is recommended to use the nix flake to build the package
+and use it in other projects.
