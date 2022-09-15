@@ -1,0 +1,4 @@
+namespace NtkHW {
+  public abstract class Display : GLib.Object, NtkHW.Device {}
+  public abstract class Input : GLib.Object, NtkHW.Device {}
+}

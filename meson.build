@@ -182,8 +182,8 @@ configure_file(input: 'src/NtkHW.metadata.in', output: 'NtkHW-@0@.metadata'.form
 configure_file(input: 'src/NtkHW-custom.vala.in', output: 'NtkHW-@0@-custom.vala'.format(shortver.split('-')[0]),
   configuration: conf_data)
 
-libntk_hw_src = ['src/libhw/device.c']
-libntk_hw_headers = ['include-hw/ntk/hw.h', 'include-hw/ntk/hw/device.h']
+libntk_hw_src = ['src/libhw/device.c', 'src/libhw/device-file.c', 'src/libhw/display.c', 'src/libhw/input.c']
+libntk_hw_headers = ['include-hw/ntk/hw.h', 'include-hw/ntk/hw/device.h', 'include-hw/ntk/hw/device-file.h', 'include-hw/ntk/hw/display.h', 'include-hw/ntk/hw/input.h']
 libntk_hw_inc = [include_directories('include-hw')]
 libntk_hw_deps = [libntk]
 libntk_hw_cflags = ['-I', join_paths(meson.project_build_root(), 'include-hw')]
