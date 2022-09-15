@@ -186,7 +186,14 @@ libntk_hw_src = ['src/libhw/device.c', 'src/libhw/device-file.c', 'src/libhw/dis
 libntk_hw_headers = ['include-hw/ntk/hw.h', 'include-hw/ntk/hw/device.h', 'include-hw/ntk/hw/device-file.h', 'include-hw/ntk/hw/display.h', 'include-hw/ntk/hw/input.h']
 libntk_hw_inc = [include_directories('include-hw')]
 libntk_hw_deps = [libntk]
-libntk_hw_cflags = ['-I', join_paths(meson.project_build_root(), 'include-hw')]
+libntk_hw_cflags = ['-I @0@'.format(join_paths(meson.project_build_root(), 'include-hw'))]
+
+if libdrm.found()
+  libntk_hw_src += ['src/libhw/device/drm.c']
+  libntk_hw_headers += ['include-hw/ntk/hw/device/drm.h']
+endif
+
+message(libntk_hw_cflags)
 
 libntk_hw_enums = gnome.mkenums('ntk-hw-enums', sources: libntk_hw_headers)
 
