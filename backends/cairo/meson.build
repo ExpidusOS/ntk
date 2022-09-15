@@ -27,18 +27,22 @@ if cairo.found()
     version: shortver.split('-')[0],
     dependencies: libntk_cairo_deps,
     install: true)
-  libntk_cairo_gir = gnome.generate_gir(libntk_cairo_shlib,
-    dependencies: [libntk_cairo_deps],
-    namespace: 'NtkCairo',
-    nsversion: shortver.split('-')[0],
-    sources: [libntk_cairo_src, libntk_cairo_headers],
-    header: 'ntk/backend/cairo.h',
-    install: true)
-  libntk_cairo_vapi = gnome.generate_vapi('NtkCairo-@0@'.format(shortver.split('-')[0]),
-    packages: ['Ntk-@0@'.format(shortver.split('-')[0]), 'cairo', 'pangocairo'],
-    sources: [libntk_cairo_gir[0], join_paths(meson.current_build_dir(), 'NtkCairo-@0@-custom.vala'.format(shortver.split('-')[0]))],
-    vapi_dirs: [join_paths(meson.project_source_root(), 'vapi'), meson.project_build_root()],
-    install: true)
+  if use_gir
+    libntk_cairo_gir = gnome.generate_gir(libntk_cairo_shlib,
+      dependencies: [libntk_cairo_deps],
+      namespace: 'NtkCairo',
+      nsversion: shortver.split('-')[0],
+      sources: [libntk_cairo_src, libntk_cairo_headers],
+      header: 'ntk/backend/cairo.h',
+      install: true)
+    if use_vala
+      libntk_cairo_vapi = gnome.generate_vapi('NtkCairo-@0@'.format(shortver.split('-')[0]),
+        packages: ['Ntk-@0@'.format(shortver.split('-')[0]), 'cairo', 'pangocairo'],
+        sources: [libntk_cairo_gir[0], join_paths(meson.current_build_dir(), 'NtkCairo-@0@-custom.vala'.format(shortver.split('-')[0]))],
+        vapi_dirs: [join_paths(meson.project_source_root(), 'vapi'), meson.project_build_root()],
+        install: true)
+    endif
+  endif
   libntk_cairo = declare_dependency(link_with: libntk_cairo_shlib,
     include_directories: libntk_cairo_inc,
     dependencies: [libntk_cairo_deps])
@@ -48,8 +52,10 @@ if cairo.found()
     version: longver)
 
   if not cairo_examples.disabled()
-    executable('ntk-cairo-example-basic', ['src/examples/basic/main.vala'],
-      vala_args: ['--vapidir', meson.current_build_dir()],
-      dependencies: [nuklear, nuklear_vapi, libntk, libntk_vapi, libntk_cairo, libntk_cairo_vapi])
+    if use_gir and use_vala
+      executable('ntk-cairo-example-basic', ['src/examples/basic/main.vala'],
+        vala_args: ['--vapidir', meson.current_build_dir()],
+        dependencies: [nuklear, nuklear_vapi, libntk, libntk_vapi, libntk_cairo, libntk_cairo_vapi])
+    endif
   endif
 endif

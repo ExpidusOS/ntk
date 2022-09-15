@@ -1,4 +1,4 @@
-project('ntk', 'vala', 'c', license: 'GPL-3.0-only', version: '0.1.0-prealpha')
+project('ntk', 'c', license: 'GPL-3.0-only', version: '0.1.0-prealpha')
 
 gnome = import('gnome')
 pkg = import('pkgconfig')
@@ -22,15 +22,24 @@ if git.found()
   endif
 endif
 
-add_project_arguments(['--vapidir', meson.current_build_dir()], language: 'vala')
+enable_vala = get_option('vala')
+vala = find_program('valac', native: true, required: enable_vala)
+use_vala = vala.found()
+
+enable_gir = get_option('gir')
+gir = dependency('gobject-introspection-1.0', required: enable_gir)
+use_gir = gir.found()
+
+if use_vala
+  add_project_arguments(['--vapidir', meson.current_build_dir()], language: 'vala')
+  add_languages('vala')
+endif
 
 glib = [dependency('glib-2.0'), dependency('gio-2.0')]
 gobject = dependency('gobject-2.0')
 pango = dependency('pango')
 libmath = meson.get_compiler('c').find_library('m', required: false)
 libdrm = meson.get_compiler('c').find_library('libdrm', required: false)
-
-valadoc = find_program('valadoc', native: true, required: false)
 
 conf_data = configuration_data()
 conf_data.set('PREFIX', prefix)
@@ -154,19 +163,23 @@ libntk_shlib = shared_library('ntk', libntk_src, libntk_enums,
   include_directories: libntk_inc,
   dependencies: libntk_deps,
   install: true)
-libntk_gir = gnome.generate_gir(libntk_shlib,
-  extra_args: ['--cflags-begin', libntk_cflags, '--cflags-end'],
-  dependencies: [libntk_deps],
-  namespace: 'Ntk',
-  nsversion: shortver.split('-')[0],
-  sources: [libntk_src, libntk_enums, libntk_headers],
-  header: 'ntk/ntk.h',
-  install: true)
-libntk_vapi = gnome.generate_vapi('Ntk-@0@'.format(shortver.split('-')[0]),
-  packages: ['nuklear', 'pango', 'gobject-2.0', 'glib-2.0', 'gio-2.0'],
-  sources: [libntk_gir[0], join_paths(meson.project_build_root(), 'Ntk-@0@-custom.vala'.format(shortver.split('-')[0]))],
-  vapi_dirs: join_paths(meson.project_source_root(), 'vapi'),
-  install: true)
+if use_gir
+  libntk_gir = gnome.generate_gir(libntk_shlib,
+    extra_args: ['--cflags-begin', libntk_cflags, '--cflags-end'],
+    dependencies: [libntk_deps],
+    namespace: 'Ntk',
+    nsversion: shortver.split('-')[0],
+    sources: [libntk_src, libntk_enums, libntk_headers],
+    header: 'ntk/ntk.h',
+    install: true)
+  if use_vala
+    libntk_vapi = gnome.generate_vapi('Ntk-@0@'.format(shortver.split('-')[0]),
+      packages: ['nuklear', 'pango', 'gobject-2.0', 'glib-2.0', 'gio-2.0'],
+      sources: [libntk_gir[0], join_paths(meson.project_build_root(), 'Ntk-@0@-custom.vala'.format(shortver.split('-')[0]))],
+      vapi_dirs: join_paths(meson.project_source_root(), 'vapi'),
+      install: true)
+  endif
+endif
 libntk = declare_dependency(link_with: libntk_shlib,
   include_directories: libntk_inc,
   dependencies: [libntk_deps])
@@ -193,8 +206,6 @@ if libdrm.found()
   libntk_hw_headers += ['include-hw/ntk/hw/device/drm.h']
 endif
 
-message(libntk_hw_cflags)
-
 libntk_hw_enums = gnome.mkenums('ntk-hw-enums', sources: libntk_hw_headers)
 
 libntk_hw_shlib = shared_library('ntk-hw', libntk_hw_src, libntk_hw_enums,
@@ -203,19 +214,23 @@ libntk_hw_shlib = shared_library('ntk-hw', libntk_hw_src, libntk_hw_enums,
   include_directories: libntk_hw_inc,
   dependencies: libntk_hw_deps,
   install: true)
-libntk_hw_gir = gnome.generate_gir(libntk_hw_shlib,
-  extra_args: ['--cflags-begin', libntk_hw_cflags, '--cflags-end'],
-  dependencies: [libntk_hw_deps],
-  namespace: 'NtkHW',
-  nsversion: shortver.split('-')[0],
-  sources: [libntk_hw_src, libntk_hw_enums, libntk_hw_headers],
-  header: 'ntk/hw.h',
-  install: true)
-libntk_hw_vapi = gnome.generate_vapi('NtkHW-@0@'.format(shortver.split('-')[0]),
-  packages: ['Ntk-@0@'.format(shortver.split('-')[0])],
-  sources: [libntk_hw_gir[0], join_paths(meson.project_build_root(), 'NtkHW-@0@-custom.vala'.format(shortver.split('-')[0]))],
-  vapi_dirs: [join_paths(meson.project_source_root(), 'vapi'), meson.project_build_root()],
-  install: true)
+if use_gir
+  libntk_hw_gir = gnome.generate_gir(libntk_hw_shlib,
+    extra_args: ['--cflags-begin', libntk_hw_cflags, '--cflags-end'],
+    dependencies: [libntk_hw_deps],
+    namespace: 'NtkHW',
+    nsversion: shortver.split('-')[0],
+    sources: [libntk_hw_src, libntk_hw_enums, libntk_hw_headers],
+    header: 'ntk/hw.h',
+    install: true)
+  if use_vala
+    libntk_hw_vapi = gnome.generate_vapi('NtkHW-@0@'.format(shortver.split('-')[0]),
+      packages: ['Ntk-@0@'.format(shortver.split('-')[0])],
+      sources: [libntk_hw_gir[0], join_paths(meson.project_build_root(), 'NtkHW-@0@-custom.vala'.format(shortver.split('-')[0]))],
+      vapi_dirs: [join_paths(meson.project_source_root(), 'vapi'), meson.project_build_root()],
+      install: true)
+  endif
+endif
 libntk_hw = declare_dependency(link_with: libntk_hw_shlib,
   include_directories: libntk_hw_inc,
   dependencies: [libntk_hw_deps])

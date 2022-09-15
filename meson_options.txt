@@ -1,3 +1,6 @@
+option('gir', type: 'feature', value: 'auto', description: 'Enable GIR binding generation')
+option('vala', type: 'feature', value: 'auto', description: 'Enable Vala binding and compiling')
+
 option('examples', type: 'boolean', value: true, description: 'Build the examples')
 option('cairo_examples', type: 'feature', value: 'auto', description: 'Build the Cairo examples')
 option('egl_examples', type: 'feature', value: 'auto', description: 'Build the EGL examples')
