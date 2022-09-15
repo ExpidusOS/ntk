@@ -28,6 +28,7 @@ glib = [dependency('glib-2.0'), dependency('gio-2.0')]
 gobject = dependency('gobject-2.0')
 pango = dependency('pango')
 libmath = meson.get_compiler('c').find_library('m', required: false)
+libdrm = meson.get_compiler('c').find_library('libdrm', required: false)
 
 valadoc = find_program('valadoc', native: true, required: false)
 
@@ -41,6 +42,7 @@ conf_data.set('VERSION', longver)
 conf_data.set('SMALL_VERSION', shortver.split('-')[0])
 conf_data.set('BUILDDIR', meson.current_build_dir())
 conf_data.set('SOURCEDIR', meson.current_source_dir())
+conf_data.set('NTK_HW_HAS_LIBDRM', libdrm.found())
 
 nuklear_cflags = [
   '-DNK_INCLUDE_DEFAULT_FONT=1',
@@ -133,6 +135,7 @@ configure_file(input: 'src/Ntk-custom.vala.in', output: 'Ntk-@0@-custom.vala'.fo
   configuration: conf_data)
 
 subdir('include/ntk')
+subdir('include-hw/ntk')
 
 libntk_src = ['src/lib/context.c', 'src/lib/error.c', 'src/lib/input-dispatcher.c', 'src/lib/renderer.c', 'src/lib/utils.c',
   'src/lib/font/object.c', 'src/lib/font/user.c', 'src/lib/font/pango/layout.c', 'src/lib/font/pango/object.c']
@@ -169,6 +172,48 @@ libntk = declare_dependency(link_with: libntk_shlib,
   dependencies: [libntk_deps])
 pkg.generate(libntk_shlib, description: 'GObject based UI toolkit for Nuklear',
   name: 'ntk',
+  url: 'https://github.com/ExpidusOS/ntk',
+  version: longver)
+
+configure_file(input: 'src/NtkHW.deps.in', output: 'NtkHW-@0@.deps'.format(shortver.split('-')[0]),
+  configuration: conf_data)
+configure_file(input: 'src/NtkHW.metadata.in', output: 'NtkHW-@0@.metadata'.format(shortver.split('-')[0]),
+  configuration: conf_data)
+configure_file(input: 'src/NtkHW-custom.vala.in', output: 'NtkHW-@0@-custom.vala'.format(shortver.split('-')[0]),
+  configuration: conf_data)
+
+libntk_hw_src = ['src/libhw/device.c']
+libntk_hw_headers = ['include-hw/ntk/hw.h', 'include-hw/ntk/hw/device.h']
+libntk_hw_inc = [include_directories('include-hw')]
+libntk_hw_deps = [libntk]
+libntk_hw_cflags = ['-I', join_paths(meson.project_build_root(), 'include-hw')]
+
+libntk_hw_enums = gnome.mkenums('ntk-hw-enums', sources: libntk_hw_headers)
+
+libntk_hw_shlib = shared_library('ntk-hw', libntk_hw_src, libntk_hw_enums,
+  c_args: libntk_hw_cflags,
+  version: shortver.split('-')[0],
+  include_directories: libntk_hw_inc,
+  dependencies: libntk_hw_deps,
+  install: true)
+libntk_hw_gir = gnome.generate_gir(libntk_hw_shlib,
+  extra_args: ['--cflags-begin', libntk_hw_cflags, '--cflags-end'],
+  dependencies: [libntk_hw_deps],
+  namespace: 'NtkHW',
+  nsversion: shortver.split('-')[0],
+  sources: [libntk_hw_src, libntk_hw_enums, libntk_hw_headers],
+  header: 'ntk/hw.h',
+  install: true)
+libntk_hw_vapi = gnome.generate_vapi('NtkHW-@0@'.format(shortver.split('-')[0]),
+  packages: ['Ntk-@0@'.format(shortver.split('-')[0])],
+  sources: [libntk_hw_gir[0], join_paths(meson.project_build_root(), 'NtkHW-@0@-custom.vala'.format(shortver.split('-')[0]))],
+  vapi_dirs: [join_paths(meson.project_source_root(), 'vapi'), meson.project_build_root()],
+  install: true)
+libntk_hw = declare_dependency(link_with: libntk_hw_shlib,
+  include_directories: libntk_hw_inc,
+  dependencies: [libntk_hw_deps])
+pkg.generate(libntk_hw_shlib, description: 'Hardware support library for NTK',
+  name: 'ntk-hw',
   url: 'https://github.com/ExpidusOS/ntk',
   version: longver)
 

@@ -73,7 +73,7 @@ static gboolean ntk_egl_renderer_has_ext(const char* exts, const char* ext) {
 }
 
 static void* ntk_egl_renderer_load_proc_handler(const char* name, GError** error) {
-  void* proc = (void*)eglGetProcAddress("eglGetPlatformDisplayEXT");
+  void* proc = eglGetProcAddress(name);
   if (proc == NULL) {
     ntk_egl_error_set_bad_proc(error, "proc address is NULL", name);
     return NULL;
@@ -105,6 +105,12 @@ static EGLDeviceEXT ntk_egl_renderer_get_egl_device_from_drm(NtkEGLRenderer* sel
   if (!priv->procs.eglQueryDevicesEXT(nb_devices, devices, &nb_devices)) {
     free(devices);
     g_error("Failed to query EGL devices");
+  }
+
+  EGLDeviceEXT egl_device = NULL;
+  for (int i = 0; i < nb_devices; i++) {
+    const char* egl_device_name = priv->procs.eglQueryDeviceStringEXT(devices[i], EGL_DRM_DEVICE_FILE_EXT);
+    printf("%s\n", egl_device_name);
   }
 
   free(devices);
@@ -267,7 +273,10 @@ static gboolean ntk_egl_renderer_initable_init(GInitable* initable, GCancellable
     g_debug("Getting DRM device");
 
     EGLDeviceEXT dev = ntk_egl_renderer_get_egl_device_from_drm(self, error);
-    if (dev == EGL_NO_DEVICE_EXT) return FALSE;
+    if (dev == EGL_NO_DEVICE_EXT) {
+      ntk_egl_error_set_egl(error, "Failed to get the DRM device", EGL_BAD_DEVICE_EXT);
+      return FALSE;
+    }
   }
 
 #undef HAS_EXT

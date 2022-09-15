@@ -1,0 +1,9 @@
+#ifndef __NTK_BUILD_H_
+#define __NTK_BUILD_H_ 1
+
+#define NTK_VERSION "@VERSION@"
+#define NTK_SMALL_VERSION "@SMALL_VERSION@"
+
+#mesondefine NTK_HW_HAS_LIBDRM
+
+#endif
