@@ -124,8 +124,11 @@ nuklear = declare_dependency(link_with: nuklear_shlib,
   dependencies: nuklear_deps,
   compile_args: nuklear_cflags,
   include_directories: include_directories('deps/nuklear'))
-nuklear_vapi = meson.get_compiler('vala').find_library('nuklear', dirs: join_paths(meson.project_source_root(), 'vapi'))
-install_data('vapi/nuklear.vapi', install_dir: join_paths(datadir, 'vala', 'vapi'))
+if use_vala
+  nuklear_vapi = meson.get_compiler('vala').find_library('nuklear', dirs: join_paths(meson.project_source_root(), 'vapi'))
+  install_data('vapi/nuklear.vapi', install_dir: join_paths(datadir, 'vala', 'vapi'))
+endif
+
 install_data('deps/nuklear/nuklear.h', install_dir: join_paths(prefix, 'include', 'ntk-@0@'.format(shortver)))
 
 nuklear_pc_cflags = nuklear_cflags
