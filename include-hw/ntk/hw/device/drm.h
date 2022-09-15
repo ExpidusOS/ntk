@@ -3,7 +3,6 @@
 
 #include <ntk/hw/build.h>
 #include <ntk/hw/device.h>
-#include <ntk/hw/device-file.h>
 #include <ntk/hw/display.h>
 #include <glib-object.h>
 

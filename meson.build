@@ -169,7 +169,7 @@ libntk_shlib = shared_library('ntk', libntk_src, libntk_enums,
 if use_gir
   libntk_gir = gnome.generate_gir(libntk_shlib,
     extra_args: ['--cflags-begin', libntk_cflags, '--cflags-end'],
-    dependencies: [libntk_deps],
+    dependencies: libntk_deps,
     namespace: 'Ntk',
     nsversion: shortver.split('-')[0],
     sources: [libntk_src, libntk_enums, libntk_headers],
@@ -198,8 +198,8 @@ configure_file(input: 'src/NtkHW.metadata.in', output: 'NtkHW-@0@.metadata'.form
 configure_file(input: 'src/NtkHW-custom.vala.in', output: 'NtkHW-@0@-custom.vala'.format(shortver.split('-')[0]),
   configuration: conf_data)
 
-libntk_hw_src = ['src/libhw/device.c', 'src/libhw/device-file.c', 'src/libhw/display.c', 'src/libhw/input.c']
-libntk_hw_headers = ['include-hw/ntk/hw.h', 'include-hw/ntk/hw/device.h', 'include-hw/ntk/hw/device-file.h', 'include-hw/ntk/hw/display.h', 'include-hw/ntk/hw/input.h']
+libntk_hw_src = ['src/libhw/device.c', 'src/libhw/display.c', 'src/libhw/input.c']
+libntk_hw_headers = ['include-hw/ntk/hw.h', 'include-hw/ntk/hw/device.h', 'include-hw/ntk/hw/display.h', 'include-hw/ntk/hw/input.h']
 libntk_hw_inc = [include_directories('include-hw')]
 libntk_hw_deps = [libntk]
 libntk_hw_cflags = ['-I @0@'.format(join_paths(meson.project_build_root(), 'include-hw'))]
