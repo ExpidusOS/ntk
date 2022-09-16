@@ -1,3 +1,6 @@
 [submodule "deps/nuklear"]
 	path = deps/nuklear
 	url = https://github.com/Immediate-Mode-UI/Nuklear
+[submodule "nuklear/src/nuklear"]
+	path = nuklear/src/nuklear
+	url = https://github.com/Immediate-Mode-UI/Nuklear/

@@ -39,7 +39,7 @@ if cairo.found()
       libntk_cairo_vapi = gnome.generate_vapi('NtkCairo-@0@'.format(shortver.split('-')[0]),
         packages: ['Ntk-@0@'.format(shortver.split('-')[0]), 'cairo', 'pangocairo'],
         sources: [libntk_cairo_gir[0], join_paths(meson.current_build_dir(), 'NtkCairo-@0@-custom.vala'.format(shortver.split('-')[0]))],
-        vapi_dirs: [join_paths(meson.project_source_root(), 'vapi'), meson.project_build_root()],
+        vapi_dirs: [join_paths(meson.project_source_root(), 'nuklear', 'vapi'), join_paths(meson.project_build_root(), 'core')],
         install: true)
     endif
   endif
