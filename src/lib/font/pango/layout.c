@@ -20,7 +20,7 @@ static float ntk_pango_layout_font_get_width(nk_handle userdata, float height, c
 NtkPangoLayoutFont* ntk_pango_layout_font_new(PangoLayout* layout, PangoFontDescription* font_desc) {
   pango_layout_set_font_description(layout, font_desc);
 
-  NtkPangoLayoutFont* font = g_try_malloc0(sizeof (NtkPangoLayoutFont));
+  NtkPangoLayoutFont* font = g_try_malloc0(sizeof(NtkPangoLayoutFont));
   if (font == NULL) return NULL;
 
   font->userdata.ptr = layout;

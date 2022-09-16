@@ -1,9 +1,9 @@
 #ifndef __NTK_BACKEND_GTK4_WIDGET_H_
 #define __NTK_BACKEND_GTK4_WIDGET_H_ 1
 
+#include "renderer.h"
 #include <glib-object.h>
 #include <gtk/gtk.h>
-#include "renderer.h"
 
 G_BEGIN_DECLS
 

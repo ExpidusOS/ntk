@@ -1,7 +1,7 @@
 #define G_LOG_DOMAIN "NtkRenderer"
-#include <ntk/renderer.h>
 #include "error-priv.h"
 #include "renderer-priv.h"
+#include <ntk/renderer.h>
 
 #define NTK_RENDERER_PRIVATE(self) (ntk_renderer_get_instance_private(self))
 
@@ -13,17 +13,20 @@ enum {
   N_SIGNALS
 };
 
-static guint obj_sigs[N_SIGNALS] = { 0 };
+static guint obj_sigs[N_SIGNALS] = {0};
 
 static void ntk_renderer_class_init(NtkRendererClass* klass) {
   GObjectClass* object_class = G_OBJECT_CLASS(klass);
 
-  obj_sigs[SIG_REQUEST_DRAW] = g_signal_new("request-draw", G_OBJECT_CLASS_TYPE(object_class), G_SIGNAL_RUN_FIRST, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
-  obj_sigs[SIG_RENDERED] = g_signal_new("rendered", G_OBJECT_CLASS_TYPE(object_class), G_SIGNAL_RUN_LAST, 0, NULL, NULL, g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 1, G_TYPE_POINTER);
+  obj_sigs[SIG_REQUEST_DRAW] =
+    g_signal_new("request-draw", G_OBJECT_CLASS_TYPE(object_class), G_SIGNAL_RUN_FIRST, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
+  obj_sigs[SIG_RENDERED] = g_signal_new(
+    "rendered", G_OBJECT_CLASS_TYPE(object_class), G_SIGNAL_RUN_LAST, 0, NULL, NULL, g_cclosure_marshal_VOID__POINTER,
+    G_TYPE_NONE, 1, G_TYPE_POINTER
+  );
 }
 
-static void ntk_renderer_init(NtkRenderer* self) {
-}
+static void ntk_renderer_init(NtkRenderer* self) {}
 
 void ntk_renderer_request_draw(NtkRenderer* self) {
   g_return_if_fail(NTK_IS_RENDERER(self));

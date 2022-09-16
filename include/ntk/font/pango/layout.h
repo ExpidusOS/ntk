@@ -1,8 +1,8 @@
 #ifndef __NTK_FONT_PANGO_LAYOUT_H_
 #define __NTK_FONT_PANGO_LAYOUT_H_ 1
 
-#include <pango/pango.h>
 #include <nuklear.h>
+#include <pango/pango.h>
 
 #define NTK_TYPE_PANGO_LAYOUT_FONT ntk_pango_layout_font_get_type()
 

@@ -1,6 +1,6 @@
 #define G_LOG_DOMAIN "NtkPangoFont"
-#include <ntk/font/pango/object.h>
 #include "object-priv.h"
+#include <ntk/font/pango/object.h>
 
 #define NTK_PANGO_FONT_PRIVATE(self) (ntk_pango_font_get_instance_private(self))
 
@@ -12,7 +12,9 @@ enum {
   N_PROPERTIES,
 };
 
-static GParamSpec* obj_props[N_PROPERTIES] = { NULL, };
+static GParamSpec* obj_props[N_PROPERTIES] = {
+  NULL,
+};
 
 static void ntk_pango_font_finalize(GObject* obj) {
   NtkPangoFont* self = NTK_PANGO_FONT(obj);
@@ -59,7 +61,10 @@ static void ntk_pango_font_class_init(NtkPangoFontClass* klass) {
   object_class->set_property = ntk_pango_font_set_property;
   object_class->get_property = ntk_pango_font_get_property;
 
-  obj_props[PROP_DESCRIPTION] = g_param_spec_boxed("description", "Pango Font Description", "The description of the font to utilize.", PANGO_TYPE_FONT_DESCRIPTION, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+  obj_props[PROP_DESCRIPTION] = g_param_spec_boxed(
+    "description", "Pango Font Description", "The description of the font to utilize.", PANGO_TYPE_FONT_DESCRIPTION,
+    G_PARAM_CONSTRUCT | G_PARAM_READWRITE
+  );
   g_object_class_install_properties(object_class, N_PROPERTIES, obj_props);
 }
 

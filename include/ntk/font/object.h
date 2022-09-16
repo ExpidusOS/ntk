@@ -1,9 +1,9 @@
 #ifndef __NTK_FONT_OBJECT_H_
 #define __NTK_FONT_OBJECT_H_ 1
 
+#include "user.h"
 #include <glib-object.h>
 #include <nuklear.h>
-#include "user.h"
 
 G_BEGIN_DECLS
 

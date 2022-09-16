@@ -1,16 +1,17 @@
 #define G_LOG_DOMAIN "NtkContext"
-#include <ntk/context.h>
-#include <gio/gio.h>
 #include "context-priv.h"
 #include "error-priv.h"
+#include <gio/gio.h>
+#include <ntk/context.h>
 
 #define NTK_CONTEXT_PRIVATE(self) ((self)->priv == NULL ? ntk_context_get_instance_private(self) : (self)->priv)
 
 static void ntk_context_interface_init(GInitableIface* iface);
 
-G_DEFINE_TYPE_WITH_CODE(NtkContext, ntk_context, G_TYPE_OBJECT,
-    G_ADD_PRIVATE(NtkContext)
-    G_IMPLEMENT_INTERFACE(G_TYPE_INITABLE, ntk_context_interface_init));
+G_DEFINE_TYPE_WITH_CODE(
+  NtkContext, ntk_context, G_TYPE_OBJECT,
+  G_ADD_PRIVATE(NtkContext) G_IMPLEMENT_INTERFACE(G_TYPE_INITABLE, ntk_context_interface_init)
+);
 
 enum {
   PROP_0,
@@ -24,8 +25,10 @@ enum {
   N_SIGNALS
 };
 
-static GParamSpec* obj_props[N_PROPERTIES] = { NULL, };
-static guint obj_sigs[N_SIGNALS] = { 0 };
+static GParamSpec* obj_props[N_PROPERTIES] = {
+  NULL,
+};
+static guint obj_sigs[N_SIGNALS] = {0};
 
 static void ntk_context_finalize(GObject* obj) {
   NtkContext* self = NTK_CONTEXT(obj);
@@ -127,15 +130,22 @@ static void ntk_context_class_init(NtkContextClass* klass) {
    *
    * FIXME: figure out why the getter is invalid according to "g-ir-compiler"
    */
-  obj_props[PROP_RENDERER] = g_param_spec_object("renderer", "Ntk Renderer", "The Ntk Renderer to render with.", NTK_TYPE_RENDERER, G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
+  obj_props[PROP_RENDERER] = g_param_spec_object(
+    "renderer", "Ntk Renderer", "The Ntk Renderer to render with.", NTK_TYPE_RENDERER,
+    G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE
+  );
 
   /**
    * NtkContext:font-description: (type PangoFontDescription)
    */
-  obj_props[PROP_FONT_DESCRIPTION] = g_param_spec_boxed("font-description", "Pango Font Description", "The description of the font to utilize.", PANGO_TYPE_FONT_DESCRIPTION, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+  obj_props[PROP_FONT_DESCRIPTION] = g_param_spec_boxed(
+    "font-description", "Pango Font Description", "The description of the font to utilize.", PANGO_TYPE_FONT_DESCRIPTION,
+    G_PARAM_CONSTRUCT | G_PARAM_READWRITE
+  );
   g_object_class_install_properties(object_class, N_PROPERTIES, obj_props);
 
-  obj_sigs[SIG_RENDERED] = g_signal_new("rendered", G_OBJECT_CLASS_TYPE(object_class), G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
+  obj_sigs[SIG_RENDERED] =
+    g_signal_new("rendered", G_OBJECT_CLASS_TYPE(object_class), G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
 }
 
 static void ntk_context_init(NtkContext* self) {
@@ -190,10 +200,10 @@ gboolean ntk_context_render(NtkContext* self, NtkContextDrawCallback callback, g
   switch (type) {
     case NTK_RENDERER_TYPE_COMMAND:
       {
-        NtkRendererCommand* cmd = g_malloc0(sizeof (NtkRendererCommand));
+        NtkRendererCommand* cmd = g_malloc0(sizeof(NtkRendererCommand));
         cmd->is_vertex = 0;
         g_debug("Rendering context without vertexes");
-        nk_foreach(cmd->draw, &priv->nk) {
+        nk_foreach (cmd->draw, &priv->nk) {
           if (!ntk_renderer_draw(priv->renderer, cmd, error)) {
             priv->is_drawing = FALSE;
             g_free(cmd);
@@ -205,7 +215,7 @@ gboolean ntk_context_render(NtkContext* self, NtkContextDrawCallback callback, g
       break;
     case NTK_RENDERER_TYPE_VERTEX:
       {
-        NtkRendererCommand* cmd = g_malloc0(sizeof (NtkRendererCommand));
+        NtkRendererCommand* cmd = g_malloc0(sizeof(NtkRendererCommand));
         cmd->is_vertex = 1;
         g_debug("Rendering context with vertexes");
 
@@ -221,7 +231,7 @@ gboolean ntk_context_render(NtkContext* self, NtkContextDrawCallback callback, g
         nk_buffer_init_default(&cmd->vertex.idx);
         nk_convert(&priv->nk, &cmd->vertex.cmds, &cmd->vertex.verts, &cmd->vertex.idx, &cfg);
 
-        nk_draw_foreach(cmd->vertex.cmd, &priv->nk, &cmd->vertex.cmds) {
+        nk_draw_foreach (cmd->vertex.cmd, &priv->nk, &cmd->vertex.cmds) {
           if (!ntk_renderer_draw(priv->renderer, cmd, error)) {
             priv->is_drawing = FALSE;
             g_free(cmd);
@@ -236,7 +246,7 @@ gboolean ntk_context_render(NtkContext* self, NtkContextDrawCallback callback, g
       }
       break;
   }
-  
+
   g_signal_emit(self, obj_sigs[SIG_RENDERED], 0);
   nk_clear(&priv->nk);
 

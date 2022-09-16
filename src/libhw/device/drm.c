@@ -1,7 +1,7 @@
 #define G_LOG_DOMAIN "NtkHWDrmDevice"
-#include <ntk/hw/device/drm.h>
-#include <gio/gio.h>
 #include "drm-priv.h"
+#include <gio/gio.h>
+#include <ntk/hw/device/drm.h>
 
 #define NTK_HW_DRM_DEVICE_PRIVATE(self) ((self)->priv == NULL ? ntk_hw_drm_device_get_instance_private(self) : (self)->priv)
 

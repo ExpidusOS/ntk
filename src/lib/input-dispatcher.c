@@ -1,7 +1,7 @@
 #define G_LOG_DOMAIN "NtkInputDispatcher"
-#include <ntk/input-dispatcher.h>
-#include "input-dispatcher-priv.h"
 #include "context-priv.h"
+#include "input-dispatcher-priv.h"
+#include <ntk/input-dispatcher.h>
 
 #define NTK_INPUT_DISPATCHER_PRIVATE(self) (ntk_input_dispatcher_get_instance_private(self))
 
@@ -13,7 +13,7 @@ enum {
   N_SIGNALS
 };
 
-static guint obj_sigs[N_SIGNALS] = { 0 };
+static guint obj_sigs[N_SIGNALS] = {0};
 
 static void ntk_input_dispatcher_constructed(GObject* obj) {
   G_OBJECT_CLASS(ntk_input_dispatcher_parent_class)->constructed(obj);
@@ -40,8 +40,11 @@ static void ntk_input_dispatcher_class_init(NtkInputDispatcherClass* klass) {
   object_class->constructed = ntk_input_dispatcher_constructed;
   object_class->finalize = ntk_input_dispatcher_finalize;
 
-  obj_sigs[SIG_ATTACH] = g_signal_new("attach", G_OBJECT_CLASS_TYPE(object_class), G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL, G_TYPE_NONE, 1, NTK_TYPE_CONTEXT);
-  obj_sigs[SIG_DETACH] = g_signal_new("detach", G_OBJECT_CLASS_TYPE(object_class), G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
+  obj_sigs[SIG_ATTACH] = g_signal_new(
+    "attach", G_OBJECT_CLASS_TYPE(object_class), G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL, G_TYPE_NONE, 1, NTK_TYPE_CONTEXT
+  );
+  obj_sigs[SIG_DETACH] =
+    g_signal_new("detach", G_OBJECT_CLASS_TYPE(object_class), G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
 }
 
 static void ntk_input_dispatcher_init(NtkInputDispatcher* self) {}
@@ -78,8 +81,10 @@ void ntk_input_dispatcher_wait(NtkInputDispatcher* self, NtkInputDispatcherEvent
   g_return_if_fail(klass->wait != NULL);
 
   NtkInputDispatcherEvent event;
-  if (ev == NULL) event.type = NTK_INPUT_DISPATCHER_TYPE_NONE;
-  else ev->type = NTK_INPUT_DISPATCHER_TYPE_NONE;
+  if (ev == NULL)
+    event.type = NTK_INPUT_DISPATCHER_TYPE_NONE;
+  else
+    ev->type = NTK_INPUT_DISPATCHER_TYPE_NONE;
   klass->wait(self, ev == NULL ? &event : ev);
 
   ntk_input_dispatcher_triggerev(self, ev == NULL ? &event : ev);
@@ -125,7 +130,7 @@ void ntk_input_dispatcher_triggerv(NtkInputDispatcher* self, NtkInputDispatcherE
       ev.data.ascii.len = va_arg(ap, size_t);
       break;
     case NTK_INPUT_DISPATCHER_TYPE_GLYPH:
-      memcpy(&ev.data.glyph.g, va_arg(ap, nk_glyph), sizeof (nk_glyph));
+      memcpy(&ev.data.glyph.g, va_arg(ap, nk_glyph), sizeof(nk_glyph));
       break;
     case NTK_INPUT_DISPATCHER_TYPE_UNICODE:
       ev.data.unicode.r = va_arg(ap, nk_rune);
@@ -150,18 +155,29 @@ void ntk_input_dispatcher_triggerev(NtkInputDispatcher* self, NtkInputDispatcher
     case NTK_INPUT_DISPATCHER_TYPE_NONE:
       break;
     case NTK_INPUT_DISPATCHER_TYPE_MOTION:
-      g_debug("Received motion: x: %d, y: %d", NTK_INPUT_DISPATCHER_EVENT_MOTION(ev).x, NTK_INPUT_DISPATCHER_EVENT_BUTTON(ev).y);
-      nk_input_motion(&priv->ctx->priv->nk, NTK_INPUT_DISPATCHER_EVENT_MOTION(ev).x, NTK_INPUT_DISPATCHER_EVENT_BUTTON(ev).y);
+      g_debug(
+        "Received motion: x: %d, y: %d", NTK_INPUT_DISPATCHER_EVENT_MOTION(ev).x, NTK_INPUT_DISPATCHER_EVENT_BUTTON(ev).y
+      );
+      nk_input_motion(
+        &priv->ctx->priv->nk, NTK_INPUT_DISPATCHER_EVENT_MOTION(ev).x, NTK_INPUT_DISPATCHER_EVENT_BUTTON(ev).y
+      );
       break;
     case NTK_INPUT_DISPATCHER_TYPE_KEY:
-      g_debug("Received key: key: %d, down: %d", NTK_INPUT_DISPATCHER_EVENT_KEY(ev).key, NTK_INPUT_DISPATCHER_EVENT_KEY(ev).down);
+      g_debug(
+        "Received key: key: %d, down: %d", NTK_INPUT_DISPATCHER_EVENT_KEY(ev).key, NTK_INPUT_DISPATCHER_EVENT_KEY(ev).down
+      );
       nk_input_key(&priv->ctx->priv->nk, NTK_INPUT_DISPATCHER_EVENT_KEY(ev).key, NTK_INPUT_DISPATCHER_EVENT_KEY(ev).down);
       break;
     case NTK_INPUT_DISPATCHER_TYPE_BUTTON:
-      g_debug("Received button: btn: %d, x: %d, y: %d, down: %d", NTK_INPUT_DISPATCHER_EVENT_BUTTON(ev).btn, NTK_INPUT_DISPATCHER_EVENT_BUTTON(ev).x, NTK_INPUT_DISPATCHER_EVENT_BUTTON(ev).y,
-        NTK_INPUT_DISPATCHER_EVENT_BUTTON(ev).down);
-      nk_input_button(&priv->ctx->priv->nk, NTK_INPUT_DISPATCHER_EVENT_BUTTON(ev).btn, NTK_INPUT_DISPATCHER_EVENT_BUTTON(ev).x, NTK_INPUT_DISPATCHER_EVENT_BUTTON(ev).y,
-        NTK_INPUT_DISPATCHER_EVENT_BUTTON(ev).down);
+      g_debug(
+        "Received button: btn: %d, x: %d, y: %d, down: %d", NTK_INPUT_DISPATCHER_EVENT_BUTTON(ev).btn,
+        NTK_INPUT_DISPATCHER_EVENT_BUTTON(ev).x, NTK_INPUT_DISPATCHER_EVENT_BUTTON(ev).y,
+        NTK_INPUT_DISPATCHER_EVENT_BUTTON(ev).down
+      );
+      nk_input_button(
+        &priv->ctx->priv->nk, NTK_INPUT_DISPATCHER_EVENT_BUTTON(ev).btn, NTK_INPUT_DISPATCHER_EVENT_BUTTON(ev).x,
+        NTK_INPUT_DISPATCHER_EVENT_BUTTON(ev).y, NTK_INPUT_DISPATCHER_EVENT_BUTTON(ev).down
+      );
       break;
     case NTK_INPUT_DISPATCHER_TYPE_SCROLL:
       {
@@ -173,7 +189,9 @@ void ntk_input_dispatcher_triggerev(NtkInputDispatcher* self, NtkInputDispatcher
       }
       break;
     case NTK_INPUT_DISPATCHER_TYPE_ASCII:
-      g_debug("Received ascii: %lu \"%s\"", NTK_INPUT_DISPATCHER_EVENT_ASCII(ev).len, NTK_INPUT_DISPATCHER_EVENT_ASCII(ev).str);
+      g_debug(
+        "Received ascii: %lu \"%s\"", NTK_INPUT_DISPATCHER_EVENT_ASCII(ev).len, NTK_INPUT_DISPATCHER_EVENT_ASCII(ev).str
+      );
       for (size_t i = 0; i < NTK_INPUT_DISPATCHER_EVENT_ASCII(ev).len; i++) {
         nk_input_char(&priv->ctx->priv->nk, NTK_INPUT_DISPATCHER_EVENT_ASCII(ev).str[i]);
       }

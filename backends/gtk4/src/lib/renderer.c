@@ -1,9 +1,9 @@
 #define G_LOG_DOMAIN "NtkGtk4Renderer"
+#include "renderer-priv.h"
+#include <math.h>
 #include <ntk/backend/gtk4/renderer.h>
 #include <ntk/font.h>
 #include <ntk/utils.h>
-#include <math.h>
-#include "renderer-priv.h"
 
 #define NTK_GTK4_RENDERER_PRIVATE(self) ((self)->priv == NULL ? ntk_gtk4_renderer_get_instance_private(self) : (self)->priv)
 

@@ -1,6 +1,6 @@
 #define G_LOG_DOMAIN "NtkGtk4Widget"
-#include <ntk/backend/gtk4/widget.h>
 #include "widget-priv.h"
+#include <ntk/backend/gtk4/widget.h>
 
 #define NTK_GTK4_WIDGET_PRIVATE(self) ((self)->priv == NULL ? ntk_gtk4_widget_get_instance_private(self) : (self)->priv)
 
@@ -10,13 +10,16 @@ enum {
   N_PROPERTIES,
 };
 
-static GParamSpec* obj_props[N_PROPERTIES] = { NULL, };
+static GParamSpec* obj_props[N_PROPERTIES] = {
+  NULL,
+};
 
 static void ntk_gtk4_widget_interface_init(GtkBuildableIface* iface);
 
-G_DEFINE_TYPE_WITH_CODE(NtkGtk4Widget, ntk_gtk4_widget, GTK_TYPE_WIDGET,
-    G_ADD_PRIVATE(NtkGtk4Widget)
-    G_IMPLEMENT_INTERFACE(GTK_TYPE_BUILDABLE, ntk_gtk4_widget_interface_init));
+G_DEFINE_TYPE_WITH_CODE(
+  NtkGtk4Widget, ntk_gtk4_widget, GTK_TYPE_WIDGET,
+  G_ADD_PRIVATE(NtkGtk4Widget) G_IMPLEMENT_INTERFACE(GTK_TYPE_BUILDABLE, ntk_gtk4_widget_interface_init)
+);
 
 static void ntk_gtk4_widget_constructed(GObject* obj) {
   G_OBJECT_CLASS(ntk_gtk4_widget_parent_class)->constructed(obj);
@@ -39,7 +42,8 @@ static void ntk_gtk4_widget_constructed(GObject* obj) {
   gtk_event_controller_key_set_im_context(GTK_EVENT_CONTROLLER_KEY(priv->controller_key), priv->im_context);
   gtk_widget_add_controller(GTK_WIDGET(self), priv->controller_key);
 
-  priv->controller_scroll = gtk_event_controller_scroll_new(GTK_EVENT_CONTROLLER_SCROLL_DISCRETE | GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES);
+  priv->controller_scroll =
+    gtk_event_controller_scroll_new(GTK_EVENT_CONTROLLER_SCROLL_DISCRETE | GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES);
   gtk_widget_add_controller(GTK_WIDGET(self), priv->controller_scroll);
 
   priv->controller_motion = gtk_event_controller_motion_new();
@@ -148,8 +152,7 @@ static void ntk_gtk4_widget_map(GtkWidget* widget) {
   gtk_im_context_set_cursor_location(priv->im_context, &area);
 }
 
-static void ntk_gtk4_widget_interface_init(GtkBuildableIface* iface) {
-}
+static void ntk_gtk4_widget_interface_init(GtkBuildableIface* iface) {}
 
 static void ntk_gtk4_widget_class_init(NtkGtk4WidgetClass* klass) {
   GObjectClass* object_class = G_OBJECT_CLASS(klass);
@@ -160,7 +163,8 @@ static void ntk_gtk4_widget_class_init(NtkGtk4WidgetClass* klass) {
   object_class->set_property = ntk_gtk4_widget_set_property;
   object_class->get_property = ntk_gtk4_widget_get_property;
 
-  obj_props[PROP_RENDERER] = g_param_spec_object("renderer", "Ntk Renderer", "The Ntk Renderer to render with.", NTK_TYPE_RENDERER, G_PARAM_READABLE);
+  obj_props[PROP_RENDERER] =
+    g_param_spec_object("renderer", "Ntk Renderer", "The Ntk Renderer to render with.", NTK_TYPE_RENDERER, G_PARAM_READABLE);
   g_object_class_install_properties(object_class, N_PROPERTIES, obj_props);
 
   widget_class->compute_expand = ntk_gtk4_widget_compute_expand;

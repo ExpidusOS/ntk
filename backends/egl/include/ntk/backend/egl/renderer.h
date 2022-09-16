@@ -1,9 +1,9 @@
 #ifndef __NTK_BACKEND_EGL_RENDERER_H_
 #define __NTK_BACKEND_EGL_RENDERER_H_ 1
 
-#include <glib-object.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
+#include <glib-object.h>
 #include <ntk/renderer.h>
 
 G_BEGIN_DECLS

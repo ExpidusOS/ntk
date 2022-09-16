@@ -1,8 +1,8 @@
 #ifndef __NTK_HW_INPUT_H_
 #define __NTK_HW_INPUT_H_ 1
 
-#include <glib-object.h>
 #include "device.h"
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 

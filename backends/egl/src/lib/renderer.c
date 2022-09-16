@@ -1,9 +1,9 @@
 #define G_LOG_DOMAIN "NtkEGLRenderer"
-#include <ntk/backend/egl/renderer.h>
-#include <ntk/font.h>
-#include <gio/gio.h>
 #include "error-priv.h"
 #include "renderer-priv.h"
+#include <gio/gio.h>
+#include <ntk/backend/egl/renderer.h>
+#include <ntk/font.h>
 
 #define NTK_EGL_RENDERER_PRIVATE(self) ((self)->priv == NULL ? ntk_egl_renderer_get_instance_private(self) : (self)->priv)
 
@@ -19,57 +19,75 @@ typedef struct {
   float col[4];
 } NtkEGLVertex;
 
-static GParamSpec* obj_props[N_PROPERTIES] = { NULL, };
+static GParamSpec* obj_props[N_PROPERTIES] = {
+  NULL,
+};
 
 static void ntk_egl_renderer_interface_init(GInitableIface* iface);
 
-G_DEFINE_TYPE_WITH_CODE(NtkEGLRenderer, ntk_egl_renderer, NTK_TYPE_RENDERER,
-  G_ADD_PRIVATE(NtkEGLRenderer)
-  G_IMPLEMENT_INTERFACE(G_TYPE_INITABLE, ntk_egl_renderer_interface_init));
+G_DEFINE_TYPE_WITH_CODE(
+  NtkEGLRenderer, ntk_egl_renderer, NTK_TYPE_RENDERER,
+  G_ADD_PRIVATE(NtkEGLRenderer) G_IMPLEMENT_INTERFACE(G_TYPE_INITABLE, ntk_egl_renderer_interface_init)
+);
 
 static const struct nk_draw_vertex_layout_element ntk_egl_vertex_layout[] = {
-  { NK_VERTEX_POSITION, NK_FORMAT_FLOAT, NK_OFFSETOF(NtkEGLVertex, pos) },
-  { NK_VERTEX_TEXCOORD, NK_FORMAT_FLOAT, NK_OFFSETOF(NtkEGLVertex, uv) },
-  { NK_VERTEX_COLOR, NK_FORMAT_R32G32B32A32_FLOAT, NK_OFFSETOF(NtkEGLVertex, col) },
-  { NK_VERTEX_LAYOUT_END },
+  {NK_VERTEX_POSITION, NK_FORMAT_FLOAT, NK_OFFSETOF(NtkEGLVertex, pos)},
+  {NK_VERTEX_TEXCOORD, NK_FORMAT_FLOAT, NK_OFFSETOF(NtkEGLVertex, uv)},
+  {NK_VERTEX_COLOR, NK_FORMAT_R32G32B32A32_FLOAT, NK_OFFSETOF(NtkEGLVertex, col)},
+  {NK_VERTEX_LAYOUT_END},
 };
 
 static const char* ntk_egl_renderer_error_stringify(EGLint error) {
   switch (error) {
-    case EGL_SUCCESS: return "EGL_SUCCESS";
-    case EGL_NOT_INITIALIZED: return "EGL_NOT_INITIALIZED";
-    case EGL_BAD_ACCESS: return "EGL_BAD_ACCESS";
-    case EGL_BAD_ALLOC: return "EGL_BAD_ALLOC";
-    case EGL_BAD_ATTRIBUTE: return "EGL_BAD_ATTRIBUTE";
-    case EGL_BAD_CONTEXT: return "EGL_BAD_CONTEXT";
-    case EGL_BAD_CONFIG: return "EGL_BAD_CONFIG";
-    case EGL_BAD_CURRENT_SURFACE: return "EGL_BAD_CURRENT_SURFACE";
-    case EGL_BAD_DISPLAY: return "EGL_BAD_DISPLAY";
-    case EGL_BAD_DEVICE_EXT: return "EGL_BAD_DEVICE_EXT";
-    case EGL_BAD_SURFACE: return "EGL_BAD_SURFACE";
-    case EGL_BAD_MATCH: return "EGL_BAD_MATCH";
-    case EGL_BAD_PARAMETER: return "EGL_BAD_PARAMETER";
-    case EGL_BAD_NATIVE_PIXMAP: return "EGL_BAD_NATIVE_PIXMAP";
-    case EGL_BAD_NATIVE_WINDOW: return "EGL_BAD_NATIVE_WINDOW";
-    case EGL_CONTEXT_LOST: return "EGL_CONTEXT_LOST";
+    case EGL_SUCCESS:
+      return "EGL_SUCCESS";
+    case EGL_NOT_INITIALIZED:
+      return "EGL_NOT_INITIALIZED";
+    case EGL_BAD_ACCESS:
+      return "EGL_BAD_ACCESS";
+    case EGL_BAD_ALLOC:
+      return "EGL_BAD_ALLOC";
+    case EGL_BAD_ATTRIBUTE:
+      return "EGL_BAD_ATTRIBUTE";
+    case EGL_BAD_CONTEXT:
+      return "EGL_BAD_CONTEXT";
+    case EGL_BAD_CONFIG:
+      return "EGL_BAD_CONFIG";
+    case EGL_BAD_CURRENT_SURFACE:
+      return "EGL_BAD_CURRENT_SURFACE";
+    case EGL_BAD_DISPLAY:
+      return "EGL_BAD_DISPLAY";
+    case EGL_BAD_DEVICE_EXT:
+      return "EGL_BAD_DEVICE_EXT";
+    case EGL_BAD_SURFACE:
+      return "EGL_BAD_SURFACE";
+    case EGL_BAD_MATCH:
+      return "EGL_BAD_MATCH";
+    case EGL_BAD_PARAMETER:
+      return "EGL_BAD_PARAMETER";
+    case EGL_BAD_NATIVE_PIXMAP:
+      return "EGL_BAD_NATIVE_PIXMAP";
+    case EGL_BAD_NATIVE_WINDOW:
+      return "EGL_BAD_NATIVE_WINDOW";
+    case EGL_CONTEXT_LOST:
+      return "EGL_CONTEXT_LOST";
   }
   return "unknown error";
 }
 
-
 static gboolean ntk_egl_renderer_has_ext(const char* exts, const char* ext) {
   size_t extlen = strlen(ext);
-	const char* end = exts + strlen(exts);
-	while (exts < end) {
-		if (*exts == ' ') {
-			exts++;
-			continue;
-		}
-		size_t n = strcspn(exts, " ");
-		if (n == extlen && strncmp(ext, exts, n) == 0) return TRUE;
-		exts += n;
-	}
-	return FALSE;
+  const char* end = exts + strlen(exts);
+  while (exts < end) {
+    if (*exts == ' ') {
+      exts++;
+      continue;
+    }
+    size_t n = strcspn(exts, " ");
+    if (n == extlen && strncmp(ext, exts, n) == 0) return TRUE;
+    exts += n;
+  }
+  return FALSE;
 }
 
 static void* ntk_egl_renderer_load_proc_handler(const char* name, GError** error) {
@@ -83,7 +101,9 @@ static void* ntk_egl_renderer_load_proc_handler(const char* name, GError** error
   return proc;
 }
 
-static void ntk_egl_renderer_log(EGLenum error, const char* command, EGLint msg_type, EGLLabelKHR thread, EGLLabelKHR obj, const char* msg) {
+static void ntk_egl_renderer_log(
+  EGLenum error, const char* command, EGLint msg_type, EGLLabelKHR thread, EGLLabelKHR obj, const char* msg
+) {
   g_critical("EGL command: %s, error: %s (0x%x): %s", command, ntk_egl_renderer_error_stringify(error), error, msg);
 }
 
@@ -129,7 +149,7 @@ static gboolean ntk_egl_renderer_configure_vertex(NtkRenderer* renderer, struct 
   cfg->shape_AA = NK_ANTI_ALIASING_ON;
   cfg->line_AA = NK_ANTI_ALIASING_ON;
   cfg->vertex_layout = ntk_egl_vertex_layout;
-  cfg->vertex_size = sizeof (NtkEGLVertex);
+  cfg->vertex_size = sizeof(NtkEGLVertex);
   cfg->vertex_alignment = NK_ALIGNOF(NtkEGLVertex);
   cfg->circle_segment_count = 22;
   cfg->curve_segment_count = 22;
@@ -254,12 +274,15 @@ static gboolean ntk_egl_renderer_initable_init(GInitable* initable, GCancellable
     if (ntk_egl_renderer_load_proc(priv, eglDebugMessageControlKHR, error) == NULL) return FALSE;
 
     static const EGLAttrib debug_attribs[] = {
-      EGL_DEBUG_MSG_CRITICAL_KHR, EGL_TRUE,
-      EGL_DEBUG_MSG_ERROR_KHR, EGL_TRUE,
-      EGL_DEBUG_MSG_WARN_KHR, EGL_TRUE,
-      EGL_DEBUG_MSG_INFO_KHR, EGL_TRUE,
-      EGL_NONE
-		};
+      EGL_DEBUG_MSG_CRITICAL_KHR,
+      EGL_TRUE,
+      EGL_DEBUG_MSG_ERROR_KHR,
+      EGL_TRUE,
+      EGL_DEBUG_MSG_WARN_KHR,
+      EGL_TRUE,
+      EGL_DEBUG_MSG_INFO_KHR,
+      EGL_TRUE,
+      EGL_NONE};
 
     priv->procs.eglDebugMessageControlKHR(ntk_egl_renderer_log, debug_attribs);
   }
@@ -299,7 +322,9 @@ static void ntk_egl_renderer_class_init(NtkEGLRendererClass* klass) {
   /**
    * NtkEGLRenderer:egl-display: (skip)
    */
-  obj_props[PROP_EGL_DISPLAY] = g_param_spec_pointer("egl-display", "EGL Display", "The EGL Display Snapshot to render onto.", G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
+  obj_props[PROP_EGL_DISPLAY] = g_param_spec_pointer(
+    "egl-display", "EGL Display", "The EGL Display Snapshot to render onto.", G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE
+  );
   g_object_class_install_properties(object_class, N_PROPERTIES, obj_props);
 
   renderer_class->get_render_type = ntk_egl_renderer_get_render_type;

@@ -46,6 +46,7 @@ typedef struct {
  */
 typedef struct {
   int is_vertex:1;
+
   union {
     const NtkRendererDrawCommand* draw;
     NtkRendererVertexCommand vertex;

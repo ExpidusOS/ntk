@@ -1,10 +1,10 @@
 #ifndef __NTK_INPUT_DISPATCHER_H_
 #define __NTK_INPUT_DISPATCHER_H_ 1
 
-#include <stdarg.h>
+#include "context.h"
 #include <glib-object.h>
 #include <nuklear.h>
-#include "context.h"
+#include <stdarg.h>
 
 G_BEGIN_DECLS
 
@@ -40,27 +40,33 @@ typedef struct {
       int x;
       int y;
     } motion;
+
     struct {
       enum nk_keys key;
       int down;
     } key;
+
     struct {
       enum nk_buttons btn;
       int x;
       int y;
       int down;
     } button;
+
     struct {
       float x;
       float y;
     } scroll;
+
     struct {
       char* str;
       size_t len;
     } ascii;
+
     struct {
       nk_glyph g;
     } glyph;
+
     struct {
       nk_rune r;
     } unicode;

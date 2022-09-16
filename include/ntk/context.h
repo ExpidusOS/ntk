@@ -1,8 +1,8 @@
 #ifndef __NTK_CONTEXT_H_
 #define __NTK_CONTEXT_H_ 1
 
-#include <glib-object.h>
 #include "renderer.h"
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 

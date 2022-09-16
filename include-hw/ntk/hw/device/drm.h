@@ -1,10 +1,10 @@
 #ifndef __NTK_HW_DEVICE_DRM_H_
 #define __NTK_HW_DEVICE_DRM_H_ 1
 
+#include <glib-object.h>
 #include <ntk/hw/build.h>
 #include <ntk/hw/device.h>
 #include <ntk/hw/display.h>
-#include <glib-object.h>
 
 #ifndef NTK_HW_HAS_LIBDRM
 #error "Libdrm support was not compiled into NTK"

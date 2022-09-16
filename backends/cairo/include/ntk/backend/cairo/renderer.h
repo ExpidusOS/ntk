@@ -1,9 +1,9 @@
 #ifndef __NTK_BACKEND_CAIRO_RENDERER_H_
 #define __NTK_BACKEND_CAIRO_RENDERER_H_ 1
 
+#include <cairo.h>
 #include <glib-object.h>
 #include <ntk/renderer.h>
-#include <cairo.h>
 
 G_BEGIN_DECLS
 

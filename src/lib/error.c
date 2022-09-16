@@ -1,5 +1,5 @@
-#include <ntk/error.h>
 #include "error-priv.h"
+#include <ntk/error.h>
 
 typedef union {
   NtkRenderer* renderer;

@@ -2,8 +2,8 @@
 #define __NTK_FONT_PANGO_OBJECT_H_ 1
 
 #include <glib-object.h>
-#include <pango/pango.h>
 #include <ntk/font/object.h>
+#include <pango/pango.h>
 
 G_BEGIN_DECLS
 

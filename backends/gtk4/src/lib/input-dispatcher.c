@@ -1,9 +1,10 @@
 #define G_LOG_DOMAIN "NtkGtk4InputDispatcher"
-#include <ntk/backend/gtk4/input-dispatcher.h>
 #include "input-dispatcher-priv.h"
 #include <math.h>
+#include <ntk/backend/gtk4/input-dispatcher.h>
 
-#define NTK_GTK4_INPUT_DISPATCHER_PRIVATE(self) ((self)->priv == NULL ? ntk_gtk4_input_dispatcher_get_instance_private(self) : (self)->priv)
+#define NTK_GTK4_INPUT_DISPATCHER_PRIVATE(self)                                                                             \
+  ((self)->priv == NULL ? ntk_gtk4_input_dispatcher_get_instance_private(self) : (self)->priv)
 
 G_DEFINE_TYPE_WITH_PRIVATE(NtkGtk4InputDispatcher, ntk_gtk4_input_dispatcher, NTK_TYPE_INPUT_DISPATCHER);
 
@@ -13,14 +14,15 @@ enum {
   N_PROPERTIES,
 };
 
-static GParamSpec* obj_props[N_PROPERTIES] = { NULL, };
-static guint nuklear_gtk4_button_map[] = {
-  [GDK_BUTTON_PRIMARY] = NK_BUTTON_LEFT,
-  [GDK_BUTTON_MIDDLE] = NK_BUTTON_MIDDLE,
-  [GDK_BUTTON_SECONDARY] = NK_BUTTON_RIGHT
+static GParamSpec* obj_props[N_PROPERTIES] = {
+  NULL,
 };
+static guint nuklear_gtk4_button_map[] = {
+  [GDK_BUTTON_PRIMARY] = NK_BUTTON_LEFT, [GDK_BUTTON_MIDDLE] = NK_BUTTON_MIDDLE, [GDK_BUTTON_SECONDARY] = NK_BUTTON_RIGHT};
 
-static void ntk_gtk4_input_dispatcher_handle_gesture_click_pressed(GtkGestureClick* gclick, int n_pressed, double x, double y, gpointer data) {
+static void ntk_gtk4_input_dispatcher_handle_gesture_click_pressed(
+  GtkGestureClick* gclick, int n_pressed, double x, double y, gpointer data
+) {
   NtkGtk4InputDispatcher* self = NTK_GTK4_INPUT_DISPATCHER(data);
   g_return_if_fail(NTK_GTK4_IS_INPUT_DISPATCHER(self));
 
@@ -31,13 +33,17 @@ static void ntk_gtk4_input_dispatcher_handle_gesture_click_pressed(GtkGestureCli
   g_object_get(gclick, "button", &btn, NULL);
 
   if (n_pressed < 2) {
-    ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_BUTTON, nuklear_gtk4_button_map[btn], rx, ry, 1);
+    ntk_input_dispatcher_trigger(
+      NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_BUTTON, nuklear_gtk4_button_map[btn], rx, ry, 1
+    );
   } else if (btn == GDK_BUTTON_PRIMARY) {
     ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_BUTTON, NK_BUTTON_DOUBLE, rx, ry, 1);
   }
 }
 
-static void ntk_gtk4_input_dispatcher_handle_gesture_click_released(GtkGestureClick* gclick, int n_pressed, double x, double y, gpointer data) {
+static void ntk_gtk4_input_dispatcher_handle_gesture_click_released(
+  GtkGestureClick* gclick, int n_pressed, double x, double y, gpointer data
+) {
   NtkGtk4InputDispatcher* self = NTK_GTK4_INPUT_DISPATCHER(data);
   g_return_if_fail(NTK_GTK4_IS_INPUT_DISPATCHER(self));
 
@@ -48,18 +54,24 @@ static void ntk_gtk4_input_dispatcher_handle_gesture_click_released(GtkGestureCl
   g_object_get(gclick, "button", &btn, NULL);
 
   if (n_pressed < 2) {
-    ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_BUTTON, nuklear_gtk4_button_map[btn], rx, ry, 0);
+    ntk_input_dispatcher_trigger(
+      NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_BUTTON, nuklear_gtk4_button_map[btn], rx, ry, 0
+    );
   } else if (btn == GDK_BUTTON_PRIMARY) {
     ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_BUTTON, NK_BUTTON_DOUBLE, rx, ry, 0);
   }
 }
 
-static void ntk_gtk4_input_dispatcher_handle_key_pressed(GtkEventControllerKey* key, guint keyval, guint keycode, GdkModifierType state, gpointer data) {
+static void ntk_gtk4_input_dispatcher_handle_key_pressed(
+  GtkEventControllerKey* key, guint keyval, guint keycode, GdkModifierType state, gpointer data
+) {
   NtkGtk4InputDispatcher* self = NTK_GTK4_INPUT_DISPATCHER(data);
   g_return_if_fail(NTK_GTK4_IS_INPUT_DISPATCHER(self));
 
-  if (state & GDK_SHIFT_MASK) ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_SHIFT, 1);
-  if (state & GDK_CONTROL_MASK) ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_CTRL, 1);
+  if (state & GDK_SHIFT_MASK)
+    ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_SHIFT, 1);
+  if (state & GDK_CONTROL_MASK)
+    ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_CTRL, 1);
 
   switch (keyval) {
     case GDK_KEY_Delete:
@@ -89,16 +101,24 @@ static void ntk_gtk4_input_dispatcher_handle_key_pressed(GtkEventControllerKey* 
   }
 
   GtkIMContext* im_context = gtk_event_controller_key_get_im_context(key);
-  if (im_context != NULL) gtk_im_context_focus_in(im_context);
-  else ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_UNICODE, gdk_keyval_to_unicode(keyval));
+  if (im_context != NULL)
+    gtk_im_context_focus_in(im_context);
+  else
+    ntk_input_dispatcher_trigger(
+      NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_UNICODE, gdk_keyval_to_unicode(keyval)
+    );
 }
 
-static void ntk_gtk4_input_dispatcher_handle_key_released(GtkEventControllerKey* key, guint keyval, guint keycode, GdkModifierType state, gpointer data) {
+static void ntk_gtk4_input_dispatcher_handle_key_released(
+  GtkEventControllerKey* key, guint keyval, guint keycode, GdkModifierType state, gpointer data
+) {
   NtkGtk4InputDispatcher* self = NTK_GTK4_INPUT_DISPATCHER(data);
   g_return_if_fail(NTK_GTK4_IS_INPUT_DISPATCHER(self));
 
-  if (state & GDK_SHIFT_MASK) ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_SHIFT, 0);
-  if (state & GDK_CONTROL_MASK) ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_CTRL, 0);
+  if (state & GDK_SHIFT_MASK)
+    ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_SHIFT, 0);
+  if (state & GDK_CONTROL_MASK)
+    ntk_input_dispatcher_trigger(NTK_INPUT_DISPATCHER(self), NTK_INPUT_DISPATCHER_TYPE_KEY, NK_KEY_CTRL, 0);
 
   switch (keyval) {
     case GDK_KEY_Delete:
@@ -175,7 +195,8 @@ static void ntk_gtk4_input_dispatcher_connect_controllers(NtkGtk4InputDispatcher
     if (g_hash_table_contains(priv->handlers, name)) continue;
 
     GList* sigs = NULL;
-#define _ATTACH_SIGNAL(obj, name, handler) sigs = g_list_append(sigs, GINT_TO_POINTER(g_signal_connect(obj, name, G_CALLBACK(handler), self)))
+#define _ATTACH_SIGNAL(obj, name, handler)                                                                                  \
+  sigs = g_list_append(sigs, GINT_TO_POINTER(g_signal_connect(obj, name, G_CALLBACK(handler), self)))
 #define ATTACH_SIGNAL(name, handler) _ATTACH_SIGNAL(controller, name, handler)
 
     if (GTK_IS_GESTURE_CLICK(controller)) {
@@ -237,7 +258,8 @@ static void ntk_gtk4_input_dispatcher_connect_controllers(NtkGtk4InputDispatcher
   }
 }
 
-static void ntk_gtk4_input_dispatcher_controllers_change(GListModel* model, guint pos, guint removed, guint added, gpointer data) {
+static void
+ntk_gtk4_input_dispatcher_controllers_change(GListModel* model, guint pos, guint removed, guint added, gpointer data) {
   NtkGtk4InputDispatcher* self = NTK_GTK4_INPUT_DISPATCHER(data);
   ntk_gtk4_input_dispatcher_connect_controllers(self);
 }
@@ -253,7 +275,8 @@ static void ntk_gtk4_input_dispatcher_constructed(GObject* obj) {
   priv->controllers = gtk_widget_observe_controllers(priv->widget);
   g_assert(priv->controllers != NULL);
 
-  priv->controllers_change_id = g_signal_connect(priv->controllers, "items-changed", G_CALLBACK(ntk_gtk4_input_dispatcher_controllers_change), self);
+  priv->controllers_change_id =
+    g_signal_connect(priv->controllers, "items-changed", G_CALLBACK(ntk_gtk4_input_dispatcher_controllers_change), self);
   ntk_gtk4_input_dispatcher_connect_controllers(self);
 }
 
@@ -306,7 +329,9 @@ static void ntk_gtk4_input_dispatcher_class_init(NtkGtk4InputDispatcherClass* kl
   object_class->set_property = ntk_gtk4_input_dispatcher_set_property;
   object_class->get_property = ntk_gtk4_input_dispatcher_get_property;
 
-  obj_props[PROP_WIDGET] = g_param_spec_object("widget", "Gtk Widget", "The Gtk widget to pull events from", GTK_TYPE_WIDGET, G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
+  obj_props[PROP_WIDGET] = g_param_spec_object(
+    "widget", "Gtk Widget", "The Gtk widget to pull events from", GTK_TYPE_WIDGET, G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE
+  );
   g_object_class_install_properties(object_class, N_PROPERTIES, obj_props);
 }
 

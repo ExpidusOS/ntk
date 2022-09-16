@@ -5,11 +5,12 @@
 #ifdef CAIRO_HAS_GOBJECT_FUNCTIONS
 #include <cairo-gobject.h>
 #endif
-#include <pango/pangocairo.h>
-#include <math.h>
 #include "renderer-priv.h"
+#include <math.h>
+#include <pango/pangocairo.h>
 
-#define NTK_CAIRO_RENDERER_PRIVATE(self) ((self)->priv == NULL ? ntk_cairo_renderer_get_instance_private(self) : (self)->priv)
+#define NTK_CAIRO_RENDERER_PRIVATE(self)                                                                                    \
+  ((self)->priv == NULL ? ntk_cairo_renderer_get_instance_private(self) : (self)->priv)
 
 enum {
   PROP_0,
@@ -19,7 +20,9 @@ enum {
   N_PROPERTIES,
 };
 
-static GParamSpec* obj_props[N_PROPERTIES] = { NULL, };
+static GParamSpec* obj_props[N_PROPERTIES] = {
+  NULL,
+};
 
 G_DEFINE_TYPE_WITH_PRIVATE(NtkCairoRenderer, ntk_cairo_renderer, NTK_TYPE_RENDERER);
 
@@ -122,7 +125,7 @@ static gboolean ntk_cairo_renderer_render_command(NtkRenderer* renderer, const s
     case NK_COMMAND_CIRCLE:
       {
         struct nk_command_circle* c = (struct nk_command_circle*)cmd;
-        double r = (c->w < c->h ? c->w: c->h) / 2;
+        double r = (c->w < c->h ? c->w : c->h) / 2;
 
         cairo_set_source_rgba(priv->cr, c->color.r / 255.0, c->color.g / 255.0, c->color.b / 255.0, c->color.a / 255.0);
         cairo_set_line_width(priv->cr, c->line_thickness);
@@ -261,7 +264,10 @@ static gboolean ntk_cairo_renderer_render_command(NtkRenderer* renderer, const s
 
         cairo_scale(priv->cr, xs, ys);
 
-        cairo_surface_t* surf = cairo_image_surface_create_for_data(c->img.handle.ptr, CAIRO_FORMAT_ARGB32, c->img.w, c->img.h, cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, c->img.w));
+        cairo_surface_t* surf = cairo_image_surface_create_for_data(
+          c->img.handle.ptr, CAIRO_FORMAT_ARGB32, c->img.w, c->img.h,
+          cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, c->img.w)
+        );
         cairo_set_source_surface(priv->cr, surf, c->x / xs, c->y / ys);
         cairo_paint(priv->cr);
         cairo_set_matrix(priv->cr, &matrix);
@@ -273,11 +279,15 @@ static gboolean ntk_cairo_renderer_render_command(NtkRenderer* renderer, const s
       {
         struct nk_command_text* c = (struct nk_command_text*)cmd;
 
-        cairo_set_source_rgba(priv->cr, c->background.r / 255.0, c->background.g / 255.0, c->background.b / 255.0, c->background.a / 255.0);
+        cairo_set_source_rgba(
+          priv->cr, c->background.r / 255.0, c->background.g / 255.0, c->background.b / 255.0, c->background.a / 255.0
+        );
         cairo_rectangle(priv->cr, c->x, c->y, c->w, c->h);
         cairo_fill(priv->cr);
 
-        cairo_set_source_rgba(priv->cr, c->foreground.r / 255.0, c->foreground.g / 255.0, c->foreground.b / 255.0, c->foreground.a / 255.0);
+        cairo_set_source_rgba(
+          priv->cr, c->foreground.r / 255.0, c->foreground.g / 255.0, c->foreground.b / 255.0, c->foreground.a / 255.0
+        );
 
         NtkPangoLayoutFont* font = ntk_pango_layout_font_copy((NtkPangoLayoutFont*)c->font);
         PangoLayout* layout = PANGO_LAYOUT(font->userdata.ptr);
@@ -425,13 +435,20 @@ static void ntk_cairo_renderer_class_init(NtkCairoRendererClass* klass) {
   object_class->set_property = ntk_cairo_renderer_set_property;
   object_class->get_property = ntk_cairo_renderer_get_property;
 
-  obj_props[PROP_WIDTH] = g_param_spec_int("width", "Width", "The width to render at.", 0, G_MAXINT, 0, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
-  obj_props[PROP_HEIGHT] = g_param_spec_int("height", "Height", "The height to render at.", 0, G_MAXINT, 0, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+  obj_props[PROP_WIDTH] =
+    g_param_spec_int("width", "Width", "The width to render at.", 0, G_MAXINT, 0, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+  obj_props[PROP_HEIGHT] =
+    g_param_spec_int("height", "Height", "The height to render at.", 0, G_MAXINT, 0, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
 #ifdef CAIRO_HAS_GOBJECT_FUNCTIONS
-  obj_props[PROP_SURFACE] = g_param_spec_boxed("surface", "Cairo Surface", "The Cairo surface to render onto", CAIRO_GOBJECT_TYPE_SURFACE, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+  obj_props[PROP_SURFACE] = g_param_spec_boxed(
+    "surface", "Cairo Surface", "The Cairo surface to render onto", CAIRO_GOBJECT_TYPE_SURFACE,
+    G_PARAM_CONSTRUCT | G_PARAM_READWRITE
+  );
 #else
-  obj_props[PROP_SURFACE] = g_param_spec_pointer("surface", "Cairo Surface", "The Cairo surface to render onto", G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+  obj_props[PROP_SURFACE] = g_param_spec_pointer(
+    "surface", "Cairo Surface", "The Cairo surface to render onto", G_PARAM_CONSTRUCT | G_PARAM_READWRITE
+  );
 #endif
 
   g_object_class_install_properties(object_class, N_PROPERTIES, obj_props);
