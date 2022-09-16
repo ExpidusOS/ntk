@@ -1,6 +1,7 @@
 #define G_LOG_DOMAIN "NtkCairoRenderer"
 #include <ntk/backend/cairo/renderer.h>
-#include <ntk/font.h>
+#include <ntk/font/pango/layout.h>
+#include <ntk/font/pango/object.h>
 #include <ntk/utils.h>
 #ifdef CAIRO_HAS_GOBJECT_FUNCTIONS
 #include <cairo-gobject.h>

@@ -4,7 +4,7 @@
 #include <nuklear.h>
 #include <pango/pango.h>
 
-#define NTK_TYPE_PANGO_LAYOUT_FONT ntk_pango_layout_font_get_type()
+#define NTK_PANGO_TYPE_LAYOUT_FONT ntk_pango_layout_font_get_type()
 
 /**
  * NtkPangoLayoutFont:

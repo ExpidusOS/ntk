@@ -7,8 +7,8 @@
 
 G_BEGIN_DECLS
 
-#define NTK_TYPE_PANGO_FONT ntk_pango_font_get_type()
-G_DECLARE_DERIVABLE_TYPE(NtkPangoFont, ntk_pango_font, NTK, PANGO_FONT, NtkFont);
+#define NTK_PANGO_TYPE_FONT ntk_pango_font_get_type()
+G_DECLARE_DERIVABLE_TYPE(NtkPangoFont, ntk_pango_font, NTK_PANGO, FONT, NtkFont);
 
 /**
  * NtkPangoFont:

@@ -71,7 +71,7 @@ static void ntk_pango_font_class_init(NtkPangoFontClass* klass) {
 static void ntk_pango_font_init(NtkPangoFont* self) {}
 
 void ntk_pango_font_set_description(NtkPangoFont* self, const PangoFontDescription* desc) {
-  g_return_if_fail(NTK_IS_PANGO_FONT(self));
+  g_return_if_fail(NTK_PANGO_IS_FONT(self));
   g_return_if_fail(desc != NULL);
 
   NtkPangoFontPrivate* priv = NTK_PANGO_FONT_PRIVATE(self);
@@ -84,7 +84,7 @@ void ntk_pango_font_set_description(NtkPangoFont* self, const PangoFontDescripti
 }
 
 PangoFontDescription* ntk_pango_font_get_description(NtkPangoFont* self) {
-  g_return_val_if_fail(NTK_IS_PANGO_FONT(self), NULL);
+  g_return_val_if_fail(NTK_PANGO_IS_FONT(self), NULL);
 
   NtkPangoFontPrivate* priv = NTK_PANGO_FONT_PRIVATE(self);
   g_return_val_if_fail(priv != NULL, NULL);

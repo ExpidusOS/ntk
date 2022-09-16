@@ -1,5 +1,5 @@
 #define G_LOG_DOMAIN "NtkPangoLayoutFont"
-#include <ntk/font.h>
+#include <ntk/font/pango/layout.h>
 
 G_DEFINE_BOXED_TYPE(NtkPangoLayoutFont, ntk_pango_layout_font, ntk_pango_layout_font_copy, ntk_pango_layout_font_free);
 

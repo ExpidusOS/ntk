@@ -55,5 +55,6 @@ conf_data.set('NTK_HW_HAS_LIBDRM', libdrm.found())
 
 subdir('nuklear')
 subdir('core')
+subdir('fonts')
 subdir('hw')
 subdir('backends')
