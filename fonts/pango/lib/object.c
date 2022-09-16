@@ -1,6 +1,8 @@
 #define G_LOG_DOMAIN "NtkPangoFont"
 #include "object-priv.h"
 #include <ntk/font/pango/object.h>
+#include <ntk/font/pango/layout.h>
+#include <ntk/font/user.h>
 
 #define NTK_PANGO_FONT_PRIVATE(self) (ntk_pango_font_get_instance_private(self))
 
@@ -16,11 +18,21 @@ static GParamSpec* obj_props[N_PROPERTIES] = {
   NULL,
 };
 
+static void ntk_pango_font_constructed(GObject* obj) {
+  G_OBJECT_CLASS(ntk_pango_font_parent_class)->constructed(obj);
+
+  NtkPangoFont* self = NTK_PANGO_FONT(obj);
+  NtkPangoFontPrivate* priv = NTK_PANGO_FONT_PRIVATE(self);
+
+  priv->ctx = pango_context_new();
+}
+
 static void ntk_pango_font_finalize(GObject* obj) {
   NtkPangoFont* self = NTK_PANGO_FONT(obj);
   NtkPangoFontPrivate* priv = NTK_PANGO_FONT_PRIVATE(self);
 
   g_clear_pointer(&priv->desc, pango_font_description_free);
+  g_clear_object(&priv->ctx);
 
   G_OBJECT_CLASS(ntk_pango_font_parent_class)->finalize(obj);
 }
@@ -53,9 +65,22 @@ static void ntk_pango_font_get_property(GObject* obj, guint prop_id, GValue* val
   }
 }
 
+static NtkUserFont* ntk_pango_font_get_handle(NtkFont* font) {
+  NtkPangoFont* self = NTK_PANGO_FONT(font);
+  g_return_val_if_fail(self != NULL, NULL);
+
+  NtkPangoFontPrivate* priv = NTK_PANGO_FONT_PRIVATE(self);
+  g_return_val_if_fail(priv != NULL, NULL);
+
+  PangoLayout* layout = pango_layout_new(priv->ctx);
+  return (NtkUserFont*)ntk_pango_layout_font_new(layout, priv->desc);
+}
+
 static void ntk_pango_font_class_init(NtkPangoFontClass* klass) {
   GObjectClass* object_class = G_OBJECT_CLASS(klass);
+  NtkFontClass* font_class = NTK_FONT_CLASS(klass);
 
+  object_class->constructed = ntk_pango_font_constructed;
   object_class->finalize = ntk_pango_font_finalize;
 
   object_class->set_property = ntk_pango_font_set_property;
@@ -66,6 +91,8 @@ static void ntk_pango_font_class_init(NtkPangoFontClass* klass) {
     G_PARAM_CONSTRUCT | G_PARAM_READWRITE
   );
   g_object_class_install_properties(object_class, N_PROPERTIES, obj_props);
+
+  font_class->get_handle = ntk_pango_font_get_handle;
 }
 
 static void ntk_pango_font_init(NtkPangoFont* self) {}

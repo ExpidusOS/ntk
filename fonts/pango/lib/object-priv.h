@@ -5,6 +5,7 @@
 
 typedef struct _NtkPangoFontPrivate {
   PangoFontDescription* desc;
+  PangoContext* ctx;
 } NtkPangoFontPrivate;
 
 #endif
