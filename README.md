@@ -26,7 +26,7 @@ These dependencies must be present for the target machine to build Ntk.
 - `libglvnd` (disable with `-Degl=disabled`, default: `auto`)
 - `cairo` (disable with `-Dcairo=disabled`, default: `auto`)
 
-### Getiing the source code
+### Getting the source code
 
 Ntk is hosted on GitHub at `ExpidusOS/ntk`, it is recommended to use `git` to clone the repository and switching
 to the ref your wishing to use. Once you have the repository clones, you must pull the submodules using `git`
