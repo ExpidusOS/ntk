@@ -1,5 +1,4 @@
-#ifndef __NTK_HW_DEVICE_DRM_H_
-#define __NTK_HW_DEVICE_DRM_H_ 1
+#pragma once
 
 #include <glib-object.h>
 #include <ntk/hw/build.h>
@@ -30,5 +29,3 @@ struct _NtkHWDrmDevice {
 NtkHWDisplay* ntk_hw_drm_device_new(const gchar* path, GError** error);
 
 G_END_DECLS
-
-#endif

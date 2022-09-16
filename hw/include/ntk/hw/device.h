@@ -1,5 +1,4 @@
-#ifndef __NTK_HW_DEVICE_H_
-#define __NTK_HW_DEVICE_H_ 1
+#pragma once
 
 #include <glib-object.h>
 
@@ -22,5 +21,3 @@ struct _NtkHWDeviceInterface {
 gchar* ntk_hw_device_get_name(NtkHWDevice* self);
 
 G_END_DECLS
-
-#endif

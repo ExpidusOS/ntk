@@ -1,5 +1,4 @@
-#ifndef __NTK_HW_DISPLAY_H_
-#define __NTK_HW_DISPLAY_H_ 1
+#pragma once
 
 #include "device.h"
 #include <glib-object.h>
@@ -19,5 +18,3 @@ struct _NtkHWDisplayClass {
 };
 
 G_END_DECLS
-
-#endif

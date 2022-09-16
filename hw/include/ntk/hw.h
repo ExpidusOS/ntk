@@ -1,6 +1,5 @@
-#ifndef __NTK_HW_H_
-#define __NTK_HW_H_
+#pragma once
 
 #include "hw/device.h"
-
-#endif
+#include "hw/display.h"
+#include "hw/input.h"
