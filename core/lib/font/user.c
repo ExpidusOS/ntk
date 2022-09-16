@@ -1,4 +1,3 @@
-#define G_LOG_DOMAIN "NtkFontUser"
 #include <ntk/font/user.h>
 
 G_DEFINE_BOXED_TYPE(NtkUserFont, ntk_user_font, ntk_user_font_copy, ntk_user_font_free);

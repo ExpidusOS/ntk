@@ -1,4 +1,3 @@
-#define G_LOG_DOMAIN "NtkGtk4Renderer"
 #include "renderer-priv.h"
 #include <math.h>
 #include <ntk/backend/gtk4/renderer.h>

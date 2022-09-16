@@ -15,6 +15,7 @@ if egl.found()
   libntk_egl_inc = include_directories('include')
   libntk_egl_deps = [egl, libntk]
   libntk_egl_shlib = shared_library('ntk-egl', libntk_egl_src,
+    c_args: ['-DG_LOG_DOMAIN="NtkEGL"'],
     include_directories: libntk_egl_inc,
     version: shortver.split('-')[0],
     dependencies: libntk_egl_deps,

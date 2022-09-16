@@ -21,7 +21,7 @@ endif
 libntk_hw_enums = gnome.mkenums('ntk-hw-enums', sources: libntk_hw_headers)
 
 libntk_hw_shlib = shared_library('ntk-hw', libntk_hw_src, libntk_hw_enums,
-  c_args: libntk_hw_cflags,
+  c_args: [libntk_hw_cflags, '-DG_LOG_DOMAIN="NtkHW"'],
   version: shortver.split('-')[0],
   include_directories: libntk_hw_inc,
   dependencies: libntk_hw_deps,

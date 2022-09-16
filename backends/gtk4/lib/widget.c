@@ -1,4 +1,3 @@
-#define G_LOG_DOMAIN "NtkGtk4Widget"
 #include "widget-priv.h"
 #include <ntk/backend/gtk4/widget.h>
 

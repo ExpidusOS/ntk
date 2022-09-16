@@ -1,4 +1,3 @@
-#define G_LOG_DOMAIN "NtkEGLRenderer"
 #include "error-priv.h"
 #include "renderer-priv.h"
 #include <gio/gio.h>

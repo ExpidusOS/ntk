@@ -1,4 +1,3 @@
-#define G_LOG_DOMAIN "NtkInputDispatcher"
 #include "context-priv.h"
 #include "input-dispatcher-priv.h"
 #include <ntk/input-dispatcher.h>

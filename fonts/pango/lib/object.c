@@ -1,4 +1,3 @@
-#define G_LOG_DOMAIN "NtkPangoFont"
 #include "object-priv.h"
 #include <ntk/font/pango/layout.h>
 #include <ntk/font/pango/object.h>

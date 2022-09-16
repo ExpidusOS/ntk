@@ -1,4 +1,3 @@
-#define G_LOG_DOMAIN "NtkHWDrmDevice"
 #include "drm-priv.h"
 #include <gio/gio.h>
 #include <ntk/hw/device/drm.h>

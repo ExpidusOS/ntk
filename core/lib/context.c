@@ -1,4 +1,3 @@
-#define G_LOG_DOMAIN "NtkContext"
 #include "context-priv.h"
 #include "error-priv.h"
 #include <gio/gio.h>

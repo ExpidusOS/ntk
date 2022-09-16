@@ -1,4 +1,3 @@
-#define G_LOG_DOMAIN "NtkCairoRenderer"
 #include <ntk/backend/cairo/renderer.h>
 #include <ntk/font/pango/layout.h>
 #include <ntk/font/pango/object.h>

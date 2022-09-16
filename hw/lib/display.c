@@ -1,4 +1,3 @@
-#define G_LOG_DOMAIN "NtkHWDisplay"
 #include <ntk/hw/display.h>
 
 static void ntk_hw_display_device_interface_init(NtkHWDeviceInterface* iface);

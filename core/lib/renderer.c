@@ -1,4 +1,3 @@
-#define G_LOG_DOMAIN "NtkRenderer"
 #include "error-priv.h"
 #include "renderer-priv.h"
 #include <ntk/renderer.h>

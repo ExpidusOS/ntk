@@ -19,7 +19,7 @@ libntk_cflags = ['-I', join_paths(meson.current_build_dir(), 'include')]
 libntk_enums = gnome.mkenums('ntk-enums', sources: libntk_headers)
 
 libntk_shlib = shared_library('ntk', libntk_src, libntk_enums,
-  c_args: libntk_cflags,
+  c_args: [libntk_cflags, '-DG_LOG_DOMAIN="Ntk"'],
   version: shortver.split('-')[0],
   include_directories: libntk_inc,
   dependencies: libntk_deps,

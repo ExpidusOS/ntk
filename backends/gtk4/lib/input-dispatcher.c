@@ -1,4 +1,3 @@
-#define G_LOG_DOMAIN "NtkGtk4InputDispatcher"
 #include "input-dispatcher-priv.h"
 #include <math.h>
 #include <ntk/backend/gtk4/input-dispatcher.h>

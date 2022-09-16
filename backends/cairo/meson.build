@@ -23,6 +23,7 @@ if cairo.found()
   endif
 
   libntk_cairo_shlib = shared_library('ntk-cairo', libntk_cairo_src,
+    c_args: ['-DG_LOG_DOMAIN="NtkCairo"'],
     include_directories: libntk_cairo_inc,
     version: shortver.split('-')[0],
     dependencies: libntk_cairo_deps,

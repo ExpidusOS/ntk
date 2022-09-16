@@ -1,4 +1,3 @@
-#define G_LOG_DOMAIN "NtkUtils"
 #include <ntk/utils.h>
 
 void ntk_command_log(

@@ -1,4 +1,3 @@
-#define G_LOG_DOMAIN "NtkHWInput"
 #include <ntk/hw/input.h>
 
 static void ntk_hw_input_device_interface_init(NtkHWDeviceInterface* iface);

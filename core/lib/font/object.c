@@ -1,4 +1,3 @@
-#define G_LOG_DOMAIN "NtkFont"
 #include <ntk/font/object.h>
 
 G_DEFINE_TYPE(NtkFont, ntk_font, G_TYPE_OBJECT);
