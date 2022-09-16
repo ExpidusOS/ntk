@@ -1,8 +1,5 @@
-#ifndef __NTK_FONT_PANGO_H_
-#define __NTK_FONT_PANGO_H_ 1
+#pragma once
 
 #include "pango/layout.h"
 #include "pango/object-layout.h"
 #include "pango/object.h"
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef __NTK_FONT_PANGO_OBJECT_H_
-#define __NTK_FONT_PANGO_OBJECT_H_ 1
+#pragma once
 
 #include <glib-object.h>
 #include <ntk/font/object.h>
@@ -33,5 +32,3 @@ void ntk_pango_font_set_description(NtkPangoFont* self, const PangoFontDescripti
 PangoFontDescription* ntk_pango_font_get_description(NtkPangoFont* self);
 
 G_END_DECLS
-
-#endif

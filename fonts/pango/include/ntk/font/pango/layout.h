@@ -1,5 +1,4 @@
-#ifndef __NTK_FONT_PANGO_LAYOUT_H_
-#define __NTK_FONT_PANGO_LAYOUT_H_ 1
+#pragma once
 
 #include <nuklear.h>
 #include <pango/pango.h>
@@ -35,5 +34,3 @@ NtkPangoLayoutFont* ntk_pango_layout_font_copy(NtkPangoLayoutFont* font);
  * @font: (transfer none): The font
  */
 void ntk_pango_layout_font_free(NtkPangoLayoutFont* font);
-
-#endif

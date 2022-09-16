@@ -1,5 +1,4 @@
-#ifndef __NTK_FONT_PANGO_OBJECT_LAYOUT_H_
-#define __NTK_FONT_PANGO_OBJECT_LAYOUT_H_ 1
+#pragma once
 
 #include <glib-object.h>
 #include <ntk/font/pango/object.h>
@@ -28,5 +27,3 @@ NtkFont* ntk_pango_font_layout_new_with_layout(PangoLayout* layout, PangoFontDes
 PangoLayout* ntk_pango_font_layout_get_layout(NtkPangoFontLayout* self);
 
 G_END_DECLS
-
-#endif
