@@ -18,6 +18,7 @@ enum {
   PROP_WIDTH,
   PROP_HEIGHT,
   PROP_SURFACE,
+  PROP_CONTEXT,
   N_PROPERTIES,
 };
 
@@ -307,14 +308,6 @@ static gboolean ntk_cairo_renderer_render_command(NtkRenderer* renderer, const s
   return TRUE;
 }
 
-static struct nk_user_font* ntk_cairo_renderer_get_font(NtkRenderer* renderer, PangoFontDescription* desc, GError** error) {
-  NtkCairoRenderer* self = NTK_CAIRO_RENDERER(renderer);
-  NtkCairoRendererPrivate* priv = NTK_CAIRO_RENDERER_PRIVATE(self);
-
-  PangoLayout* layout = pango_cairo_create_layout(priv->cr);
-  return ntk_pango_layout_font_new(layout, desc);
-}
-
 static void ntk_cairo_renderer_get_size(NtkRenderer* renderer, int* width, int* height) {
   NtkCairoRenderer* self = NTK_CAIRO_RENDERER(renderer);
   NtkCairoRendererPrivate* priv = NTK_CAIRO_RENDERER_PRIVATE(self);
@@ -355,8 +348,6 @@ static void ntk_cairo_renderer_constructed(GObject* obj) {
   NtkCairoRenderer* self = NTK_CAIRO_RENDERER(obj);
   NtkCairoRendererPrivate* priv = NTK_CAIRO_RENDERER_PRIVATE(self);
 
-  priv->pango_ctx = pango_context_new();
-
   if (priv->width > 0 && priv->height > 0 && priv->surf == NULL) {
     priv->surf = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, priv->width, priv->height);
   }
@@ -368,7 +359,6 @@ static void ntk_cairo_renderer_finalize(GObject* obj) {
   NtkCairoRenderer* self = NTK_CAIRO_RENDERER(obj);
   NtkCairoRendererPrivate* priv = NTK_CAIRO_RENDERER_PRIVATE(self);
 
-  g_clear_object(&priv->pango_ctx);
   g_clear_pointer(&priv->cr, cairo_destroy);
   g_clear_pointer(&priv->surf, cairo_surface_destroy);
 
@@ -413,6 +403,13 @@ static void ntk_cairo_renderer_get_property(GObject* obj, guint prop_id, GValue*
     case PROP_HEIGHT:
       g_value_set_int(value, priv->height);
       break;
+    case PROP_CONTEXT:
+#ifdef CAIRO_HAS_GOBJECT_FUNCTIONS
+      g_value_set_boxed(value, priv->cr);
+#else
+      g_value_set_pointer(value, priv->cr);
+#endif
+      break;
     case PROP_SURFACE:
 #ifdef CAIRO_HAS_GOBJECT_FUNCTIONS
       g_value_set_boxed(value, priv->surf);
@@ -442,11 +439,18 @@ static void ntk_cairo_renderer_class_init(NtkCairoRendererClass* klass) {
     g_param_spec_int("height", "Height", "The height to render at.", 0, G_MAXINT, 0, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
 #ifdef CAIRO_HAS_GOBJECT_FUNCTIONS
+  obj_props[PROP_CONTEXT] = g_param_spec_boxed(
+    "context", "Cairo Context", "The Cairo context to render onto", CAIRO_GOBJECT_TYPE_CONTEXT,
+    G_PARAM_READABLE
+  );
   obj_props[PROP_SURFACE] = g_param_spec_boxed(
     "surface", "Cairo Surface", "The Cairo surface to render onto", CAIRO_GOBJECT_TYPE_SURFACE,
     G_PARAM_CONSTRUCT | G_PARAM_READWRITE
   );
 #else
+  obj_props[PROP_CONTEXT] = g_param_spec_pointer(
+    "context", "Cairo Context", "The Cairo context to render onto", G_PARAM_READABLE
+  );
   obj_props[PROP_SURFACE] = g_param_spec_pointer(
     "surface", "Cairo Surface", "The Cairo surface to render onto", G_PARAM_CONSTRUCT | G_PARAM_READWRITE
   );
@@ -456,7 +460,6 @@ static void ntk_cairo_renderer_class_init(NtkCairoRendererClass* klass) {
 
   renderer_class->get_render_type = ntk_cairo_renderer_get_render_type;
   renderer_class->render_command = ntk_cairo_renderer_render_command;
-  renderer_class->get_font = ntk_cairo_renderer_get_font;
   renderer_class->get_size = ntk_cairo_renderer_get_size;
   renderer_class->set_size = ntk_cairo_renderer_set_size;
 }
@@ -548,4 +551,10 @@ cairo_surface_t* ntk_cairo_renderer_get_surface(NtkCairoRenderer* self) {
   g_return_val_if_fail(NTK_CAIRO_IS_RENDERER(self), NULL);
   NtkCairoRendererPrivate* priv = NTK_CAIRO_RENDERER_PRIVATE(self);
   return priv->surf;
+}
+
+cairo_t* ntk_cairo_renderer_get_context(NtkCairoRenderer* self) {
+  g_return_val_if_fail(NTK_CAIRO_IS_RENDERER(self), NULL);
+  NtkCairoRendererPrivate* priv = NTK_CAIRO_RENDERER_PRIVATE(self);
+  return priv->cr;
 }

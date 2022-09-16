@@ -55,7 +55,7 @@ if cairo.found()
     if use_gir and use_vala
       executable('ntk-cairo-example-basic', ['src/examples/basic/main.vala'],
         vala_args: ['--vapidir', meson.current_build_dir()],
-        dependencies: [nuklear, nuklear_vapi, libntk, libntk_vapi, libntk_cairo, libntk_cairo_vapi])
+        dependencies: [nuklear, nuklear_vapi, libntk, libntk_vapi, libntk_cairo, libntk_cairo_vapi, libntk_pango, libntk_pango_vapi, pangocairo])
     endif
   endif
 endif

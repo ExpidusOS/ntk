@@ -13,7 +13,7 @@ libntk_headers = ['include/ntk/ntk.h', 'include/ntk/context.h', 'include/ntk/err
   'include/ntk/font/object.h', 'include/ntk/font/user.h']
 
 libntk_inc = [include_directories('include')]
-libntk_deps = [glib, gobject, pango, nuklear]
+libntk_deps = [glib, gobject, nuklear]
 
 libntk_cflags = ['-I', join_paths(meson.current_build_dir(), 'include')]
 libntk_enums = gnome.mkenums('ntk-enums', sources: libntk_headers)
@@ -36,7 +36,7 @@ if use_gir
     install: true)
   if use_vala
     libntk_vapi = gnome.generate_vapi('Ntk-@0@'.format(shortver.split('-')[0]),
-      packages: ['nuklear', 'pango', 'gobject-2.0', 'glib-2.0', 'gio-2.0'],
+      packages: ['nuklear', 'gobject-2.0', 'glib-2.0', 'gio-2.0'],
       sources: [libntk_gir[0], join_paths(meson.current_build_dir(), 'Ntk-@0@-custom.vala'.format(shortver.split('-')[0]))],
       vapi_dirs: join_paths(meson.project_source_root(), 'nuklear', 'vapi'),
       install: true)

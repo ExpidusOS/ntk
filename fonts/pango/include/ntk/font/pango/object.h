@@ -19,6 +19,9 @@ struct _NtkPangoFontClass {
   NtkFontClass parent_class;
 };
 
+NtkFont* ntk_pango_font_new(PangoFontDescription* desc);
+NtkFont* ntk_pango_font_new_with_context(PangoContext* ctx, PangoFontDescription* desc);
+
 /**
  * ntk_pango_font_set_description: (set-property description)
  */

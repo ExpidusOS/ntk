@@ -3,6 +3,7 @@
 
 #include "renderer.h"
 #include <glib-object.h>
+#include <ntk/font.h>
 
 G_BEGIN_DECLS
 
@@ -39,10 +40,11 @@ typedef void (*NtkContextDrawCallback)(NtkContext* context, struct nk_context* n
 /**
  * ntk_context_new: (constructor)
  * @renderer: The renderer to use to render.
+ * @font: The font to use.
  * @error: (out): The pointer to store the error.
  * Returns: An instance of #NtkContext
  */
-NtkContext* ntk_context_new(NtkRenderer* renderer, GError** error);
+NtkContext* ntk_context_new(NtkRenderer* renderer, NtkFont* font, GError** error);
 
 /**
  * ntk_context_get_renderer: (skip)
@@ -52,18 +54,18 @@ NtkContext* ntk_context_new(NtkRenderer* renderer, GError** error);
 NtkRenderer* ntk_context_get_renderer(NtkContext* self);
 
 /**
- * ntk_context_get_font_description: (get-property font-description)
+ * ntk_context_get_font: (get-property font)
  * @self: an #NtkContext
- * Returns: The font description in use.
+ * Returns: (transfer full): The font being used.
  */
-PangoFontDescription* ntk_context_get_font_description(NtkContext* self);
+NtkFont* ntk_context_get_font(NtkContext* self);
 
 /**
- * ntk_context_set_font_description: (set-property font-description)
+ * ntk_context_set_font: (set-property font)
  * @self: an #NtkContext
- * @desc: The value to set the font description to.
+ * @value: (transfer full): The value to set the font to.
  */
-void ntk_context_set_font_description(NtkContext* self, PangoFontDescription* desc);
+void ntk_context_set_font(NtkContext* self, NtkFont* value);
 
 /**
  * ntk_context_render:

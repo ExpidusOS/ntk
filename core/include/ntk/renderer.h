@@ -3,7 +3,6 @@
 
 #include <glib-object.h>
 #include <nuklear.h>
-#include <pango/pango.h>
 
 G_BEGIN_DECLS
 
@@ -65,7 +64,6 @@ struct _NtkRendererClass {
   gboolean (*configure_vertex)(NtkRenderer* self, struct nk_convert_config* cfg, GError** error);
   gboolean (*render_command)(NtkRenderer* self, const NtkRendererDrawCommand* cmd, GError** error);
   gboolean (*render_vertex)(NtkRenderer* self, NtkRendererVertexCommand* cmd, GError** error);
-  struct nk_user_font* (*get_font)(NtkRenderer* self, PangoFontDescription* desc, GError** error);
   void (*set_size)(NtkRenderer* self, int width, int height);
   void (*get_size)(NtkRenderer* self, int* width, int* height);
 };
@@ -92,8 +90,6 @@ gboolean ntk_renderer_draw(NtkRenderer* self, NtkRendererCommand* cmd, GError** 
  * @error: (out): The error which was thrown.
  */
 gboolean ntk_renderer_configure_vertex(NtkRenderer* self, struct nk_convert_config* cfg, GError** error);
-
-struct nk_user_font* ntk_renderer_get_font(NtkRenderer* self, PangoFontDescription* desc, GError** error);
 
 G_END_DECLS
 

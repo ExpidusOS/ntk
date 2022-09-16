@@ -69,6 +69,8 @@ void ntk_cairo_renderer_set_surface(NtkCairoRenderer* self, cairo_surface_t* val
  */
 cairo_surface_t* ntk_cairo_renderer_get_surface(NtkCairoRenderer* self);
 
+cairo_t* ntk_cairo_renderer_get_context(NtkCairoRenderer* self);
+
 G_END_DECLS
 
 #endif

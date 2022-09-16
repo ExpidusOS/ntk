@@ -139,17 +139,3 @@ gboolean ntk_renderer_configure_vertex(NtkRenderer* self, struct nk_convert_conf
 
   return klass->configure_vertex(self, cfg, error);
 }
-
-struct nk_user_font* ntk_renderer_get_font(NtkRenderer* self, PangoFontDescription* desc, GError** error) {
-  NtkRendererClass* klass;
-  g_return_val_if_fail(NTK_IS_RENDERER(self), FALSE);
-  g_return_val_if_fail(desc != NULL, FALSE);
-  g_return_val_if_fail(error == NULL || *error == NULL, FALSE);
-  klass = NTK_RENDERER_GET_CLASS(self);
-
-  if (klass->get_font == NULL) {
-    ntk_error_set_bad_renderer(error, "the render type does not implement get_font", self);
-    return FALSE;
-  }
-  return klass->get_font(self, desc, error);
-}

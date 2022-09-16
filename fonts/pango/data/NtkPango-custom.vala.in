@@ -1,0 +1,9 @@
+namespace NtkPango {
+	public class Font : Ntk.Font {
+    public Pango.Context context { get; construct; }
+    public Pango.FontDescription description { get; set construct; }
+
+    public Font(Pango.FontDescription desc);
+    public Font.with_context(Pango.Context ctx, Pango.FontDescription desc);
+  }
+}

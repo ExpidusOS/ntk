@@ -10,6 +10,7 @@ G_DEFINE_TYPE_WITH_PRIVATE(NtkPangoFont, ntk_pango_font, NTK_TYPE_FONT);
 
 enum {
   PROP_0,
+  PROP_CONTEXT,
   PROP_DESCRIPTION,
   N_PROPERTIES,
 };
@@ -24,7 +25,7 @@ static void ntk_pango_font_constructed(GObject* obj) {
   NtkPangoFont* self = NTK_PANGO_FONT(obj);
   NtkPangoFontPrivate* priv = NTK_PANGO_FONT_PRIVATE(self);
 
-  priv->ctx = pango_context_new();
+  if (priv->ctx != NULL) priv->ctx = pango_context_new();
 }
 
 static void ntk_pango_font_finalize(GObject* obj) {
@@ -42,6 +43,9 @@ static void ntk_pango_font_set_property(GObject* obj, guint prop_id, const GValu
   NtkPangoFontPrivate* priv = NTK_PANGO_FONT_PRIVATE(self);
 
   switch (prop_id) {
+    case PROP_CONTEXT:
+      priv->ctx = g_value_get_object(value);
+      break;
     case PROP_DESCRIPTION:
       priv->desc = g_value_get_boxed(value);
       break;
@@ -56,6 +60,9 @@ static void ntk_pango_font_get_property(GObject* obj, guint prop_id, GValue* val
   NtkPangoFontPrivate* priv = NTK_PANGO_FONT_PRIVATE(self);
 
   switch (prop_id) {
+    case PROP_CONTEXT:
+      g_value_set_object(value, priv->ctx);
+      break;
     case PROP_DESCRIPTION:
       g_value_set_boxed(value, priv->desc);
       break;
@@ -86,6 +93,10 @@ static void ntk_pango_font_class_init(NtkPangoFontClass* klass) {
   object_class->set_property = ntk_pango_font_set_property;
   object_class->get_property = ntk_pango_font_get_property;
 
+  obj_props[PROP_CONTEXT] = g_param_spec_object(
+    "context", "Pango Context", "The Pango context to use", PANGO_TYPE_CONTEXT,
+    G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE
+  );
   obj_props[PROP_DESCRIPTION] = g_param_spec_boxed(
     "description", "Pango Font Description", "The description of the font to utilize.", PANGO_TYPE_FONT_DESCRIPTION,
     G_PARAM_CONSTRUCT | G_PARAM_READWRITE
@@ -96,6 +107,14 @@ static void ntk_pango_font_class_init(NtkPangoFontClass* klass) {
 }
 
 static void ntk_pango_font_init(NtkPangoFont* self) {}
+
+NtkFont* ntk_pango_font_new(PangoFontDescription* desc) {
+  return g_object_new(NTK_PANGO_TYPE_FONT, "description", desc, NULL);
+}
+
+NtkFont* ntk_pango_font_new_with_context(PangoContext* ctx, PangoFontDescription* desc) {
+  return g_object_new(NTK_PANGO_TYPE_FONT, "context", ctx, "description", desc, NULL);
+}
 
 void ntk_pango_font_set_description(NtkPangoFont* self, const PangoFontDescription* desc) {
   g_return_if_fail(NTK_PANGO_IS_FONT(self));

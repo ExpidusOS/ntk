@@ -16,7 +16,7 @@ G_DEFINE_TYPE_WITH_CODE(
 enum {
   PROP_0,
   PROP_RENDERER,
-  PROP_FONT_DESCRIPTION,
+  PROP_FONT,
   N_PROPERTIES
 };
 
@@ -40,7 +40,9 @@ static void ntk_context_finalize(GObject* obj) {
     priv->inited = FALSE;
   }
 
+  g_clear_pointer(((struct nk_user_font**)&priv->nk.style.font), ntk_user_font_free);
   g_clear_object(&priv->renderer);
+  g_clear_object(&priv->font);
 
   G_OBJECT_CLASS(ntk_context_parent_class)->finalize(obj);
 }
@@ -53,17 +55,12 @@ static void ntk_context_set_property(GObject* obj, guint prop_id, const GValue* 
     case PROP_RENDERER:
       priv->renderer = g_value_dup_object(value);
       break;
-    case PROP_FONT_DESCRIPTION:
-      priv->font_desc = g_value_get_boxed(value);
+    case PROP_FONT:
+      priv->font = g_value_get_object(value);
       if (priv->inited) {
-        GError* error = NULL;
-        struct nk_user_font* font = ntk_renderer_get_font(priv->renderer, priv->font_desc, &error);
-        if (error != NULL) {
-          g_error("Failed to retrieve the font: %s:%d: %s", g_quark_to_string(error->domain), error->code, error->message);
-        } else {
-          g_return_if_fail(font != NULL);
-          priv->nk.style.font = font;
-        }
+        g_clear_pointer(&priv->nk.style.font, ntk_user_font_free);
+        priv->nk.style.font = (struct nk_user_font*)ntk_font_get_handle(priv->font);
+        g_assert(priv->nk.style.font != NULL);
       }
       break;
     default:
@@ -80,8 +77,8 @@ static void ntk_context_get_property(GObject* obj, guint prop_id, GValue* value,
     case PROP_RENDERER:
       g_value_set_object(value, priv->renderer);
       break;
-    case PROP_FONT_DESCRIPTION:
-      g_value_set_boxed(value, priv->font_desc);
+    case PROP_FONT:
+      g_value_set_object(value, priv->font);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, prop_id, pspec);
@@ -93,14 +90,9 @@ static gboolean ntk_context_initable_init(GInitable* initable, GCancellable* can
   NtkContext* self = NTK_CONTEXT(initable);
   NtkContextPrivate* priv = NTK_CONTEXT_PRIVATE(self);
 
-  if (priv->font_desc == NULL) {
-    g_debug("Using default font");
-    priv->font_desc = pango_font_description_from_string("Droid Sans Regular 12px");
-  }
-
   g_return_val_if_fail(priv->renderer != NULL, FALSE);
-  struct nk_user_font* font = ntk_renderer_get_font(priv->renderer, priv->font_desc, error);
-  if (*error != NULL) return FALSE;
+  g_return_val_if_fail(priv->font != NULL, FALSE);
+  struct nk_user_font* font = (struct nk_user_font*)ntk_font_get_handle(priv->font);
   g_return_val_if_fail(font != NULL, FALSE);
 
   g_debug("Initializing Nuklear");
@@ -138,8 +130,8 @@ static void ntk_context_class_init(NtkContextClass* klass) {
   /**
    * NtkContext:font-description: (type PangoFontDescription)
    */
-  obj_props[PROP_FONT_DESCRIPTION] = g_param_spec_boxed(
-    "font-description", "Pango Font Description", "The description of the font to utilize.", PANGO_TYPE_FONT_DESCRIPTION,
+  obj_props[PROP_FONT] = g_param_spec_object(
+    "font", "Ntk Font", "The font to use.", NTK_TYPE_FONT,
     G_PARAM_CONSTRUCT | G_PARAM_READWRITE
   );
   g_object_class_install_properties(object_class, N_PROPERTIES, obj_props);
@@ -152,8 +144,8 @@ static void ntk_context_init(NtkContext* self) {
   self->priv = ntk_context_get_instance_private(self);
 }
 
-NtkContext* ntk_context_new(NtkRenderer* renderer, GError** error) {
-  return g_initable_new(NTK_TYPE_CONTEXT, NULL, error, "renderer", renderer, NULL);
+NtkContext* ntk_context_new(NtkRenderer* renderer, NtkFont* font, GError** error) {
+  return g_initable_new(NTK_TYPE_CONTEXT, NULL, error, "renderer", renderer, "font", font, NULL);
 }
 
 NtkRenderer* ntk_context_get_renderer(NtkContext* self) {
@@ -163,20 +155,20 @@ NtkRenderer* ntk_context_get_renderer(NtkContext* self) {
   return priv->renderer;
 }
 
-PangoFontDescription* ntk_context_get_font_description(NtkContext* self) {
+NtkFont* ntk_context_get_font(NtkContext* self) {
   g_return_val_if_fail(NTK_IS_CONTEXT(self), NULL);
   NtkContextPrivate* priv = NTK_CONTEXT_PRIVATE(self);
   g_return_val_if_fail(priv != NULL, NULL);
-  return priv->font_desc;
+  return g_object_ref(priv->font);
 }
 
-void ntk_context_set_font_description(NtkContext* self, PangoFontDescription* desc) {
+void ntk_context_set_font(NtkContext* self, NtkFont* value) {
   g_return_if_fail(NTK_IS_CONTEXT(self));
   NtkContextPrivate* priv = NTK_CONTEXT_PRIVATE(self);
   g_return_if_fail(priv != NULL);
 
-  priv->font_desc = desc;
-  g_object_notify_by_pspec(G_OBJECT(self), obj_props[PROP_FONT_DESCRIPTION]);
+  priv->font = g_object_ref(value);
+  g_object_notify_by_pspec(G_OBJECT(self), obj_props[PROP_FONT]);
 }
 
 gboolean ntk_context_render(NtkContext* self, NtkContextDrawCallback callback, gpointer callback_target, GError** error) {

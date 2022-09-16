@@ -3,9 +3,9 @@ namespace Ntk {
 	[Version (since = "0.1.0")]
   public class Context : GLib.Object, GLib.Initable {
     public Ntk.Renderer renderer { get; construct; }
-    public Pango.FontDescription font_description { get; set construct; }
+    public Ntk.Font font { get; set construct; }
 
-    public Context(Ntk.Renderer renderer) throws GLib.Error;
+    public Context(Ntk.Renderer renderer, Ntk.Font font) throws GLib.Error;
 
     public bool render(Ntk.ContextDrawCallback callback) throws GLib.Error;
   }
