@@ -1,9 +1,12 @@
 namespace NtkPango {
 	public class Font : Ntk.Font {
-    public Pango.Context context { get; construct; }
     public Pango.FontDescription description { get; set construct; }
+  }
 
-    public Font(Pango.FontDescription desc);
-    public Font.with_context(Pango.Context ctx, Pango.FontDescription desc);
+  public class FontLayout : NtkPango.Font {
+    public Pango.Layout layout { get; construct; }
+
+    public FontLayout(Pango.FontDescription desc);
+    public FontLayout.with_layout(Pango.Layout layout, Pango.FontDescription desc);
   }
 }

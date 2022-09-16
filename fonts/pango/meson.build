@@ -7,8 +7,8 @@ configure_file(input: 'data/NtkPango-custom.vala.in', output: 'NtkPango-@0@-cust
 
 subdir('include/ntk/font/pango')
 
-libntk_pango_src = ['lib/layout.c', 'lib/object.c']
-libntk_pango_headers = ['include/ntk/font/pango.h', 'include/ntk/font/pango/layout.h', 'include/ntk/font/pango/object.h']
+libntk_pango_src = ['lib/layout.c', 'lib/object.c', 'lib/object-layout.c']
+libntk_pango_headers = ['include/ntk/font/pango.h', 'include/ntk/font/pango/layout.h', 'include/ntk/font/pango/object.h', 'include/ntk/font/pango/object-layout.h']
 
 libntk_pango_inc = [include_directories('include')]
 libntk_pango_deps = [libntk, pango]

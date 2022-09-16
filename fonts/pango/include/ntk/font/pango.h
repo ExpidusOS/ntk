@@ -3,5 +3,6 @@
 
 #include "pango/layout.h"
 #include "pango/object.h"
+#include "pango/object-layout.h"
 
 #endif

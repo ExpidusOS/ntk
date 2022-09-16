@@ -40,7 +40,6 @@ static void ntk_context_finalize(GObject* obj) {
     priv->inited = FALSE;
   }
 
-  g_clear_pointer(((struct nk_user_font**)&priv->nk.style.font), ntk_user_font_free);
   g_clear_object(&priv->renderer);
   g_clear_object(&priv->font);
 
@@ -56,9 +55,8 @@ static void ntk_context_set_property(GObject* obj, guint prop_id, const GValue* 
       priv->renderer = g_value_dup_object(value);
       break;
     case PROP_FONT:
-      priv->font = g_value_get_object(value);
+      priv->font = g_value_dup_object(value);
       if (priv->inited) {
-        g_clear_pointer(&priv->nk.style.font, ntk_user_font_free);
         priv->nk.style.font = (struct nk_user_font*)ntk_font_get_handle(priv->font);
         g_assert(priv->nk.style.font != NULL);
       }

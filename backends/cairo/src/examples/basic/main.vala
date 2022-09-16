@@ -9,7 +9,13 @@ namespace NtkExampleCairoBasic {
 
       try {
         var renderer = new NtkCairo.Renderer(1024, 768);
-        var ntk = new Ntk.Context(renderer, new NtkPango.Font.with_context(Pango.cairo_create_context(renderer.context), Pango.FontDescription.from_string("Droid Sans Regular 12px")));
+        var font = new NtkPango.FontLayout.with_layout(Pango.cairo_create_layout(renderer.context), Pango.FontDescription.from_string("Droid Sans Regular 12px"));
+        
+        font.handle.connect(() => {
+          Pango.cairo_update_layout(renderer.context, font.layout);
+        });
+
+        var ntk = new Ntk.Context(renderer, font);
 
         renderer.rendered.connect(() => {
           renderer.surface.write_to_png("cairo-basic.png");
@@ -18,15 +24,15 @@ namespace NtkExampleCairoBasic {
         var opt = false;
         float val = 0.55f;
 
+        Nk.Rect rect = {};
+        rect.x = 50;
+        rect.y = 50;
+
+        rect.w = 220;
+        rect.h = 220;
+
         try {
           ntk.render((ntk, nk) => {
-            Nk.Rect rect = {};
-            rect.x = 50;
-            rect.y = 50;
-
-            rect.w = 220;
-            rect.h = 220;
-
             if (nk.begin("Hello, world", rect, Nk.PanelFlags.BORDER | Nk.PanelFlags.TITLE | Nk.PanelFlags.MOVABLE | Nk.PanelFlags.CLOSABLE)) {
               nk.layout_row_static(30, 80, 1);
               nk.button_label("button");
