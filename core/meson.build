@@ -50,3 +50,8 @@ pkg.generate(libntk_shlib, description: 'GObject based UI toolkit for Nuklear',
   name: 'ntk',
   url: 'https://github.com/ExpidusOS/ntk',
   version: longver)
+
+if get_option('tests')
+  test_prog = executable('ntk-tests', ['tests/main.c'],
+    dependencies: libntk)
+endif

@@ -1,7 +1,7 @@
 #define G_LOG_DOMAIN "NtkPangoFont"
 #include "object-priv.h"
-#include <ntk/font/pango/object.h>
 #include <ntk/font/pango/layout.h>
+#include <ntk/font/pango/object.h>
 #include <ntk/font/user.h>
 
 #define NTK_PANGO_FONT_PRIVATE(self) (ntk_pango_font_get_instance_private(self))

@@ -1,9 +1,10 @@
 #define G_LOG_DOMAIN "NtkPangoFontLayout"
+#include "object-layout-priv.h"
 #include <ntk/font/pango/layout.h>
 #include <ntk/font/pango/object-layout.h>
-#include "object-layout-priv.h"
 
-#define NTK_PANGO_FONT_LAYOUT_PRIVATE(self) ((self)->priv == NULL ? ntk_pango_font_layout_get_instance_private(self) : (self)->priv)
+#define NTK_PANGO_FONT_LAYOUT_PRIVATE(self)                                                                                 \
+  ((self)->priv == NULL ? ntk_pango_font_layout_get_instance_private(self) : (self)->priv)
 
 G_DEFINE_TYPE_WITH_PRIVATE(NtkPangoFontLayout, ntk_pango_font_layout, NTK_PANGO_TYPE_FONT);
 
@@ -75,7 +76,9 @@ static NtkUserFont* ntk_pango_font_layout_get_handle(NtkFont* font) {
   NtkPangoFontLayoutPrivate* priv = NTK_PANGO_FONT_LAYOUT_PRIVATE(self);
   g_return_val_if_fail(priv != NULL, NULL);
 
-  return (NtkUserFont*)ntk_pango_layout_font_new(priv->layout, (PangoFontDescription*)pango_layout_get_font_description(priv->layout));
+  return (NtkUserFont*)ntk_pango_layout_font_new(
+    priv->layout, (PangoFontDescription*)pango_layout_get_font_description(priv->layout)
+  );
 }
 
 static void ntk_pango_font_layout_class_init(NtkPangoFontLayoutClass* klass) {
@@ -89,8 +92,7 @@ static void ntk_pango_font_layout_class_init(NtkPangoFontLayoutClass* klass) {
   object_class->get_property = ntk_pango_font_layout_get_property;
 
   obj_props[PROP_LAYOUT] = g_param_spec_object(
-    "layout", "Pango Layout", "The Pango layout to use", PANGO_TYPE_LAYOUT,
-    G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE
+    "layout", "Pango Layout", "The Pango layout to use", PANGO_TYPE_LAYOUT, G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE
   );
   g_object_class_install_properties(object_class, N_PROPERTIES, obj_props);
 

@@ -440,17 +440,15 @@ static void ntk_cairo_renderer_class_init(NtkCairoRendererClass* klass) {
 
 #ifdef CAIRO_HAS_GOBJECT_FUNCTIONS
   obj_props[PROP_CONTEXT] = g_param_spec_boxed(
-    "context", "Cairo Context", "The Cairo context to render onto", CAIRO_GOBJECT_TYPE_CONTEXT,
-    G_PARAM_READABLE
+    "context", "Cairo Context", "The Cairo context to render onto", CAIRO_GOBJECT_TYPE_CONTEXT, G_PARAM_READABLE
   );
   obj_props[PROP_SURFACE] = g_param_spec_boxed(
     "surface", "Cairo Surface", "The Cairo surface to render onto", CAIRO_GOBJECT_TYPE_SURFACE,
     G_PARAM_CONSTRUCT | G_PARAM_READWRITE
   );
 #else
-  obj_props[PROP_CONTEXT] = g_param_spec_pointer(
-    "context", "Cairo Context", "The Cairo context to render onto", G_PARAM_READABLE
-  );
+  obj_props[PROP_CONTEXT] =
+    g_param_spec_pointer("context", "Cairo Context", "The Cairo context to render onto", G_PARAM_READABLE);
   obj_props[PROP_SURFACE] = g_param_spec_pointer(
     "surface", "Cairo Surface", "The Cairo surface to render onto", G_PARAM_CONSTRUCT | G_PARAM_READWRITE
   );
