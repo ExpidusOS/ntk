@@ -128,10 +128,8 @@ static void ntk_context_class_init(NtkContextClass* klass) {
   /**
    * NtkContext:font-description: (type PangoFontDescription)
    */
-  obj_props[PROP_FONT] = g_param_spec_object(
-    "font", "Ntk Font", "The font to use.", NTK_TYPE_FONT,
-    G_PARAM_CONSTRUCT | G_PARAM_READWRITE
-  );
+  obj_props[PROP_FONT] =
+    g_param_spec_object("font", "Ntk Font", "The font to use.", NTK_TYPE_FONT, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
   g_object_class_install_properties(object_class, N_PROPERTIES, obj_props);
 
   obj_sigs[SIG_RENDERED] =

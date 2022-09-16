@@ -1,5 +1,4 @@
-#ifndef __NTK_FONT_USER_H_
-#define __NTK_FONT_USER_H_ 1
+#pragma once
 
 #include <glib-object.h>
 #include <nuklear.h>
@@ -32,5 +31,3 @@ NtkUserFont* ntk_user_font_copy(NtkUserFont* self);
 void ntk_user_font_free(NtkUserFont* self);
 
 G_END_DECLS
-
-#endif

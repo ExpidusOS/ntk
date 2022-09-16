@@ -1,5 +1,4 @@
-#ifndef __NTK_RENDERER_H_
-#define __NTK_RENDERER_H_ 1
+#pragma once
 
 #include <glib-object.h>
 #include <nuklear.h>
@@ -92,5 +91,3 @@ gboolean ntk_renderer_draw(NtkRenderer* self, NtkRendererCommand* cmd, GError** 
 gboolean ntk_renderer_configure_vertex(NtkRenderer* self, struct nk_convert_config* cfg, GError** error);
 
 G_END_DECLS
-
-#endif

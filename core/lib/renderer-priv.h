@@ -1,9 +1,6 @@
-#ifndef __RENDERER_PRIV_H_
-#define __RENDERER_PRIV_H_ 1
+#pragma once
 
 typedef struct _NtkRendererPrivate {
   int width;
   int height;
 } NtkRendererPrivate;
-
-#endif

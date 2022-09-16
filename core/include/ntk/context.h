@@ -1,5 +1,4 @@
-#ifndef __NTK_CONTEXT_H_
-#define __NTK_CONTEXT_H_ 1
+#pragma once
 
 #include "renderer.h"
 #include <glib-object.h>
@@ -82,5 +81,3 @@ void ntk_context_set_font(NtkContext* self, NtkFont* value);
 gboolean ntk_context_render(NtkContext* self, NtkContextDrawCallback callback, gpointer callback_target, GError** error);
 
 G_END_DECLS
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef __NTK_INPUT_DISPATCHER_H_
-#define __NTK_INPUT_DISPATCHER_H_ 1
+#pragma once
 
 #include "context.h"
 #include <glib-object.h>
@@ -124,5 +123,3 @@ void ntk_input_dispatcher_triggerv(NtkInputDispatcher* self, NtkInputDispatcherE
 void ntk_input_dispatcher_triggerev(NtkInputDispatcher* self, NtkInputDispatcherEvent* ev);
 
 G_END_DECLS
-
-#endif

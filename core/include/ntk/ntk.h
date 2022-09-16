@@ -1,5 +1,4 @@
-#ifndef __NTK_H_
-#define __NTK_H_ 1
+#pragma once
 
 #include "context.h"
 #include "error.h"
@@ -8,5 +7,3 @@
 #include "renderer.h"
 #include "utils.h"
 #include <ntk/build.h>
-
-#endif

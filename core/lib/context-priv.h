@@ -1,5 +1,4 @@
-#ifndef __CONTEXT_PRIVATE_H_
-#define __CONTEXT_PRIVATE_H_ 1
+#pragma once
 
 #include <ntk/font.h>
 #include <ntk/renderer.h>
@@ -12,5 +11,3 @@ typedef struct _NtkContextPrivate {
   NtkRenderer* renderer;
   NtkFont* font;
 } NtkContextPrivate;
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef __NTK_FONT_OBJECT_H_
-#define __NTK_FONT_OBJECT_H_ 1
+#pragma once
 
 #include "user.h"
 #include <glib-object.h>
@@ -24,5 +23,3 @@ struct _NtkFontClass {
 NtkUserFont* ntk_font_get_handle(NtkFont* self);
 
 G_END_DECLS
-
-#endif

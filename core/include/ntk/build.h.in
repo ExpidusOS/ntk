@@ -1,7 +1,4 @@
-#ifndef __NTK_BUILD_H_
-#define __NTK_BUILD_H_ 1
+#pragma once
 
 #define NTK_VERSION "@VERSION@"
 #define NTK_SMALL_VERSION "@SMALL_VERSION@"
-
-#endif
