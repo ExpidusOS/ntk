@@ -17,16 +17,16 @@ static float ntk_pango_layout_font_get_width(nk_handle userdata, float height, c
 }
 
 NtkPangoLayoutFont* ntk_pango_layout_font_new(PangoLayout* layout, PangoFontDescription* font_desc) {
-  pango_layout_set_font_description(layout, font_desc);
-
   NtkPangoLayoutFont* font = g_try_malloc0(sizeof(NtkPangoLayoutFont));
   if (font == NULL) return NULL;
 
-  font->userdata.ptr = layout;
+  font->userdata.ptr = g_object_ref(layout);
   font->height = pango_font_description_get_size(font_desc) / PANGO_SCALE;
   font->width = ntk_pango_layout_font_get_width;
 
   g_debug("Font %p created: layout: %p, height: %f", font, font->userdata.ptr, font->height);
+
+  if (font_desc != NULL) pango_layout_set_font_description(PANGO_LAYOUT(font->userdata.ptr), font_desc);
   return font;
 }
 

@@ -16,7 +16,7 @@ libntk_pango_deps = [libntk, pango]
 libntk_pango_cflags = ['-I', join_paths(meson.current_build_dir(), 'include')]
 
 libntk_pango_shlib = shared_library('ntk-pango', libntk_pango_src,
-  c_args: libntk_pango_cflags,
+  c_args: [libntk_pango_cflags, '-DG_LOG_DOMAIN="NtkPango"'],
   version: shortver.split('-')[0],
   include_directories: libntk_pango_inc,
   dependencies: libntk_pango_deps,
