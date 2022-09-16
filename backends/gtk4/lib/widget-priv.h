@@ -1,5 +1,4 @@
-#ifndef __WIDGET_PRIV_H_
-#define __WIDGET_PRIV_H_ 1
+#pragma once
 
 #include <ntk/renderer.h>
 
@@ -15,5 +14,3 @@ typedef struct _NtkGtk4WidgetPrivate {
   GtkEventController* controller_scroll;
   GtkEventController* controller_motion;
 } NtkGtk4WidgetPrivate;
-
-#endif

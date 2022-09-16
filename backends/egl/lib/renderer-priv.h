@@ -1,5 +1,4 @@
-#ifndef __RENDERER_PRIV_H_
-#define __RENDERER_PRIV_H_ 1
+#pragma once
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
@@ -23,5 +22,3 @@ typedef struct _NtkEGLRendererPrivate {
     PFNEGLQUERYDEVICESEXTPROC eglQueryDevicesEXT;
   } procs;
 } NtkEGLRendererPrivate;
-
-#endif

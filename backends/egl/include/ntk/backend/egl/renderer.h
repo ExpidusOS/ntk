@@ -1,5 +1,4 @@
-#ifndef __NTK_BACKEND_EGL_RENDERER_H_
-#define __NTK_BACKEND_EGL_RENDERER_H_ 1
+#pragma once
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
@@ -31,5 +30,3 @@ NtkRenderer* ntk_egl_renderer_new(GError** error);
 EGLDisplay* ntk_egl_renderer_get_display(NtkEGLRenderer* self);
 
 G_END_DECLS
-
-#endif

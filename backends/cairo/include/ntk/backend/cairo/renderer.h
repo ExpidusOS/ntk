@@ -1,5 +1,4 @@
-#ifndef __NTK_BACKEND_CAIRO_RENDERER_H_
-#define __NTK_BACKEND_CAIRO_RENDERER_H_ 1
+#pragma once
 
 #include <cairo.h>
 #include <glib-object.h>
@@ -72,5 +71,3 @@ cairo_surface_t* ntk_cairo_renderer_get_surface(NtkCairoRenderer* self);
 cairo_t* ntk_cairo_renderer_get_context(NtkCairoRenderer* self);
 
 G_END_DECLS
-
-#endif

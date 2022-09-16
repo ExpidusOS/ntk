@@ -1,5 +1,4 @@
-#ifndef __RENDERER_PRIV_H_
-#define __RENDERER_PRIV_H_ 1
+#pragma once
 
 #include <cairo.h>
 
@@ -12,5 +11,3 @@ typedef struct _NtkCairoRendererPrivate {
   int width;
   int height;
 } NtkCairoRendererPrivate;
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef __NTK_BACKEND_GTK4_RENDERER_H_
-#define __NTK_BACKEND_GTK4_RENDERER_H_ 1
+#pragma once
 
 #include <glib-object.h>
 #include <gtk/gtk.h>
@@ -25,5 +24,3 @@ NtkRenderer* ntk_gtk4_renderer_new();
 void ntk_gtk4_renderer_snapshot_to(NtkGtk4Renderer* self, GtkSnapshot* snapshot);
 
 G_END_DECLS
-
-#endif

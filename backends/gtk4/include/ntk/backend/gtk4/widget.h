@@ -1,5 +1,4 @@
-#ifndef __NTK_BACKEND_GTK4_WIDGET_H_
-#define __NTK_BACKEND_GTK4_WIDGET_H_ 1
+#pragma once
 
 #include "renderer.h"
 #include <glib-object.h>
@@ -26,5 +25,3 @@ GtkWidget* ntk_gtk4_widget_new();
 NtkRenderer* ntk_gtk4_widget_get_renderer(NtkGtk4Widget* self);
 
 G_END_DECLS
-
-#endif

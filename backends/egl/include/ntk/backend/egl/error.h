@@ -1,5 +1,4 @@
-#ifndef __NTK_BACKEND_EGL_ERROR_H_
-#define __NTK_BACKEND_EGL_ERROR_H_ 1
+#pragma once
 
 #include <glib.h>
 
@@ -17,5 +16,3 @@ typedef enum {
 
 #define NTK_EGL_ERROR ntk_egl_error_quark()
 GQuark ntk_egl_error_quark();
-
-#endif

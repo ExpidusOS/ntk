@@ -1,7 +1,4 @@
-#ifndef __NTK_BACKEND_EGL_H_
-#define __NTK_BACKEND_EGL_H_ 1
+#pragma once
 
 #include "egl/error.h"
 #include "egl/renderer.h"
-
-#endif

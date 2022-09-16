@@ -1,5 +1,4 @@
-#ifndef __NTK_BACKEND_GTK4_INPUT_DISPATCHER_H_
-#define __NTK_BACKEND_GTK4_INPUT_DISPATCHER_H_ 1
+#pragma once
 
 #include <glib-object.h>
 #include <gtk/gtk.h>
@@ -28,5 +27,3 @@ NtkInputDispatcher* ntk_gtk4_input_dispatcher_new(GtkWidget* widget);
 GtkWidget* ntk_gtk4_input_dispatcher_get_widget(NtkGtk4InputDispatcher* self);
 
 G_END_DECLS
-
-#endif

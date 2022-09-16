@@ -1,5 +1,4 @@
-#ifndef __INPUT_DISPATCHER_PRIV_H_
-#define __INPUT_DISPATCHER_PRIV_H_ 1
+#pragma once
 
 #include <gtk/gtk.h>
 
@@ -9,5 +8,3 @@ typedef struct _NtkGtk4InputDispatcherPrivate {
   GListModel* controllers;
   gulong controllers_change_id;
 } NtkGtk4InputDispatcherPrivate;
-
-#endif
