@@ -7,7 +7,9 @@
 
 G_DEFINE_TYPE_WITH_PRIVATE(NtkHWDrmDevice, ntk_hw_drm_device, NTK_HW_TYPE_DISPLAY);
 
-static void ntk_hw_drm_device_class_init(NtkHWDrmDeviceClass* klass) {}
+static void ntk_hw_drm_device_class_init(NtkHWDrmDeviceClass* klass) {
+  NtkHWDeviceClass* device_class = NTK_HW_DEVICE_CLASS(klass);
+}
 
 static void ntk_hw_drm_device_init(NtkHWDrmDevice* self) {
   self->priv = ntk_hw_drm_device_get_instance_private(self);
