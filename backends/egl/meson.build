@@ -3,14 +3,14 @@ egl = dependency('egl', required: get_option('egl'))
 if egl.found()
   egl_examples = get_option('egl_examples').require(get_option('examples'))
 
-  configure_file(input: 'src/NtkEGL.deps.in', output: 'NtkEGL-@0@.deps'.format(shortver.split('-')[0]),
+  configure_file(input: 'data/NtkEGL.deps.in', output: 'NtkEGL-@0@.deps'.format(shortver.split('-')[0]),
     configuration: conf_data)
-  configure_file(input: 'src/NtkEGL.metadata.in', output: 'NtkEGL-@0@.metadata'.format(shortver.split('-')[0]),
+  configure_file(input: 'data/NtkEGL.metadata.in', output: 'NtkEGL-@0@.metadata'.format(shortver.split('-')[0]),
     configuration: conf_data)
-  configure_file(input: 'src/NtkEGL-custom.vala.in', output: 'NtkEGL-@0@-custom.vala'.format(shortver.split('-')[0]),
+  configure_file(input: 'data/NtkEGL-custom.vala.in', output: 'NtkEGL-@0@-custom.vala'.format(shortver.split('-')[0]),
     configuration: conf_data)
 
-  libntk_egl_src = ['src/lib/error.c', 'src/lib/renderer.c']
+  libntk_egl_src = ['lib/error.c', 'lib/renderer.c']
   libntk_egl_headers = ['include/ntk/backend/egl.h', 'include/ntk/backend/egl/renderer.h']
   libntk_egl_inc = include_directories('include')
   libntk_egl_deps = [egl, libntk]
@@ -45,7 +45,7 @@ if egl.found()
 
   if not egl_examples.disabled()
     if use_gir and use_vala
-      executable('ntk-egl-example-basic', ['src/examples/basic/main.vala'],
+      executable('ntk-egl-example-basic', ['examples/basic/main.vala'],
         vala_args: ['--vapidir', meson.current_build_dir()],
         dependencies: [
           glib,

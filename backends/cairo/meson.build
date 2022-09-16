@@ -6,14 +6,14 @@ if cairo.found()
   pangocairo = dependency('pangocairo')
   cairo_gobject = dependency('cairo-gobject', required: false)
 
-  configure_file(input: 'src/NtkCairo.deps.in', output: 'NtkCairo-@0@.deps'.format(shortver.split('-')[0]),
+  configure_file(input: 'data/NtkCairo.deps.in', output: 'NtkCairo-@0@.deps'.format(shortver.split('-')[0]),
     configuration: conf_data)
-  configure_file(input: 'src/NtkCairo.metadata.in', output: 'NtkCairo-@0@.metadata'.format(shortver.split('-')[0]),
+  configure_file(input: 'data/NtkCairo.metadata.in', output: 'NtkCairo-@0@.metadata'.format(shortver.split('-')[0]),
     configuration: conf_data)
-  configure_file(input: 'src/NtkCairo-custom.vala.in', output: 'NtkCairo-@0@-custom.vala'.format(shortver.split('-')[0]),
+  configure_file(input: 'data/NtkCairo-custom.vala.in', output: 'NtkCairo-@0@-custom.vala'.format(shortver.split('-')[0]),
     configuration: conf_data)
 
-  libntk_cairo_src = ['src/lib/renderer.c']
+  libntk_cairo_src = ['lib/renderer.c']
   libntk_cairo_headers = ['include/ntk/backend/cairo.h', 'include/ntk/backend/cairo/renderer.h']
   libntk_cairo_inc = include_directories('include')
   libntk_cairo_deps = [cairo, libntk, pangocairo, libntk_pango]
@@ -53,7 +53,7 @@ if cairo.found()
 
   if not cairo_examples.disabled()
     if use_gir and use_vala
-      executable('ntk-cairo-example-basic', ['src/examples/basic/main.vala'],
+      executable('ntk-cairo-example-basic', ['examples/basic/main.vala'],
         vala_args: ['--vapidir', meson.current_build_dir()],
         dependencies: [nuklear, nuklear_vapi, libntk, libntk_vapi, libntk_cairo, libntk_cairo_vapi, libntk_pango, libntk_pango_vapi, pangocairo])
     endif
