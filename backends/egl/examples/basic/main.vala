@@ -9,8 +9,7 @@ namespace NtkExampleEGLBasic {
 
       try {
         var renderer = new NtkEGL.Renderer();
-        var font = new NtkPango.FontLayout(Pango.FontDescription.from_string("Droid Sans Regular 12px"));
-        var ntk = new Ntk.Context(renderer, font);
+        var ntk = new Ntk.Context(renderer, renderer.get_font("Droid Sans Regular", 12));
 
         var opt = false;
         float val = 0.55f;
