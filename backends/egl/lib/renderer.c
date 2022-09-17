@@ -163,29 +163,6 @@ static gboolean ntk_egl_renderer_render_vertex(NtkRenderer* renderer, NtkRendere
   return TRUE;
 }
 
-static struct nk_user_font* ntk_egl_renderer_get_font(NtkRenderer* renderer, PangoFontDescription* desc, GError** error) {
-  NtkEGLRenderer* self = NTK_EGL_RENDERER(renderer);
-  NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
-
-  // TODO: figure out how to do this with pango
-  struct nk_font_config cfg = nk_font_config(pango_font_description_get_size(desc) / PANGO_SCALE);
-  cfg.merge_mode = FALSE;
-  cfg.range = nk_font_default_glyph_ranges();
-  cfg.coord_type = NK_COORD_PIXEL;
-
-  priv->atlas.font_num = 1;
-  struct nk_font* font = nk_font_atlas_add_default(&priv->atlas, pango_font_description_get_size(desc) / PANGO_SCALE, &cfg);
-
-  int img_width;
-  int img_height;
-  const void* img = nk_font_atlas_bake(&priv->atlas, &img_width, &img_height, NK_FONT_ATLAS_RGBA32);
-  (void)img;
-
-  // TODO: insert into our font map<string(desc), void*(img)>
-  nk_font_atlas_end(&priv->atlas, nk_handle_id(1), 0);
-  return &font->handle;
-}
-
 static void ntk_egl_renderer_finalize(GObject* obj) {
   NtkEGLRenderer* self = NTK_EGL_RENDERER(obj);
   NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
@@ -329,7 +306,6 @@ static void ntk_egl_renderer_class_init(NtkEGLRendererClass* klass) {
   renderer_class->get_render_type = ntk_egl_renderer_get_render_type;
   renderer_class->configure_vertex = ntk_egl_renderer_configure_vertex;
   renderer_class->render_vertex = ntk_egl_renderer_render_vertex;
-  renderer_class->get_font = ntk_egl_renderer_get_font;
 }
 
 static void ntk_egl_renderer_init(NtkEGLRenderer* self) {

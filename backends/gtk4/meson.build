@@ -33,7 +33,7 @@ if gtk4.found()
   libntk_gtk4_vapi = gnome.generate_vapi('NtkGtk4-@0@'.format(shortver.split('-')[0]),
     packages: ['Ntk-@0@'.format(shortver.split('-')[0]), 'NtkCairo-@0@'.format(shortver.split('-')[0]), 'gtk4', 'cairo'],
     sources: [libntk_gtk4_gir[0], join_paths(meson.current_build_dir(), 'NtkGtk4-@0@-custom.vala'.format(shortver.split('-')[0]))],
-    vapi_dirs: [join_paths(meson.project_source_root(), 'vapi'), meson.project_build_root(), join_paths(meson.project_build_root(), 'backends', 'cairo')],
+    vapi_dirs: [join_paths(meson.project_source_root(), 'nuklear', 'vapi'), join_paths(meson.project_build_root(), 'core'), join_paths(meson.project_build_root(), 'backends', 'cairo')],
     install: true)
   libntk_gtk4 = declare_dependency(link_with: libntk_gtk4_shlib,
     include_directories: libntk_gtk4_inc,

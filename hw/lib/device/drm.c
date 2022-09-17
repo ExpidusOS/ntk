@@ -1,13 +1,13 @@
 #include "drm-priv.h"
 #include <gio/gio.h>
 #include <ntk/hw/device/drm.h>
+#include <ntk/hw/device.h>
 
 #define NTK_HW_DRM_DEVICE_PRIVATE(self) ((self)->priv == NULL ? ntk_hw_drm_device_get_instance_private(self) : (self)->priv)
 
 G_DEFINE_TYPE_WITH_PRIVATE(NtkHWDrmDevice, ntk_hw_drm_device, NTK_HW_TYPE_DISPLAY);
 
 static void ntk_hw_drm_device_class_init(NtkHWDrmDeviceClass* klass) {
-  NtkHWDeviceClass* device_class = NTK_HW_DEVICE_CLASS(klass);
 }
 
 static void ntk_hw_drm_device_init(NtkHWDrmDevice* self) {

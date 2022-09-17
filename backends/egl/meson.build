@@ -32,7 +32,7 @@ if egl.found()
       libntk_egl_vapi = gnome.generate_vapi('NtkEGL-@0@'.format(shortver.split('-')[0]),
         packages: ['Ntk-@0@'.format(shortver.split('-')[0])],
         sources: [libntk_egl_gir[0], join_paths(meson.current_build_dir(), 'NtkEGL-@0@-custom.vala'.format(shortver.split('-')[0]))],
-        vapi_dirs: [join_paths(meson.project_source_root(), 'vapi'), meson.project_build_root()],
+        vapi_dirs: [join_paths(meson.project_source_root(), 'nuklear', 'vapi'), join_paths(meson.project_build_root(), 'core')],
         install: true)
     endif
   endif
@@ -57,6 +57,8 @@ if egl.found()
           declare_dependency(link_with: libntk_egl_shlib,
             include_directories: libntk_egl_inc),
           libntk_egl_vapi,
+          libntk_pango,
+          libntk_pango_vapi
         ])
     endif
   endif

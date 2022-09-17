@@ -14,8 +14,8 @@ libntk_hw_deps = [libntk]
 libntk_hw_cflags = ['-I @0@'.format(join_paths(meson.current_build_dir(), 'include'))]
 
 if libdrm.found()
-  libntk_hw_src += ['src/libhw/device/drm.c']
-  libntk_hw_headers += ['include-hw/ntk/hw/device/drm.h']
+  libntk_hw_src += ['lib/device/drm.c']
+  libntk_hw_headers += ['include/ntk/hw/device/drm.h']
 endif
 
 libntk_hw_enums = gnome.mkenums('ntk-hw-enums', sources: libntk_hw_headers)

@@ -292,9 +292,6 @@ static gboolean ntk_cairo_renderer_render_command(NtkRenderer* renderer, const s
 
         NtkPangoLayoutFont* font = ntk_pango_layout_font_copy((NtkPangoLayoutFont*)c->font);
         PangoLayout* layout = PANGO_LAYOUT(font->userdata.ptr);
-        const PangoFontDescription* desc = pango_layout_get_font_description(layout);
-
-        printf("%s\n", pango_font_description_to_filename(desc));
 
         pango_cairo_update_layout(priv->cr, layout);
         cairo_move_to(priv->cr, c->x, c->y);

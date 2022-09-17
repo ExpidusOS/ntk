@@ -24,12 +24,6 @@ static gboolean ntk_gtk4_renderer_render_command(NtkRenderer* renderer, const st
   return renderer_class->render_command(priv->renderer, cmd, error);
 }
 
-static struct nk_user_font* ntk_gtk4_renderer_get_font(NtkRenderer* renderer, PangoFontDescription* desc, GError** error) {
-  NtkGtk4Renderer* self = NTK_GTK4_RENDERER(renderer);
-  NtkGtk4RendererPrivate* priv = NTK_GTK4_RENDERER_PRIVATE(self);
-  return ntk_renderer_get_font(priv->renderer, desc, error);
-}
-
 static void ntk_gtk4_renderer_get_size(NtkRenderer* renderer, int* width, int* height) {
   NtkGtk4Renderer* self = NTK_GTK4_RENDERER(renderer);
   NtkGtk4RendererPrivate* priv = NTK_GTK4_RENDERER_PRIVATE(self);
@@ -71,7 +65,6 @@ static void ntk_gtk4_renderer_class_init(NtkGtk4RendererClass* klass) {
 
   renderer_class->get_render_type = ntk_gtk4_renderer_get_render_type;
   renderer_class->render_command = ntk_gtk4_renderer_render_command;
-  renderer_class->get_font = ntk_gtk4_renderer_get_font;
   renderer_class->get_size = ntk_gtk4_renderer_get_size;
   renderer_class->set_size = ntk_gtk4_renderer_set_size;
 }
