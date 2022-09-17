@@ -7,6 +7,7 @@ namespace NtkGtk4 {
 
   public class Renderer : Ntk.Renderer {
     public Gtk.Snapshot snapshot { get; construct; }
+    public Ntk.Renderer subrenderer { get; }
 
     public Renderer();
 

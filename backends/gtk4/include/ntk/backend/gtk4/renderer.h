@@ -21,6 +21,7 @@ struct _NtkGtk4Renderer {
  */
 NtkRenderer* ntk_gtk4_renderer_new();
 
+NtkRenderer* ntk_gtk4_renderer_get_subrenderer(NtkGtk4Renderer* self);
 void ntk_gtk4_renderer_snapshot_to(NtkGtk4Renderer* self, GtkSnapshot* snapshot);
 
 G_END_DECLS

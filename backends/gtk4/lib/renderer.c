@@ -8,6 +8,16 @@
 
 G_DEFINE_TYPE_WITH_PRIVATE(NtkGtk4Renderer, ntk_gtk4_renderer, NTK_TYPE_RENDERER);
 
+enum {
+  PROP_0,
+  PROP_SUBRENDERER,
+  N_PROPERTIES
+};
+
+static GParamSpec* obj_props[N_PROPERTIES] = {
+  NULL,
+};
+
 static NtkRendererType ntk_gtk4_renderer_get_render_type(NtkRenderer* renderer) {
   NtkGtk4Renderer* self = NTK_GTK4_RENDERER(renderer);
   NtkGtk4RendererPrivate* priv = NTK_GTK4_RENDERER_PRIVATE(self);
@@ -56,12 +66,34 @@ static void ntk_gtk4_renderer_finalize(GObject* obj) {
   G_OBJECT_CLASS(ntk_gtk4_renderer_parent_class)->finalize(obj);
 }
 
+static void ntk_gtk4_renderer_get_property(GObject* obj, guint prop_id, GValue* value, GParamSpec* pspec) {
+  NtkGtk4Renderer* self = NTK_GTK4_RENDERER(obj);
+  NtkGtk4RendererPrivate* priv = NTK_GTK4_RENDERER_PRIVATE(self);
+
+  switch (prop_id) {
+    case PROP_SUBRENDERER:
+      g_value_set_object(value, priv->renderer);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, prop_id, pspec);
+      break;
+  }
+}
+
 static void ntk_gtk4_renderer_class_init(NtkGtk4RendererClass* klass) {
   GObjectClass* object_class = G_OBJECT_CLASS(klass);
   NtkRendererClass* renderer_class = NTK_RENDERER_CLASS(klass);
 
   object_class->constructed = ntk_gtk4_renderer_constructed;
   object_class->finalize = ntk_gtk4_renderer_finalize;
+
+  object_class->get_property = ntk_gtk4_renderer_get_property;
+
+  obj_props[PROP_SUBRENDERER] = g_param_spec_object(
+    "subrenderer", "Ntk Renderer", "The Ntk Renderer to render with.", NTK_TYPE_RENDERER,
+    G_PARAM_READABLE
+  );
+  g_object_class_install_properties(object_class, N_PROPERTIES, obj_props);
 
   renderer_class->get_render_type = ntk_gtk4_renderer_get_render_type;
   renderer_class->render_command = ntk_gtk4_renderer_render_command;
@@ -75,6 +107,12 @@ static void ntk_gtk4_renderer_init(NtkGtk4Renderer* self) {
 
 NtkRenderer* ntk_gtk4_renderer_new() {
   return NTK_RENDERER(g_object_new(NTK_GTK4_TYPE_RENDERER, NULL));
+}
+
+NtkRenderer* ntk_gtk4_renderer_get_subrenderer(NtkGtk4Renderer* self) {
+  g_return_val_if_fail(NTK_GTK4_IS_RENDERER(self), NULL);
+  NtkGtk4RendererPrivate* priv = NTK_GTK4_RENDERER_PRIVATE(self);
+  return priv->renderer;
 }
 
 void ntk_gtk4_renderer_snapshot_to(NtkGtk4Renderer* self, GtkSnapshot* snapshot) {
