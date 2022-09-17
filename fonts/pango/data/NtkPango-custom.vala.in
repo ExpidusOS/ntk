@@ -1,5 +1,5 @@
 namespace NtkPango {
-	public class Font : Ntk.Font {
+	public abstract class Font : Ntk.Font {
     public Pango.FontDescription description { get; set construct; }
   }
 
