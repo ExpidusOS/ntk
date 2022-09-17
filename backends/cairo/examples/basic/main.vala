@@ -9,13 +9,7 @@ namespace NtkExampleCairoBasic {
 
       try {
         var renderer = new NtkCairo.Renderer(1024, 768);
-        var font = new NtkPango.FontLayout.with_layout(Pango.cairo_create_layout(renderer.context), Pango.FontDescription.from_string("Droid Sans Regular 12px"));
-        
-        font.handle.connect(() => {
-          Pango.cairo_update_layout(renderer.context, font.layout);
-        });
-
-        var ntk = new Ntk.Context(renderer, font);
+        var ntk = new Ntk.Context(renderer, renderer.get_font("Droid Sans Regular", 12));
 
         renderer.rendered.connect(() => {
           renderer.surface.write_to_png("cairo-basic.png");

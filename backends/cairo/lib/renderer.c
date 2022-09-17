@@ -1,6 +1,5 @@
 #include <ntk/backend/cairo/renderer.h>
-#include <ntk/font/pango/layout.h>
-#include <ntk/font/pango/object.h>
+#include <ntk/font/pango.h>
 #include <ntk/utils.h>
 #ifdef CAIRO_HAS_GOBJECT_FUNCTIONS
 #include <cairo-gobject.h>
@@ -422,6 +421,29 @@ static void ntk_cairo_renderer_get_property(GObject* obj, guint prop_id, GValue*
   }
 }
 
+static void ntk_cairo_renderer_font_handle(NtkFont* font, gpointer userdata) {
+  NtkCairoRenderer* self = NTK_CAIRO_RENDERER(userdata);
+  NtkCairoRendererPrivate* priv = NTK_CAIRO_RENDERER_PRIVATE(self);
+
+  NtkPangoFontLayout* font_layout = NTK_PANGO_FONT_LAYOUT(font);
+  PangoLayout* pango_layout = ntk_pango_font_layout_get_layout(font_layout);
+  pango_cairo_update_layout(priv->cr, pango_layout);
+}
+
+static NtkFont* ntk_cairo_renderer_get_font(NtkRenderer* renderer, gchar* name, int size, GError** error) {
+  NtkCairoRenderer* self = NTK_CAIRO_RENDERER(renderer);
+  NtkCairoRendererPrivate* priv = NTK_CAIRO_RENDERER_PRIVATE(self);
+
+  PangoLayout* layout = pango_cairo_create_layout(priv->cr);
+
+  PangoFontDescription* desc = pango_font_description_from_string(name);
+  pango_font_description_set_size(desc, size * PANGO_SCALE);
+
+  NtkFont* font = ntk_pango_font_layout_new_with_layout(layout, desc);
+  g_signal_connect(font, "handle", G_CALLBACK(ntk_cairo_renderer_font_handle), self);
+  return font;
+}
+
 static void ntk_cairo_renderer_class_init(NtkCairoRendererClass* klass) {
   GObjectClass* object_class = G_OBJECT_CLASS(klass);
   NtkRendererClass* renderer_class = NTK_RENDERER_CLASS(klass);
@@ -459,6 +481,7 @@ static void ntk_cairo_renderer_class_init(NtkCairoRendererClass* klass) {
   renderer_class->render_command = ntk_cairo_renderer_render_command;
   renderer_class->get_size = ntk_cairo_renderer_get_size;
   renderer_class->set_size = ntk_cairo_renderer_set_size;
+  renderer_class->get_font = ntk_cairo_renderer_get_font;
 }
 
 static void ntk_cairo_renderer_init(NtkCairoRenderer* self) {

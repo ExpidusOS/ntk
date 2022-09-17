@@ -16,21 +16,8 @@ namespace NtkExampleGtkBasic {
 
       this.input = new NtkGtk4.InputDispatcher(this.widget);
 
-      var renderer = this.widget.renderer as NtkGtk4.Renderer;
-      assert(renderer != null);
-      
-      var cairo_renderer = renderer.subrenderer as NtkCairo.Renderer;
-      assert(cairo_renderer != null);
-      var font = new NtkPango.FontLayout.with_layout(Pango.cairo_create_layout(cairo_renderer.context), Pango.FontDescription.from_string("Droid Sans Regular 12px"));
-
-      font.handle.connect(() => {
-        assert(renderer != null);
-        assert(cairo_renderer != null);
-        Pango.cairo_update_layout(cairo_renderer.context, font.layout);
-      });
-
       try {
-        this.ntk = new Ntk.Context(this.widget.renderer, font);
+        this.ntk = new Ntk.Context(this.widget.renderer, this.widget.renderer.get_font("Droid Sans Regular", 12));
       } catch (GLib.Error e) {
         GLib.error("Failed to initialize: %s:%d: %s", e.domain.to_string(), e.code, e.message);
       }

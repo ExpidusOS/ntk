@@ -18,8 +18,10 @@ struct _NtkFontClass {
   GObjectClass parent_class;
 
   NtkUserFont* (*get_handle)(NtkFont* self);
+  gchar* (*get_name)(NtkFont* self);
 };
 
 NtkUserFont* ntk_font_get_handle(NtkFont* self);
+gchar* ntk_font_get_name(NtkFont* self);
 
 G_END_DECLS

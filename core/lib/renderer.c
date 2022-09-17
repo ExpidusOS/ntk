@@ -138,3 +138,19 @@ gboolean ntk_renderer_configure_vertex(NtkRenderer* self, struct nk_convert_conf
 
   return klass->configure_vertex(self, cfg, error);
 }
+
+NtkFont* ntk_renderer_get_font(NtkRenderer* self, gchar* name, int size, GError** error) {
+  NtkRendererClass* klass;
+  g_return_val_if_fail(NTK_IS_RENDERER(self), FALSE);
+  g_return_val_if_fail(name != NULL, FALSE);
+  g_return_val_if_fail(size > 0, FALSE);
+  g_return_val_if_fail(error == NULL || *error == NULL, FALSE);
+  klass = NTK_RENDERER_GET_CLASS(self);
+
+  if (klass->get_font == NULL) {
+    ntk_error_set_bad_renderer(error, "the render type does not implement get_font", self);
+    return FALSE;
+  }
+
+  return klass->get_font(self, name, size, error);
+}

@@ -80,6 +80,16 @@ static void ntk_gtk4_renderer_get_property(GObject* obj, guint prop_id, GValue* 
   }
 }
 
+static NtkFont* ntk_gtk4_renderer_get_font(NtkRenderer* renderer, gchar* name, int size, GError** error) {
+  NtkGtk4Renderer* self = NTK_GTK4_RENDERER(renderer);
+  NtkGtk4RendererPrivate* priv = NTK_GTK4_RENDERER_PRIVATE(self);
+
+  NtkRendererClass* renderer_class = NTK_RENDERER_GET_CLASS(priv->renderer);
+  g_return_val_if_fail(renderer_class != NULL, FALSE);
+  g_return_val_if_fail(renderer_class->get_font != NULL, FALSE);
+  return renderer_class->get_font(priv->renderer, name, size, error);
+}
+
 static void ntk_gtk4_renderer_class_init(NtkGtk4RendererClass* klass) {
   GObjectClass* object_class = G_OBJECT_CLASS(klass);
   NtkRendererClass* renderer_class = NTK_RENDERER_CLASS(klass);
@@ -99,6 +109,7 @@ static void ntk_gtk4_renderer_class_init(NtkGtk4RendererClass* klass) {
   renderer_class->render_command = ntk_gtk4_renderer_render_command;
   renderer_class->get_size = ntk_gtk4_renderer_get_size;
   renderer_class->set_size = ntk_gtk4_renderer_set_size;
+  renderer_class->get_font = ntk_gtk4_renderer_get_font;
 }
 
 static void ntk_gtk4_renderer_init(NtkGtk4Renderer* self) {

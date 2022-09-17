@@ -2,6 +2,7 @@
 
 #include <glib-object.h>
 #include <nuklear.h>
+#include <ntk/font/object.h>
 
 G_BEGIN_DECLS
 
@@ -65,6 +66,8 @@ struct _NtkRendererClass {
   gboolean (*render_vertex)(NtkRenderer* self, NtkRendererVertexCommand* cmd, GError** error);
   void (*set_size)(NtkRenderer* self, int width, int height);
   void (*get_size)(NtkRenderer* self, int* width, int* height);
+
+  NtkFont* (*get_font)(NtkRenderer* self, gchar* name, int size, GError** error);
 };
 
 void ntk_renderer_request_draw(NtkRenderer* self);
@@ -89,5 +92,7 @@ gboolean ntk_renderer_draw(NtkRenderer* self, NtkRendererCommand* cmd, GError** 
  * @error: (out): The error which was thrown.
  */
 gboolean ntk_renderer_configure_vertex(NtkRenderer* self, struct nk_convert_config* cfg, GError** error);
+
+NtkFont* ntk_renderer_get_font(NtkRenderer* self, gchar* name, int size, GError** error);
 
 G_END_DECLS

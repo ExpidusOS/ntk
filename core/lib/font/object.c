@@ -28,3 +28,12 @@ NtkUserFont* ntk_font_get_handle(NtkFont* self) {
   g_signal_emit(self, obj_sigs[SIG_HANDLE], 0);
   return klass->get_handle(self);
 }
+
+gchar* ntk_font_get_name(NtkFont* self) {
+  g_return_val_if_fail(NTK_IS_FONT(self), NULL);
+
+  NtkFontClass* klass = NTK_FONT_GET_CLASS(self);
+  g_return_val_if_fail(klass != NULL, NULL);
+  g_return_val_if_fail(klass->get_name != NULL, NULL);
+  return klass->get_name(self);
+}

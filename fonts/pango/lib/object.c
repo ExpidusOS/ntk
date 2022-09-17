@@ -46,8 +46,15 @@ static void ntk_pango_font_get_property(GObject* obj, guint prop_id, GValue* val
   }
 }
 
+static gchar* ntk_pango_font_get_name(NtkFont* font) {
+  NtkPangoFont* self = NTK_PANGO_FONT(font);
+  NtkPangoFontPrivate* priv = NTK_PANGO_FONT_PRIVATE(self);
+  return pango_font_description_to_string(priv->desc);
+}
+
 static void ntk_pango_font_class_init(NtkPangoFontClass* klass) {
   GObjectClass* object_class = G_OBJECT_CLASS(klass);
+  NtkFontClass* font_class = NTK_FONT_CLASS(klass);
 
   object_class->set_property = ntk_pango_font_set_property;
   object_class->get_property = ntk_pango_font_get_property;
@@ -57,6 +64,8 @@ static void ntk_pango_font_class_init(NtkPangoFontClass* klass) {
     G_PARAM_CONSTRUCT | G_PARAM_READWRITE
   );
   g_object_class_install_properties(object_class, N_PROPERTIES, obj_props);
+
+  font_class->get_name = ntk_pango_font_get_name;
 }
 
 static void ntk_pango_font_init(NtkPangoFont* self) {}
