@@ -8,12 +8,12 @@ namespace NtkExampleEGLBasic {
       base.activate();
 
       try {
-        var renderer = new NtkEGL.Renderer(new NtkHW.DrmRender(), 1024, 768);
+        var renderer = new NtkEGL.Renderer(new NtkHW.DrmRender());
         
-        renderer.render.connect((buffer, horiz, vert) => {
+        /* renderer.render.connect((buffer, horiz, vert) => {
           var surf = new Cairo.ImageSurface.for_data((uchar[])buffer, Cairo.Format.ARGB32, horiz, vert, Cairo.Format.ARGB32.stride_for_width(horiz));
           surf.write_to_png("egl-basic.png");
-        });
+        }); */
 
         var ntk = new Ntk.Context(renderer, renderer.get_font("Droid Sans Regular", 12));
 

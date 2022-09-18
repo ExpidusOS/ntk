@@ -12,4 +12,5 @@ option('gtk4_examples', type: 'feature', value: 'auto', description: 'Build the 
 
 option('cairo', type: 'feature', value: 'auto', description: 'Enable the Cairo backend')
 option('egl', type: 'feature', value: 'auto', description: 'Enable the EGL backend')
+option('gles2', type: 'feature', value: 'auto', description: 'Enable the GLES2 backend')
 option('gtk4', type: 'feature', value: 'auto', description: 'Enable the GTK4 backend')

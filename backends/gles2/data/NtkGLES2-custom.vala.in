@@ -1,0 +1,5 @@
+namespace NtkGLES2 {
+  public class Renderer : Ntk.Renderer {
+    public Renderer() throws GLib.Error;
+  }
+}

@@ -1,4 +1,6 @@
 #include "error-priv.h"
+#include "ntk/backend/gles2/renderer.h"
+#include "ntk/renderer.h"
 #include "renderer-priv.h"
 #include <gio/gio.h>
 #include <ntk/backend/egl/renderer.h>
@@ -9,29 +11,15 @@
 
 enum {
   PROP_0,
-  PROP_WIDTH,
-  PROP_HEIGHT,
   PROP_DEVICE,
-  PROP_SURFACE,
   PROP_DISPLAY,
+  PROP_GL_RENDERER,
   N_PROPERTIES,
 };
-
-enum {
-  SIG_RENDER,
-  N_SIGNALS
-};
-
-typedef struct {
-  float pos[2];
-  float uv[2];
-  float col[4];
-} NtkEGLVertex;
 
 static GParamSpec* obj_props[N_PROPERTIES] = {
   NULL,
 };
-static guint obj_sigs[N_SIGNALS] = {0};
 
 static void ntk_egl_renderer_interface_init(GInitableIface* iface);
 
@@ -39,13 +27,6 @@ G_DEFINE_TYPE_WITH_CODE(
   NtkEGLRenderer, ntk_egl_renderer, NTK_TYPE_RENDERER,
   G_ADD_PRIVATE(NtkEGLRenderer) G_IMPLEMENT_INTERFACE(G_TYPE_INITABLE, ntk_egl_renderer_interface_init)
 );
-
-static const struct nk_draw_vertex_layout_element ntk_egl_vertex_layout[] = {
-  {NK_VERTEX_POSITION, NK_FORMAT_FLOAT, NK_OFFSETOF(NtkEGLVertex, pos)},
-  {NK_VERTEX_TEXCOORD, NK_FORMAT_FLOAT, NK_OFFSETOF(NtkEGLVertex, uv)},
-  {NK_VERTEX_COLOR, NK_FORMAT_R32G32B32A32_FLOAT, NK_OFFSETOF(NtkEGLVertex, col)},
-  {NK_VERTEX_LAYOUT_END},
-};
 
 static const char* ntk_egl_renderer_error_stringify(EGLint error) {
   switch (error) {
@@ -166,7 +147,7 @@ static EGLDeviceEXT ntk_egl_renderer_get_egl_device_from_drm(NtkEGLRenderer* sel
 
 static gboolean ntk_egl_renderer_begin(NtkEGLRenderer* self, GError** error) {
   NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
-  if (!eglMakeCurrent(priv->display, priv->surface, priv->surface, priv->context)) {
+  if (!eglMakeCurrent(priv->display, EGL_NO_SURFACE, EGL_NO_SURFACE, priv->context)) {
     ntk_egl_error_set_egl(error, "Failed to make the EGL context current", eglGetError());
     return FALSE;
   }
@@ -175,30 +156,6 @@ static gboolean ntk_egl_renderer_begin(NtkEGLRenderer* self, GError** error) {
 
 static gboolean ntk_egl_renderer_end(NtkEGLRenderer* self, GError** error) {
   NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
-
-  void* buffer = NULL;
-  if (!eglQuerySurface(priv->display, priv->surface, EGL_RENDER_BUFFER, (EGLint*)&buffer)) {
-    ntk_egl_error_set_egl(error, "Failed to query the buffer of the surface", eglGetError());
-    eglReleaseThread();
-    return FALSE;
-  }
-
-  EGLint horiz_res = 0;
-  if (!eglQuerySurface(priv->display, priv->surface, EGL_HORIZONTAL_RESOLUTION, &horiz_res)) {
-    ntk_egl_error_set_egl(error, "Failed to query the horizontal resolution of the surface", eglGetError());
-    eglReleaseThread();
-    return FALSE;
-  }
-
-  EGLint vert_res = 0;
-  if (!eglQuerySurface(priv->display, priv->surface, EGL_VERTICAL_RESOLUTION, &vert_res)) {
-    ntk_egl_error_set_egl(error, "Failed to query the vertical resolution of the surface", eglGetError());
-    eglReleaseThread();
-    return FALSE;
-  }
-
-  g_signal_emit(self, obj_sigs[SIG_RENDER], 0, buffer, horiz_res, vert_res);
-  eglSwapBuffers(priv->display, priv->surface);
   eglReleaseThread();
   return TRUE;
 }
@@ -212,34 +169,42 @@ static gboolean ntk_egl_renderer_configure_vertex(NtkRenderer* renderer, struct 
   NtkEGLRenderer* self = NTK_EGL_RENDERER(renderer);
   NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
 
-  cfg->shape_AA = NK_ANTI_ALIASING_ON;
-  cfg->line_AA = NK_ANTI_ALIASING_ON;
-  cfg->vertex_layout = ntk_egl_vertex_layout;
-  cfg->vertex_size = sizeof(NtkEGLVertex);
-  cfg->vertex_alignment = NK_ALIGNOF(NtkEGLVertex);
-  cfg->circle_segment_count = 22;
-  cfg->curve_segment_count = 22;
-  cfg->arc_segment_count = 22;
-  cfg->global_alpha = 1.0f;
-  return TRUE;
+  g_return_val_if_fail(ntk_egl_renderer_begin(self, error), FALSE);
+  gboolean result = ntk_renderer_configure_vertex(NTK_RENDERER(priv->gl_renderer), cfg, error);
+  g_return_val_if_fail(ntk_egl_renderer_end(self, error), FALSE);
+  return result;
 }
 
 static gboolean ntk_egl_renderer_render_vertex(NtkRenderer* renderer, NtkRendererVertexCommand* cmd, GError** error) {
   NtkEGLRenderer* self = NTK_EGL_RENDERER(renderer);
   NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
-  return TRUE;
+
+  g_return_val_if_fail(ntk_egl_renderer_begin(self, error), FALSE);
+
+  NtkRendererClass* render_class = NTK_RENDERER_GET_CLASS(priv->gl_renderer);
+  g_assert(render_class != NULL);
+  g_assert(render_class->render_vertex != NULL);
+  gboolean result = render_class->render_vertex(NTK_RENDERER(priv->gl_renderer), cmd, error);
+
+  g_return_val_if_fail(ntk_egl_renderer_end(self, error), FALSE);
+  return result;
 }
 
 static void ntk_egl_renderer_set_size(NtkRenderer* renderer, int width, int height) {
   NtkEGLRenderer* self = NTK_EGL_RENDERER(renderer);
   NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
 
-  priv->width = width;
-  priv->height = height;
+  GError* error = NULL;
+  if (!ntk_egl_renderer_begin(self, &error)) {
+    g_error("Failed to begin OpenGL %s:%d: %s", g_quark_to_string(error->domain), error->code, error->message);
+    g_return_if_reached();
+  }
 
-  if (priv->surface != NULL) {
-    g_return_if_fail(eglQuerySurface(priv->display, priv->surface, EGL_WIDTH, &priv->width));
-    g_return_if_fail(eglQuerySurface(priv->display, priv->surface, EGL_HEIGHT, &priv->height));
+  ntk_renderer_set_size(NTK_RENDERER(priv->gl_renderer), width, height);
+
+  if (!ntk_egl_renderer_end(self, &error)) {
+    g_error("Failed to end OpenGL %s:%d: %s", g_quark_to_string(error->domain), error->code, error->message);
+    g_return_if_reached();
   }
 }
 
@@ -247,8 +212,33 @@ static void ntk_egl_renderer_get_size(NtkRenderer* renderer, int* width, int* he
   NtkEGLRenderer* self = NTK_EGL_RENDERER(renderer);
   NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
 
-  if (width) *width = priv->width;
-  if (height) *height = priv->height;
+  GError* error = NULL;
+  if (!ntk_egl_renderer_begin(self, &error)) {
+    g_error("Failed to begin OpenGL %s:%d: %s", g_quark_to_string(error->domain), error->code, error->message);
+    g_return_if_reached();
+  }
+
+  ntk_renderer_get_size(NTK_RENDERER(priv->gl_renderer), width, height);
+
+  if (!ntk_egl_renderer_end(self, &error)) {
+    g_error("Failed to end OpenGL %s:%d: %s", g_quark_to_string(error->domain), error->code, error->message);
+    g_return_if_reached();
+  }
+}
+
+static NtkFont* ntk_egl_renderer_get_font(NtkRenderer* renderer, gchar* name, int size, GError** error) {
+  NtkEGLRenderer* self = NTK_EGL_RENDERER(renderer);
+  NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
+
+  g_return_val_if_fail(ntk_egl_renderer_begin(self, error), FALSE);
+
+  NtkRendererClass* render_class = NTK_RENDERER_GET_CLASS(priv->gl_renderer);
+  g_assert(render_class != NULL);
+  g_assert(render_class->get_font != NULL);
+  NtkFont* result = render_class->get_font(NTK_RENDERER(priv->gl_renderer), name, size, error);
+
+  g_return_val_if_fail(ntk_egl_renderer_end(self, error), FALSE);
+  return result;
 }
 
 static void ntk_egl_renderer_finalize(GObject* obj) {
@@ -256,13 +246,14 @@ static void ntk_egl_renderer_finalize(GObject* obj) {
   NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
 
   if (priv->display != NULL) {
-    if (priv->surface != NULL) {
-      g_debug("Destroying EGL surface");
-      eglDestroySurface(priv->display, priv->surface);
-      priv->surface = NULL;
-    }
-
     if (priv->context != NULL) {
+      if (priv->gl_renderer != NULL) {
+        GError* error = NULL;
+        if (!ntk_egl_renderer_begin(self, &error)) g_error("Failed to begin OpenGL %s:%d: %s", g_quark_to_string(error->domain), error->code, error->message);
+        else g_clear_object(&priv->gl_renderer);
+        if (!ntk_egl_renderer_end(self, &error)) g_error("Failed to end OpenGL %s:%d: %s", g_quark_to_string(error->domain), error->code, error->message);
+      }
+
       g_debug("Destroying EGL context");
       eglDestroyContext(priv->display, priv->context);
       priv->context = NULL;
@@ -289,14 +280,6 @@ static void ntk_egl_renderer_set_property(GObject* obj, guint prop_id, const GVa
   NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
 
   switch (prop_id) {
-    case PROP_WIDTH:
-      priv->width = g_value_get_int(value);
-      ntk_renderer_set_size(NTK_RENDERER(self), priv->width, priv->height);
-      break;
-    case PROP_HEIGHT:
-      priv->height = g_value_get_int(value);
-      ntk_renderer_set_size(NTK_RENDERER(self), priv->width, priv->height);
-      break;
     case PROP_DEVICE:
       priv->device = g_value_dup_object(value);
       break;
@@ -311,17 +294,8 @@ static void ntk_egl_renderer_get_property(GObject* obj, guint prop_id, GValue* v
   NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
 
   switch (prop_id) {
-    case PROP_WIDTH:
-      g_value_set_int(value, priv->width);
-      break;
-    case PROP_HEIGHT:
-      g_value_set_int(value, priv->height);
-      break;
-    case PROP_DEVICE:
-      g_value_set_object(value, priv->device);
-      break;
-    case PROP_SURFACE:
-      g_value_set_pointer(value, priv->surface);
+    case PROP_GL_RENDERER:
+      g_value_set_object(value, priv->gl_renderer);
       break;
     case PROP_DISPLAY:
       g_value_set_pointer(value, priv->display);
@@ -510,33 +484,12 @@ static gboolean ntk_egl_renderer_display_init(NtkEGLRenderer* self, EGLenum plat
     else g_debug("Obtained high priority context");
   }
 
-  EGLint config_attribs[] = {
-    EGL_CONFIG_CAVEAT, EGL_NONE,
-    EGL_RED_SIZE, 8,
-    EGL_GREEN_SIZE, 8,
-    EGL_BLUE_SIZE, 8,
-    EGL_ALPHA_SIZE, 8,
-    EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
-    EGL_BIND_TO_TEXTURE_RGBA, EGL_FALSE,
-    EGL_NONE
-  };
-  EGLint n_configs = 0;
-  if (!eglChooseConfig(priv->display, config_attribs, &priv->config, 1, &n_configs) && n_configs != 1) {
-    ntk_egl_error_set_egl(error, "Failed to create EGL config", eglGetError());
-    return FALSE;
-  }
+  if (!ntk_egl_renderer_begin(self, error)) return FALSE;
 
-  EGLint surf_attribs[] = {
-    EGL_WIDTH, priv->width,
-    EGL_HEIGHT, priv->height,
-    EGL_NONE
-  };
+  g_debug("Creating GLES2 renderer for EGL renderer");
+  priv->gl_renderer = NTK_GLES2_RENDERER(ntk_gles2_renderer_new(error));
 
-  if (!(priv->surface = eglCreatePbufferSurface(priv->display, priv->config, surf_attribs))) {
-    ntk_egl_error_set_egl(error, "Failed to create EGL surface", eglGetError());
-    return FALSE;
-  }
-  g_debug("Created EGL surface (width: %d, height: %d)", priv->width, priv->height);
+  if (!ntk_egl_renderer_end(self, error)) return FALSE;
   return TRUE;
 }
 
@@ -579,18 +532,13 @@ static void ntk_egl_renderer_class_init(NtkEGLRendererClass* klass) {
   object_class->set_property = ntk_egl_renderer_set_property;
   object_class->get_property = ntk_egl_renderer_get_property;
 
-  obj_props[PROP_WIDTH] =
-    g_param_spec_int("width", "Width", "The width to render at.", 0, G_MAXINT, 0, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
-  obj_props[PROP_HEIGHT] =
-    g_param_spec_int("height", "Height", "The height to render at.", 0, G_MAXINT, 0, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
-
   obj_props[PROP_DEVICE] = g_param_spec_object(
     "device", "Ntk Hardware Display Device", "The Ntk hardware display to render onto.", NTK_HW_TYPE_DISPLAY,
     G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE
   );
 
-  obj_props[PROP_SURFACE] = g_param_spec_pointer(
-    "surface", "EGL Surface", "The EGL Surface which is being rendered onto.", G_PARAM_READABLE
+  obj_props[PROP_GL_RENDERER] = g_param_spec_object(
+    "gl-renderer", "GL Renderer", "The Ntk Renderer used for making GL calls.", NTK_GLES2_TYPE_RENDERER, G_PARAM_READABLE
   );
 
   /**
@@ -600,9 +548,6 @@ static void ntk_egl_renderer_class_init(NtkEGLRendererClass* klass) {
     "display", "EGL Display", "The EGL Display Snapshot to render onto.", G_PARAM_READABLE
   );
   g_object_class_install_properties(object_class, N_PROPERTIES, obj_props);
-
-  obj_sigs[SIG_RENDER] =
-    g_signal_new("render", G_OBJECT_CLASS_TYPE(object_class), G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL, G_TYPE_NONE, 3, G_TYPE_POINTER, G_TYPE_INT, G_TYPE_INT);
 
   renderer_class->get_render_type = ntk_egl_renderer_get_render_type;
   renderer_class->configure_vertex = ntk_egl_renderer_configure_vertex;
@@ -615,8 +560,8 @@ static void ntk_egl_renderer_init(NtkEGLRenderer* self) {
   self->priv = ntk_egl_renderer_get_instance_private(self);
 }
 
-NtkRenderer* ntk_egl_renderer_new(NtkHWDisplay* device, int width, int height, GError** error) {
-  return g_initable_new(NTK_EGL_TYPE_RENDERER, NULL, error, "device", device, "width", width, "height", height, NULL);
+NtkRenderer* ntk_egl_renderer_new(NtkHWDisplay* device, GError** error) {
+  return g_initable_new(NTK_EGL_TYPE_RENDERER, NULL, error, "device", device, NULL);
 }
 
 EGLDisplay* ntk_egl_renderer_get_display(NtkEGLRenderer* self) {
