@@ -3,13 +3,14 @@
 #include <gio/gio.h>
 #include <ntk/backend/egl/renderer.h>
 #include <ntk/font.h>
+#include <ntk/hw.h>
 
 #define NTK_EGL_RENDERER_PRIVATE(self) ((self)->priv == NULL ? ntk_egl_renderer_get_instance_private(self) : (self)->priv)
 
 enum {
   PROP_0,
+  PROP_DEVICE,
   PROP_DISPLAY,
-  PROP_EGL_DISPLAY,
   N_PROPERTIES,
 };
 
@@ -109,33 +110,49 @@ static void ntk_egl_renderer_log(
 
 #define ntk_egl_renderer_load_proc(priv, name, error) ((priv)->procs.name = ntk_egl_renderer_load_proc_handler(#name, error))
 
+#ifdef NTK_HW_HAS_LIBDRM
 static EGLDeviceEXT ntk_egl_renderer_get_egl_device_from_drm(NtkEGLRenderer* self, GError** error) {
   NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
 
+  if (!NTK_HW_IS_DRM_RENDER(priv->device)) {
+    ntk_egl_error_set_binding(error, "The provided device is not a DRM render device");
+    return FALSE;
+  }
+
   EGLint nb_devices = 0;
   if (!priv->procs.eglQueryDevicesEXT(0, NULL, &nb_devices)) {
-    g_error("Failed to query EGL devices");
+    ntk_egl_error_set_egl(error, "Failed to query EGL devices", EGL_BAD_PARAMETER);
+    return EGL_NO_DEVICE_EXT;
   }
 
   EGLDeviceEXT* devices = calloc(nb_devices, sizeof(EGLDeviceEXT));
   if (devices == NULL) {
-    g_error("Failed to allocate EGL device list");
+    ntk_egl_error_set_egl(error, "Failed to allocate EGL device list", EGL_BAD_ALLOC);
+    return EGL_NO_DEVICE_EXT;
   }
 
   if (!priv->procs.eglQueryDevicesEXT(nb_devices, devices, &nb_devices)) {
     free(devices);
-    g_error("Failed to query EGL devices");
+    ntk_egl_error_set_egl(error, "Failed to query EGL devices", EGL_BAD_PARAMETER);
+    return EGL_NO_DEVICE_EXT;
   }
 
-  EGLDeviceEXT egl_device = NULL;
   for (int i = 0; i < nb_devices; i++) {
     const char* egl_device_name = priv->procs.eglQueryDeviceStringEXT(devices[i], EGL_DRM_DEVICE_FILE_EXT);
-    g_debug("Found device: %s", egl_device_name);
+    if (egl_device_name == NULL) continue;
+
+    if (ntk_hw_drm_render_has_name(NTK_HW_DRM_RENDER(priv->device), egl_device_name)) {
+      g_debug("Found device: %s", egl_device_name);
+      free(devices);
+      return devices[i];
+    }
   }
 
   free(devices);
+  ntk_egl_error_set_egl(error, "No device was found", EGL_BAD_DEVICE_EXT);
   return EGL_NO_DEVICE_EXT;
 }
+#endif
 
 static NtkRendererType ntk_egl_renderer_get_render_type(NtkRenderer* renderer) {
   (void)renderer;
@@ -169,8 +186,11 @@ static void ntk_egl_renderer_finalize(GObject* obj) {
   NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
 
   if (priv->atlas.pixel != NULL) {
+    g_debug("Destroying Nuklear font atlas");
     nk_font_atlas_clear(&priv->atlas);
   }
+
+  g_clear_object(&priv->device);
 
   G_OBJECT_CLASS(ntk_egl_renderer_parent_class)->finalize(obj);
 }
@@ -180,11 +200,11 @@ static void ntk_egl_renderer_set_property(GObject* obj, guint prop_id, const GVa
   NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
 
   switch (prop_id) {
-    case PROP_DISPLAY:
-      priv->display = g_value_dup_object(value);
+    case PROP_DEVICE:
+      priv->device = g_value_dup_object(value);
       break;
-    case PROP_EGL_DISPLAY:
-      priv->egl_display = g_value_get_pointer(value);
+    case PROP_DISPLAY:
+      priv->display = g_value_get_pointer(value);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, prop_id, pspec);
@@ -197,11 +217,11 @@ static void ntk_egl_renderer_get_property(GObject* obj, guint prop_id, GValue* v
   NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
 
   switch (prop_id) {
-    case PROP_DISPLAY:
-      g_value_set_object(value, priv->display);
+    case PROP_DEVICE:
+      g_value_set_object(value, priv->device);
       break;
-    case PROP_EGL_DISPLAY:
-      g_value_set_pointer(value, priv->egl_display);
+    case PROP_DISPLAY:
+      g_value_set_pointer(value, priv->display);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, prop_id, pspec);
@@ -209,12 +229,8 @@ static void ntk_egl_renderer_get_property(GObject* obj, guint prop_id, GValue* v
   }
 }
 
-static gboolean ntk_egl_renderer_initable_init(GInitable* initable, GCancellable* cancellable, GError** error) {
-  NtkEGLRenderer* self = NTK_EGL_RENDERER(initable);
+static gboolean ntk_egl_renderer_bootstrap_init(NtkEGLRenderer* self, GError** error) {
   NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
-
-  nk_font_atlas_init_default(&priv->atlas);
-  nk_font_atlas_begin(&priv->atlas);
 
   const char* client_exts = eglQueryString(EGL_NO_DISPLAY, EGL_EXTENSIONS);
   if (client_exts == NULL) {
@@ -274,15 +290,47 @@ static gboolean ntk_egl_renderer_initable_init(GInitable* initable, GCancellable
     ntk_egl_error_set_binding(error, "Failed to bind the OpenGL ES API");
     return FALSE;
   }
+  return TRUE;
+}
+
+static gboolean ntk_egl_renderer_display_init(NtkEGLRenderer* self, EGLenum platform, void* remote_display, GError** error) {
+  NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
+  priv->display = priv->procs.eglGetPlatformDisplayEXT(platform, remote_display, NULL);
+  if (priv->display == EGL_NO_DISPLAY) {
+    ntk_egl_error_set_egl(error, "Failed to create EGL display", EGL_BAD_DISPLAY);
+    return FALSE;
+  }
+
+  EGLint major;
+  EGLint minor;
+  if (eglInitialize(priv->display, &major, &minor) == EGL_FALSE) {
+    ntk_egl_error_set_egl(error, "Failed to initialize EGL", EGL_BAD_CONTEXT);
+    return FALSE;
+  }
+
+  g_debug("EGL initialized with version: %d.%d", major, minor);
+  return TRUE;
+}
+
+static gboolean ntk_egl_renderer_initable_init(GInitable* initable, GCancellable* cancellable, GError** error) {
+  NtkEGLRenderer* self = NTK_EGL_RENDERER(initable);
+  NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
+
+  nk_font_atlas_init_default(&priv->atlas);
+  nk_font_atlas_begin(&priv->atlas);
+
+  if (!ntk_egl_renderer_bootstrap_init(self, error)) return FALSE;
 
   if (priv->exts.EXT_platform_device) {
-    g_debug("Getting DRM device");
-
+#ifdef NTK_HW_HAS_LIBDRM
     EGLDeviceEXT dev = ntk_egl_renderer_get_egl_device_from_drm(self, error);
     if (dev == EGL_NO_DEVICE_EXT) {
-      ntk_egl_error_set_egl(error, "Failed to get the DRM device", EGL_BAD_DEVICE_EXT);
+      if (*error == NULL) ntk_egl_error_set_egl(error, "Failed to get the DRM device", EGL_BAD_DEVICE_EXT);
       return FALSE;
     }
+
+    if (!ntk_egl_renderer_display_init(self, EGL_PLATFORM_DEVICE_EXT, dev, error)) return FALSE;
+#endif
   }
 
 #undef HAS_EXT
@@ -302,16 +350,16 @@ static void ntk_egl_renderer_class_init(NtkEGLRendererClass* klass) {
   object_class->set_property = ntk_egl_renderer_set_property;
   object_class->get_property = ntk_egl_renderer_get_property;
 
-  obj_props[PROP_DISPLAY] = g_param_spec_object(
-    "display", "Ntk Hardware Display", "The Ntk hardware display to render onto.", NTK_HW_TYPE_DISPLAY,
+  obj_props[PROP_DEVICE] = g_param_spec_object(
+    "device", "Ntk Hardware Display Device", "The Ntk hardware display to render onto.", NTK_HW_TYPE_DISPLAY,
     G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE
   );
 
   /**
-   * NtkEGLRenderer:egl-display: (skip)
+   * NtkEGLRenderer:display: (skip)
    */
-  obj_props[PROP_EGL_DISPLAY] = g_param_spec_pointer(
-    "egl-display", "EGL Display", "The EGL Display Snapshot to render onto.", G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE
+  obj_props[PROP_DISPLAY] = g_param_spec_pointer(
+    "display", "EGL Display", "The EGL Display Snapshot to render onto.", G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE
   );
   g_object_class_install_properties(object_class, N_PROPERTIES, obj_props);
 
@@ -324,12 +372,12 @@ static void ntk_egl_renderer_init(NtkEGLRenderer* self) {
   self->priv = ntk_egl_renderer_get_instance_private(self);
 }
 
-NtkRenderer* ntk_egl_renderer_new(NtkHWDisplay* display, GError** error) {
-  return g_initable_new(NTK_EGL_TYPE_RENDERER, NULL, error, "display", display, NULL);
+NtkRenderer* ntk_egl_renderer_new(NtkHWDisplay* device, GError** error) {
+  return g_initable_new(NTK_EGL_TYPE_RENDERER, NULL, error, "device", device, NULL);
 }
 
 EGLDisplay* ntk_egl_renderer_get_display(NtkEGLRenderer* self) {
   g_return_val_if_fail(NTK_EGL_IS_RENDERER(self), NULL);
   NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
-  return priv->egl_display;
+  return priv->display;
 }

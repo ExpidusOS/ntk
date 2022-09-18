@@ -5,8 +5,8 @@ configure_file(input: 'data/NtkHW.deps.in', output: 'NtkHW-@0@.deps'.format(shor
 configure_file(input: 'data/NtkHW.metadata.in', output: 'NtkHW-@0@.metadata'.format(shortver.split('-')[0]),
   configuration: conf_data)
 
-libntk_hw_src = ['lib/device.c', 'lib/display.c', 'lib/input.c']
-libntk_hw_headers = ['include/ntk/hw.h', 'include/ntk/hw/device.h', 'include/ntk/hw/display.h', 'include/ntk/hw/input.h']
+libntk_hw_src = ['lib/device.c', 'lib/display.c', 'lib/error.c', 'lib/input.c']
+libntk_hw_headers = ['include/ntk/hw.h', 'include/ntk/hw/device.h', 'include/ntk/hw/display.h', 'include/ntk/hw/error.h', 'include/ntk/hw/input.h']
 libntk_hw_inc = [include_directories('include')]
 libntk_hw_deps = [libntk]
 libntk_hw_cflags = ['-I @0@'.format(join_paths(meson.current_build_dir(), 'include'))]
@@ -14,11 +14,10 @@ libntk_hw_vala_extra = ''
 
 if libdrm.found()
   libntk_hw_deps += [libdrm]
-  libntk_hw_src += ['lib/device/drm.c']
-  libntk_hw_headers += ['include/ntk/hw/device/drm.h']
+  libntk_hw_src += ['lib/drm/render.c']
+  libntk_hw_headers += ['include/ntk/hw/drm.h']
   libntk_hw_vala_extra += fs.read(join_paths(meson.current_source_dir(), 'data', 'extra', 'drm.vala'), encoding: 'utf-8')
 endif
-
 
 libntk_hw_conf = configuration_data()
 libntk_hw_conf.merge_from(conf_data)

@@ -47,21 +47,20 @@ if egl.found()
   if not egl_examples.disabled()
     if use_gir and use_vala
       executable('ntk-egl-example-basic', ['examples/basic/main.vala'],
-        vala_args: ['--vapidir', meson.current_build_dir()],
+        c_args: libntk_hw_cflags,
+        vala_args: ['--vapidir', meson.current_build_dir(), '--vapidir', join_paths(meson.current_source_dir(), 'vapi'), '--vapidir', join_paths(meson.project_source_root(), 'hw', 'vapi')],
         dependencies: [
           glib,
           nuklear,
           nuklear_vapi,
           libntk,
           libntk_vapi,
-          declare_dependency(link_with: libntk_egl_shlib,
-            include_directories: libntk_egl_inc),
+          libntk_egl,
           libntk_egl_vapi,
           libntk_pango,
           libntk_pango_vapi,
-          declare_dependency(link_with: libntk_hw_shlib,
-            include_directories: libntk_hw_inc),
-          libntk_hw_vapi
+          libntk_hw,
+          libntk_hw_vapi,
         ])
     endif
   endif

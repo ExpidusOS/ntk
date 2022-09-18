@@ -6,8 +6,8 @@
 #include <ntk/hw.h>
 
 typedef struct _NtkEGLRendererPrivate {
-  NtkHWDisplay* display;
-  EGLDisplay* egl_display;
+  NtkHWDisplay* device;
+  EGLDisplay* display;
   struct nk_font_atlas atlas;
 
   struct {

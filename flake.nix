@@ -74,16 +74,26 @@
           pkgs = nixpkgsFor.${system};
           tokyo = libtokyo.packages.${system}.gtk4;
 
-          linuxPackages = with pkgs; [
-            libdrm
-            libglvnd
-          ];
+          linuxPackages = {
+            default = with pkgs; [
+              libdrm
+              libglvnd
+            ];
+            minimal = with pkgs; [
+              libdrm
+            ];
+          };
 
-          darwinPackages = with pkgs; [
-            libglvnd
-            mesa
-            mesa.drivers
-          ];
+          darwinPackages = {
+            default = with pkgs; [
+              libglvnd
+              mesa
+              mesa.drivers
+            ];
+            minimal = with pkgs; [
+              mesa
+            ];
+          };
 
           systemPackages = {
             aarch64-linux = linuxPackages;
@@ -98,6 +108,7 @@
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
               clang_14
+              gdb
               gobject-introspection
               meson
               ninja
@@ -107,7 +118,20 @@
               tokyo
               vala
               libadwaita
-            ] ++ packagesForSystem;
+            ] ++ packagesForSystem.default;
+          };
+          minimal = pkgs.mkShell {
+            buildInputs = with pkgs; [
+              pango
+              clang_14
+              gdb
+              gobject-introspection
+              meson
+              ninja
+              pkg-config
+              glib
+              vala
+            ] ++ packagesForSystem.default;
           };
         });
     };

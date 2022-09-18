@@ -1,4 +1,4 @@
-  public class DrmDisplay : NtkHW.Display {
-    public DrmDisplay() throws GLib.Error;
-    public DrmDisplay.with_path(string path) throws GLib.Error;
+  public class DrmRender : NtkHW.Display {
+    public DrmRender() throws GLib.Error;
+    public DrmRender.with_path(string path) throws GLib.Error;
   }

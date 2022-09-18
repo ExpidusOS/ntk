@@ -40,7 +40,7 @@ glib = [dependency('glib-2.0'), dependency('gio-2.0')]
 gobject = dependency('gobject-2.0')
 pango = dependency('pango')
 libmath = meson.get_compiler('c').find_library('m', required: false)
-libdrm = dependency('libdrm', required: false)
+libdrm = dependency('libdrm', required: get_option('drm'))
 
 conf_data = configuration_data()
 conf_data.set('PREFIX', prefix)

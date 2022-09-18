@@ -8,7 +8,7 @@ namespace NtkExampleEGLBasic {
       base.activate();
 
       try {
-        var renderer = new NtkEGL.Renderer(new NtkHW.DrmDisplay());
+        var renderer = new NtkEGL.Renderer(new NtkHW.DrmRender());
         var ntk = new Ntk.Context(renderer, renderer.get_font("Droid Sans Regular", 12));
 
         var opt = false;
