@@ -97,6 +97,7 @@
         in {
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
+              clang_14
               gobject-introspection
               meson
               ninja

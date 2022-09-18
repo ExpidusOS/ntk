@@ -6,7 +6,7 @@
 G_BEGIN_DECLS
 
 #define NTK_HW_TYPE_DISPLAY ntk_hw_display_get_type()
-G_DECLARE_DERIVABLE_TYPE(NtkHWDisplay, ntk_hw_display, NTK_HW, DISPLAY, GObject);
+G_DECLARE_DERIVABLE_TYPE(NtkHWDisplay, ntk_hw_display, NTK_HW, DISPLAY, NtkHWDevice);
 
 /**
  * NtkHWDisplay:
@@ -14,7 +14,7 @@ G_DECLARE_DERIVABLE_TYPE(NtkHWDisplay, ntk_hw_display, NTK_HW, DISPLAY, GObject)
  * Since: 0.1.0
  */
 struct _NtkHWDisplayClass {
-  GObjectClass parent_class;
+  NtkHWDeviceClass parent_class;
 };
 
 G_END_DECLS

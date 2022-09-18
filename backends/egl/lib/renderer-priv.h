@@ -3,8 +3,10 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <ntk/backend/egl/renderer.h>
+#include <ntk/hw.h>
 
 typedef struct _NtkEGLRendererPrivate {
+  NtkHWDisplay* display;
   EGLDisplay* egl_display;
   struct nk_font_atlas atlas;
 

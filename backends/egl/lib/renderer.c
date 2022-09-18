@@ -8,6 +8,7 @@
 
 enum {
   PROP_0,
+  PROP_DISPLAY,
   PROP_EGL_DISPLAY,
   N_PROPERTIES,
 };
@@ -129,7 +130,7 @@ static EGLDeviceEXT ntk_egl_renderer_get_egl_device_from_drm(NtkEGLRenderer* sel
   EGLDeviceEXT egl_device = NULL;
   for (int i = 0; i < nb_devices; i++) {
     const char* egl_device_name = priv->procs.eglQueryDeviceStringEXT(devices[i], EGL_DRM_DEVICE_FILE_EXT);
-    printf("%s\n", egl_device_name);
+    g_debug("Found device: %s", egl_device_name);
   }
 
   free(devices);
@@ -179,6 +180,9 @@ static void ntk_egl_renderer_set_property(GObject* obj, guint prop_id, const GVa
   NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
 
   switch (prop_id) {
+    case PROP_DISPLAY:
+      priv->display = g_value_dup_object(value);
+      break;
     case PROP_EGL_DISPLAY:
       priv->egl_display = g_value_get_pointer(value);
       break;
@@ -193,6 +197,9 @@ static void ntk_egl_renderer_get_property(GObject* obj, guint prop_id, GValue* v
   NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
 
   switch (prop_id) {
+    case PROP_DISPLAY:
+      g_value_set_object(value, priv->display);
+      break;
     case PROP_EGL_DISPLAY:
       g_value_set_pointer(value, priv->egl_display);
       break;
@@ -295,6 +302,11 @@ static void ntk_egl_renderer_class_init(NtkEGLRendererClass* klass) {
   object_class->set_property = ntk_egl_renderer_set_property;
   object_class->get_property = ntk_egl_renderer_get_property;
 
+  obj_props[PROP_DISPLAY] = g_param_spec_object(
+    "display", "Ntk Hardware Display", "The Ntk hardware display to render onto.", NTK_HW_TYPE_DISPLAY,
+    G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE
+  );
+
   /**
    * NtkEGLRenderer:egl-display: (skip)
    */
@@ -312,8 +324,8 @@ static void ntk_egl_renderer_init(NtkEGLRenderer* self) {
   self->priv = ntk_egl_renderer_get_instance_private(self);
 }
 
-NtkRenderer* ntk_egl_renderer_new(GError** error) {
-  return g_initable_new(NTK_EGL_TYPE_RENDERER, NULL, error, NULL);
+NtkRenderer* ntk_egl_renderer_new(NtkHWDisplay* display, GError** error) {
+  return g_initable_new(NTK_EGL_TYPE_RENDERER, NULL, error, "display", display, NULL);
 }
 
 EGLDisplay* ntk_egl_renderer_get_display(NtkEGLRenderer* self) {

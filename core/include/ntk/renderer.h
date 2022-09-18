@@ -1,8 +1,8 @@
 #pragma once
 
 #include <glib-object.h>
-#include <nuklear.h>
 #include <ntk/font/object.h>
+#include <nuklear.h>
 
 G_BEGIN_DECLS
 

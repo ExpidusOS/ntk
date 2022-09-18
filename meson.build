@@ -2,6 +2,7 @@ project('ntk', 'c', license: 'GPL-3.0-only', version: '0.1.0-prealpha')
 
 gnome = import('gnome')
 pkg = import('pkgconfig')
+fs = import('fs')
 
 prefix = get_option('prefix')
 bindir = prefix / get_option('bindir')
@@ -39,7 +40,7 @@ glib = [dependency('glib-2.0'), dependency('gio-2.0')]
 gobject = dependency('gobject-2.0')
 pango = dependency('pango')
 libmath = meson.get_compiler('c').find_library('m', required: false)
-libdrm = meson.get_compiler('c').find_library('libdrm', required: false)
+libdrm = dependency('libdrm', required: false)
 
 conf_data = configuration_data()
 conf_data.set('PREFIX', prefix)

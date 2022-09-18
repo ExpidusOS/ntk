@@ -1,5 +1,5 @@
 namespace NtkEGL {
 	public class Renderer : Ntk.Renderer {
-    public Renderer() throws GLib.Error;
+    public Renderer(NtkHW.Device device) throws GLib.Error;
 	}
 }

@@ -3,6 +3,7 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <glib-object.h>
+#include <ntk/hw.h>
 #include <ntk/renderer.h>
 
 G_BEGIN_DECLS
@@ -20,7 +21,7 @@ struct _NtkEGLRenderer {
 /**
  * ntk_egl_renderer_new: (constructor)
  */
-NtkRenderer* ntk_egl_renderer_new(GError** error);
+NtkRenderer* ntk_egl_renderer_new(NtkHWDisplay* display, GError** error);
 
 /**
  * ntk_egl_get_display:

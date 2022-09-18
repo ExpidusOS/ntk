@@ -13,7 +13,7 @@ if egl.found()
   libntk_egl_src = ['lib/error.c', 'lib/renderer.c']
   libntk_egl_headers = ['include/ntk/backend/egl.h', 'include/ntk/backend/egl/renderer.h']
   libntk_egl_inc = include_directories('include')
-  libntk_egl_deps = [egl, libntk]
+  libntk_egl_deps = [egl, libntk, libntk_hw]
   libntk_egl_shlib = shared_library('ntk-egl', libntk_egl_src,
     c_args: ['-DG_LOG_DOMAIN="NtkEGL"'],
     include_directories: libntk_egl_inc,
@@ -30,9 +30,9 @@ if egl.found()
       install: true)
     if use_vala
       libntk_egl_vapi = gnome.generate_vapi('NtkEGL-@0@'.format(shortver.split('-')[0]),
-        packages: ['Ntk-@0@'.format(shortver.split('-')[0])],
+        packages: ['Ntk-@0@'.format(shortver.split('-')[0]), 'NtkHW-@0@'.format(shortver.split('-')[0])],
         sources: [libntk_egl_gir[0], join_paths(meson.current_build_dir(), 'NtkEGL-@0@-custom.vala'.format(shortver.split('-')[0]))],
-        vapi_dirs: [join_paths(meson.project_source_root(), 'nuklear', 'vapi'), join_paths(meson.project_build_root(), 'core')],
+        vapi_dirs: [join_paths(meson.project_source_root(), 'nuklear', 'vapi'), join_paths(meson.project_build_root(), 'core'), join_paths(meson.project_build_root(), 'hw')],
         install: true)
     endif
   endif
@@ -58,7 +58,10 @@ if egl.found()
             include_directories: libntk_egl_inc),
           libntk_egl_vapi,
           libntk_pango,
-          libntk_pango_vapi
+          libntk_pango_vapi,
+          declare_dependency(link_with: libntk_hw_shlib,
+            include_directories: libntk_hw_inc),
+          libntk_hw_vapi
         ])
     endif
   endif

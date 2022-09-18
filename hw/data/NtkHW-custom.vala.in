@@ -1,4 +1,7 @@
 namespace NtkHW {
-  public abstract class Display : GLib.Object, NtkHW.Device {}
-  public abstract class Input : GLib.Object, NtkHW.Device {}
+  public abstract class Device : GLib.Object {}
+  public abstract class Display : NtkHW.Device {}
+  public abstract class Input : NtkHW.Device {}
+
+@HW_EXTRA_VALA@
 }

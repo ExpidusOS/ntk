@@ -100,8 +100,7 @@ static void ntk_gtk4_renderer_class_init(NtkGtk4RendererClass* klass) {
   object_class->get_property = ntk_gtk4_renderer_get_property;
 
   obj_props[PROP_SUBRENDERER] = g_param_spec_object(
-    "subrenderer", "Ntk Renderer", "The Ntk Renderer to render with.", NTK_TYPE_RENDERER,
-    G_PARAM_READABLE
+    "subrenderer", "Ntk Renderer", "The Ntk Renderer to render with.", NTK_TYPE_RENDERER, G_PARAM_READABLE
   );
   g_object_class_install_properties(object_class, N_PROPERTIES, obj_props);
 
