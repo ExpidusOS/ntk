@@ -10,7 +10,11 @@ typedef struct _NtkEGLRendererPrivate {
   EGLDeviceEXT device_attrib;
   EGLDisplay* display;
   EGLContext context;
+  EGLSurface surface;
+  EGLConfig config;
   struct nk_font_atlas atlas;
+  int width;
+  int height;
 
   struct {
     gboolean KHR_image_base;

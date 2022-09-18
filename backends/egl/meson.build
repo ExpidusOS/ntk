@@ -45,7 +45,7 @@ if egl.found()
     version: longver)
 
   if not egl_examples.disabled()
-    if use_gir and use_vala
+    if use_gir and use_vala and cairo.found()
       executable('ntk-egl-example-basic', ['examples/basic/main.vala'],
         c_args: libntk_hw_cflags,
         vala_args: ['--vapidir', meson.current_build_dir(), '--vapidir', join_paths(meson.current_source_dir(), 'vapi'), '--vapidir', join_paths(meson.project_source_root(), 'hw', 'vapi')],
@@ -61,6 +61,7 @@ if egl.found()
           libntk_pango_vapi,
           libntk_hw,
           libntk_hw_vapi,
+          cairo
         ])
     endif
   endif

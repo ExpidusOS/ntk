@@ -9,9 +9,17 @@
 
 enum {
   PROP_0,
+  PROP_WIDTH,
+  PROP_HEIGHT,
   PROP_DEVICE,
+  PROP_SURFACE,
   PROP_DISPLAY,
   N_PROPERTIES,
+};
+
+enum {
+  SIG_RENDER,
+  N_SIGNALS
 };
 
 typedef struct {
@@ -23,6 +31,7 @@ typedef struct {
 static GParamSpec* obj_props[N_PROPERTIES] = {
   NULL,
 };
+static guint obj_sigs[N_SIGNALS] = {0};
 
 static void ntk_egl_renderer_interface_init(GInitableIface* iface);
 
@@ -155,6 +164,45 @@ static EGLDeviceEXT ntk_egl_renderer_get_egl_device_from_drm(NtkEGLRenderer* sel
 }
 #endif
 
+static gboolean ntk_egl_renderer_begin(NtkEGLRenderer* self, GError** error) {
+  NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
+  if (!eglMakeCurrent(priv->display, priv->surface, priv->surface, priv->context)) {
+    ntk_egl_error_set_egl(error, "Failed to make the EGL context current", eglGetError());
+    return FALSE;
+  }
+  return TRUE;
+}
+
+static gboolean ntk_egl_renderer_end(NtkEGLRenderer* self, GError** error) {
+  NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
+
+  void* buffer = NULL;
+  if (!eglQuerySurface(priv->display, priv->surface, EGL_RENDER_BUFFER, (EGLint*)&buffer)) {
+    ntk_egl_error_set_egl(error, "Failed to query the buffer of the surface", eglGetError());
+    eglReleaseThread();
+    return FALSE;
+  }
+
+  EGLint horiz_res = 0;
+  if (!eglQuerySurface(priv->display, priv->surface, EGL_HORIZONTAL_RESOLUTION, &horiz_res)) {
+    ntk_egl_error_set_egl(error, "Failed to query the horizontal resolution of the surface", eglGetError());
+    eglReleaseThread();
+    return FALSE;
+  }
+
+  EGLint vert_res = 0;
+  if (!eglQuerySurface(priv->display, priv->surface, EGL_VERTICAL_RESOLUTION, &vert_res)) {
+    ntk_egl_error_set_egl(error, "Failed to query the vertical resolution of the surface", eglGetError());
+    eglReleaseThread();
+    return FALSE;
+  }
+
+  g_signal_emit(self, obj_sigs[SIG_RENDER], 0, buffer, horiz_res, vert_res);
+  eglSwapBuffers(priv->display, priv->surface);
+  eglReleaseThread();
+  return TRUE;
+}
+
 static NtkRendererType ntk_egl_renderer_get_render_type(NtkRenderer* renderer) {
   (void)renderer;
   return NTK_RENDERER_TYPE_VERTEX;
@@ -182,15 +230,55 @@ static gboolean ntk_egl_renderer_render_vertex(NtkRenderer* renderer, NtkRendere
   return TRUE;
 }
 
+static void ntk_egl_renderer_set_size(NtkRenderer* renderer, int width, int height) {
+  NtkEGLRenderer* self = NTK_EGL_RENDERER(renderer);
+  NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
+
+  priv->width = width;
+  priv->height = height;
+
+  if (priv->surface != NULL) {
+    g_return_if_fail(eglQuerySurface(priv->display, priv->surface, EGL_WIDTH, &priv->width));
+    g_return_if_fail(eglQuerySurface(priv->display, priv->surface, EGL_HEIGHT, &priv->height));
+  }
+}
+
+static void ntk_egl_renderer_get_size(NtkRenderer* renderer, int* width, int* height) {
+  NtkEGLRenderer* self = NTK_EGL_RENDERER(renderer);
+  NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
+
+  if (width) *width = priv->width;
+  if (height) *height = priv->height;
+}
+
 static void ntk_egl_renderer_finalize(GObject* obj) {
   NtkEGLRenderer* self = NTK_EGL_RENDERER(obj);
   NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
+
+  if (priv->display != NULL) {
+    if (priv->surface != NULL) {
+      g_debug("Destroying EGL surface");
+      eglDestroySurface(priv->display, priv->surface);
+      priv->surface = NULL;
+    }
+
+    if (priv->context != NULL) {
+      g_debug("Destroying EGL context");
+      eglDestroyContext(priv->display, priv->context);
+      priv->context = NULL;
+    }
+
+    g_debug("Destroying EGL display");
+    eglTerminate(priv->display);
+    priv->display = NULL;
+  }
 
   if (priv->atlas.pixel != NULL) {
     g_debug("Destroying Nuklear font atlas");
     nk_font_atlas_clear(&priv->atlas);
   }
 
+  g_debug("Destroying device");
   g_clear_object(&priv->device);
 
   G_OBJECT_CLASS(ntk_egl_renderer_parent_class)->finalize(obj);
@@ -201,11 +289,16 @@ static void ntk_egl_renderer_set_property(GObject* obj, guint prop_id, const GVa
   NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
 
   switch (prop_id) {
+    case PROP_WIDTH:
+      priv->width = g_value_get_int(value);
+      ntk_renderer_set_size(NTK_RENDERER(self), priv->width, priv->height);
+      break;
+    case PROP_HEIGHT:
+      priv->height = g_value_get_int(value);
+      ntk_renderer_set_size(NTK_RENDERER(self), priv->width, priv->height);
+      break;
     case PROP_DEVICE:
       priv->device = g_value_dup_object(value);
-      break;
-    case PROP_DISPLAY:
-      priv->display = g_value_get_pointer(value);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, prop_id, pspec);
@@ -218,8 +311,17 @@ static void ntk_egl_renderer_get_property(GObject* obj, guint prop_id, GValue* v
   NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
 
   switch (prop_id) {
+    case PROP_WIDTH:
+      g_value_set_int(value, priv->width);
+      break;
+    case PROP_HEIGHT:
+      g_value_set_int(value, priv->height);
+      break;
     case PROP_DEVICE:
       g_value_set_object(value, priv->device);
+      break;
+    case PROP_SURFACE:
+      g_value_set_pointer(value, priv->surface);
       break;
     case PROP_DISPLAY:
       g_value_set_pointer(value, priv->display);
@@ -407,6 +509,34 @@ static gboolean ntk_egl_renderer_display_init(NtkEGLRenderer* self, EGLenum plat
     if (priority != EGL_CONTEXT_PRIORITY_HIGH_IMG) g_error("Failed to obtain a high priority context");
     else g_debug("Obtained high priority context");
   }
+
+  EGLint config_attribs[] = {
+    EGL_CONFIG_CAVEAT, EGL_NONE,
+    EGL_RED_SIZE, 8,
+    EGL_GREEN_SIZE, 8,
+    EGL_BLUE_SIZE, 8,
+    EGL_ALPHA_SIZE, 8,
+    EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
+    EGL_BIND_TO_TEXTURE_RGBA, EGL_FALSE,
+    EGL_NONE
+  };
+  EGLint n_configs = 0;
+  if (!eglChooseConfig(priv->display, config_attribs, &priv->config, 1, &n_configs) && n_configs != 1) {
+    ntk_egl_error_set_egl(error, "Failed to create EGL config", eglGetError());
+    return FALSE;
+  }
+
+  EGLint surf_attribs[] = {
+    EGL_WIDTH, priv->width,
+    EGL_HEIGHT, priv->height,
+    EGL_NONE
+  };
+
+  if (!(priv->surface = eglCreatePbufferSurface(priv->display, priv->config, surf_attribs))) {
+    ntk_egl_error_set_egl(error, "Failed to create EGL surface", eglGetError());
+    return FALSE;
+  }
+  g_debug("Created EGL surface (width: %d, height: %d)", priv->width, priv->height);
   return TRUE;
 }
 
@@ -428,9 +558,12 @@ static gboolean ntk_egl_renderer_initable_init(GInitable* initable, GCancellable
     }
 
     if (!ntk_egl_renderer_display_init(self, EGL_PLATFORM_DEVICE_EXT, dev, error)) return FALSE;
+    return TRUE;
 #endif
   }
-  return TRUE;
+
+  ntk_egl_error_set_egl(error, "EGL was not set up", EGL_BAD_CONTEXT);
+  return FALSE;
 }
 
 static void ntk_egl_renderer_interface_init(GInitableIface* iface) {
@@ -446,30 +579,44 @@ static void ntk_egl_renderer_class_init(NtkEGLRendererClass* klass) {
   object_class->set_property = ntk_egl_renderer_set_property;
   object_class->get_property = ntk_egl_renderer_get_property;
 
+  obj_props[PROP_WIDTH] =
+    g_param_spec_int("width", "Width", "The width to render at.", 0, G_MAXINT, 0, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+  obj_props[PROP_HEIGHT] =
+    g_param_spec_int("height", "Height", "The height to render at.", 0, G_MAXINT, 0, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+
   obj_props[PROP_DEVICE] = g_param_spec_object(
     "device", "Ntk Hardware Display Device", "The Ntk hardware display to render onto.", NTK_HW_TYPE_DISPLAY,
     G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE
+  );
+
+  obj_props[PROP_SURFACE] = g_param_spec_pointer(
+    "surface", "EGL Surface", "The EGL Surface which is being rendered onto.", G_PARAM_READABLE
   );
 
   /**
    * NtkEGLRenderer:display: (skip)
    */
   obj_props[PROP_DISPLAY] = g_param_spec_pointer(
-    "display", "EGL Display", "The EGL Display Snapshot to render onto.", G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE
+    "display", "EGL Display", "The EGL Display Snapshot to render onto.", G_PARAM_READABLE
   );
   g_object_class_install_properties(object_class, N_PROPERTIES, obj_props);
+
+  obj_sigs[SIG_RENDER] =
+    g_signal_new("render", G_OBJECT_CLASS_TYPE(object_class), G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL, G_TYPE_NONE, 3, G_TYPE_POINTER, G_TYPE_INT, G_TYPE_INT);
 
   renderer_class->get_render_type = ntk_egl_renderer_get_render_type;
   renderer_class->configure_vertex = ntk_egl_renderer_configure_vertex;
   renderer_class->render_vertex = ntk_egl_renderer_render_vertex;
+  renderer_class->set_size = ntk_egl_renderer_set_size;
+  renderer_class->get_size = ntk_egl_renderer_get_size;
 }
 
 static void ntk_egl_renderer_init(NtkEGLRenderer* self) {
   self->priv = ntk_egl_renderer_get_instance_private(self);
 }
 
-NtkRenderer* ntk_egl_renderer_new(NtkHWDisplay* device, GError** error) {
-  return g_initable_new(NTK_EGL_TYPE_RENDERER, NULL, error, "device", device, NULL);
+NtkRenderer* ntk_egl_renderer_new(NtkHWDisplay* device, int width, int height, GError** error) {
+  return g_initable_new(NTK_EGL_TYPE_RENDERER, NULL, error, "device", device, "width", width, "height", height, NULL);
 }
 
 EGLDisplay* ntk_egl_renderer_get_display(NtkEGLRenderer* self) {
