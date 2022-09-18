@@ -7,13 +7,21 @@
 
 typedef struct _NtkEGLRendererPrivate {
   NtkHWDisplay* device;
+  EGLDeviceEXT device_attrib;
   EGLDisplay* display;
+  EGLContext context;
   struct nk_font_atlas atlas;
 
   struct {
+    gboolean KHR_image_base;
     gboolean KHR_platform_gbm;
     gboolean EXT_platform_device;
     gboolean EXT_device_query;
+    gboolean IMG_context_priority;
+#ifdef NTK_HW_HAS_LIBDRM
+    gboolean EXT_device_drm;
+    gboolean EXT_device_drm_render_node;
+#endif
   } exts;
 
   struct {
@@ -22,5 +30,7 @@ typedef struct _NtkEGLRendererPrivate {
     PFNEGLQUERYDISPLAYATTRIBEXTPROC eglQueryDisplayAttribEXT;
     PFNEGLQUERYDEVICESTRINGEXTPROC eglQueryDeviceStringEXT;
     PFNEGLQUERYDEVICESEXTPROC eglQueryDevicesEXT;
+    PFNEGLDESTROYIMAGEKHRPROC eglDestroyImageKHR;
+    PFNEGLCREATEIMAGEKHRPROC eglCreateImageKHR;
   } procs;
 } NtkEGLRendererPrivate;

@@ -143,8 +143,9 @@ static EGLDeviceEXT ntk_egl_renderer_get_egl_device_from_drm(NtkEGLRenderer* sel
 
     if (ntk_hw_drm_render_has_name(NTK_HW_DRM_RENDER(priv->device), egl_device_name)) {
       g_debug("Found device: %s", egl_device_name);
+      EGLDeviceEXT egl_device = devices[i];
       free(devices);
-      return devices[i];
+      return egl_device;
     }
   }
 
@@ -246,7 +247,7 @@ static gboolean ntk_egl_renderer_bootstrap_init(NtkEGLRenderer* self, GError** e
 
 #define HAS_EXT(name) ntk_egl_renderer_has_ext(client_exts, name)
 
-  g_debug("Queried extensions: %s", client_exts);
+  g_debug("Queried base extensions: %s", client_exts);
 
   if (!HAS_EXT("EGL_EXT_platform_base")) {
     ntk_egl_error_set_missing_ext(error, "extension is not supported", "EGL_EXT_platform_base");
@@ -285,6 +286,7 @@ static gboolean ntk_egl_renderer_bootstrap_init(NtkEGLRenderer* self, GError** e
 
     priv->procs.eglDebugMessageControlKHR(ntk_egl_renderer_log, debug_attribs);
   }
+#undef HAS_EXT
 
   if (eglBindAPI(EGL_OPENGL_ES_API) == EGL_FALSE) {
     ntk_egl_error_set_binding(error, "Failed to bind the OpenGL ES API");
@@ -309,6 +311,102 @@ static gboolean ntk_egl_renderer_display_init(NtkEGLRenderer* self, EGLenum plat
   }
 
   g_debug("EGL initialized with version: %d.%d", major, minor);
+
+  const char* display_exts = eglQueryString(priv->display, EGL_EXTENSIONS);
+  if (display_exts == NULL) {
+    ntk_egl_error_set_egl(error, "Failed to query extensions.", eglGetError());
+    return FALSE;
+  }
+
+#define HAS_EXT(name) ntk_egl_renderer_has_ext(display_exts, name)
+
+  g_debug("Queried display extensions: %s", display_exts);
+
+  if (HAS_EXT("EGL_KHR_image_base")) {
+    priv->exts.KHR_image_base = TRUE;
+
+    if (ntk_egl_renderer_load_proc(priv, eglCreateImageKHR, error) == NULL) return FALSE;
+    if (ntk_egl_renderer_load_proc(priv, eglDestroyImageKHR, error) == NULL) return FALSE;
+  }
+
+  const char* device_exts = NULL;
+  const char* driver_name = NULL;
+  if (priv->exts.EXT_device_query) {
+    EGLAttrib device_attrib;
+    if (!priv->procs.eglQueryDisplayAttribEXT(priv->display, EGL_DEVICE_EXT, &device_attrib)) {
+      ntk_egl_error_set_egl(error, "Failed to query device attribute", eglGetError());
+      return FALSE;
+    }
+
+    priv->device_attrib = (EGLDeviceEXT)device_attrib;
+    if ((device_exts = priv->procs.eglQueryDeviceStringEXT(priv->device_attrib, EGL_EXTENSIONS)) == NULL) {
+      ntk_egl_error_set_egl(error, "Failed to query device extensions", eglGetError());
+      return FALSE;
+    }
+
+#undef HAS_EXT
+#define HAS_EXT(name) ntk_egl_renderer_has_ext(device_exts, name)
+
+    g_debug("Queried device extensions: %s", device_exts);
+
+#ifdef EGL_DRIVER_NAME_EXT
+    if (HAS_EXT("EGL_EXT_device_persistent_id")) {
+      driver_name = priv->procs.eglQueryDeviceStringEXT(priv->device_attrib, EGL_DRIVER_NAME_EXT);
+      g_debug("EGL driver name: %s", driver_name);
+    }
+#endif
+#ifdef NTK_HW_HAS_LIBDRM
+    priv->exts.EXT_device_drm = HAS_EXT("EGL_EXT_device_drm");
+    priv->exts.EXT_device_drm_render_node = HAS_EXT("EGL_EXT_device_drm_render_node");
+#else
+    if (HAS_EXT("EGL_EXT_device_drm") || HAS_EXT("EGL_EXT_device_drm_render_node")) g_warning("Device supports DRM but DRM support is disabled");
+#endif
+
+#undef HAS_EXT
+  }
+#define HAS_EXT(name) ntk_egl_renderer_has_ext(display_exts, name)
+
+  if (!HAS_EXT("EGL_KHR_no_config_context") && !HAS_EXT("EGL_MESA_configless_context")) {
+    ntk_egl_error_set_missing_ext(error, "extensions not supported", "EGL_KHR_no_config_context/EGL_MESA_configless_context");
+    return FALSE;
+  }
+
+  if (!HAS_EXT("EGL_KHR_surfaceless_context")) {
+    ntk_egl_error_set_missing_ext(error, "extension not supported", "EGL_KHR_surfaceless_context");
+    return FALSE;
+  }
+
+  priv->exts.IMG_context_priority = HAS_EXT("EGL_IMG_context_priority");
+
+#undef HAS_EXT
+
+  g_debug("EGL vendor: %s", eglQueryString(priv->display, EGL_VENDOR));
+
+  size_t atti = 0;
+  EGLint attribs[5];
+  attribs[atti++] = EGL_CONTEXT_CLIENT_VERSION;
+  attribs[atti++] = 2;
+
+  if (priv->exts.IMG_context_priority) {
+    attribs[atti++] = EGL_CONTEXT_PRIORITY_LEVEL_IMG;
+    attribs[atti++] = EGL_CONTEXT_PRIORITY_HIGH_IMG;
+  }
+
+  attribs[atti++] = EGL_NONE;
+  g_assert(atti <= sizeof(attribs)/sizeof(attribs[0]));
+
+  priv->context = eglCreateContext(priv->display, EGL_NO_CONFIG_KHR, EGL_NO_CONTEXT, attribs);
+  if (priv->context == EGL_NO_CONTEXT) {
+    ntk_egl_error_set_egl(error, "Failed to create EGL context", eglGetError());
+    return FALSE;
+  }
+
+  if (priv->exts.IMG_context_priority) {
+    EGLint priority = EGL_CONTEXT_PRIORITY_MEDIUM_IMG;
+    eglQueryContext(priv->display, priv->context, EGL_CONTEXT_PRIORITY_LEVEL_IMG, &priority);
+    if (priority != EGL_CONTEXT_PRIORITY_HIGH_IMG) g_error("Failed to obtain a high priority context");
+    else g_debug("Obtained high priority context");
+  }
   return TRUE;
 }
 
@@ -332,8 +430,6 @@ static gboolean ntk_egl_renderer_initable_init(GInitable* initable, GCancellable
     if (!ntk_egl_renderer_display_init(self, EGL_PLATFORM_DEVICE_EXT, dev, error)) return FALSE;
 #endif
   }
-
-#undef HAS_EXT
   return TRUE;
 }
 
