@@ -86,6 +86,10 @@ gboolean ntk_renderer_draw(NtkRenderer* self, NtkRendererCommand* cmd, GError** 
     return FALSE;
   }
 
+  if (klass->pre_render != NULL) {
+    if (!klass->pre_render(self, error)) return FALSE;
+  }
+
   gboolean result = FALSE;
 
   switch (type) {
@@ -97,8 +101,14 @@ gboolean ntk_renderer_draw(NtkRenderer* self, NtkRendererCommand* cmd, GError** 
 
       g_return_val_if_fail(cmd != NULL, FALSE);
       g_return_val_if_fail(!cmd->is_vertex, FALSE);
+
       result = klass->render_command(self, cmd->draw, error);
-      g_signal_emit(self, obj_sigs[SIG_RENDERED], 0, cmd);
+      if (result) {
+        g_signal_emit(self, obj_sigs[SIG_RENDERED], 0, cmd);
+        if (klass->post_render != NULL) {
+          if (!klass->post_render(self, error)) return FALSE;
+        }
+      }
       return result;
     case NTK_RENDERER_TYPE_VERTEX:
       if (klass->render_vertex == NULL) {
@@ -108,8 +118,14 @@ gboolean ntk_renderer_draw(NtkRenderer* self, NtkRendererCommand* cmd, GError** 
 
       g_return_val_if_fail(cmd != NULL, FALSE);
       g_return_val_if_fail(cmd->is_vertex, FALSE);
+
       result = klass->render_vertex(self, &cmd->vertex, error);
-      g_signal_emit(self, obj_sigs[SIG_RENDERED], 0, cmd);
+      if (result) {
+        g_signal_emit(self, obj_sigs[SIG_RENDERED], 0, cmd);
+        if (klass->post_render != NULL) {
+          if (!klass->post_render(self, error)) return FALSE;
+        }
+      }
       return result;
   }
 

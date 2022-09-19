@@ -1,4 +1,4 @@
-gles2 = dependency('glesv2', required: get_option('gles2'))
+gles2 = dependency('glesv2', required: get_option('gles2').require(pangoft2.found()))
 
 if gles2.found()
   configure_file(input: 'data/NtkGLES2.deps.in', output: 'NtkGLES2-@0@.deps'.format(shortver.split('-')[0]),
@@ -7,11 +7,16 @@ if gles2.found()
     configuration: conf_data)
   configure_file(input: 'data/NtkGLES2-custom.vala.in', output: 'NtkGLES2-@0@-custom.vala'.format(shortver.split('-')[0]),
     configuration: conf_data)
+  libntk_gles2_res_source = configure_file(input: 'data/ntk-gles2.gresource.xml.in', output: 'ntk-gles2.gresource.xml',
+    configuration: conf_data)
 
-  libntk_gles2_src = ['lib/error.c', 'lib/renderer.c']
-  libntk_gles2_headers = ['include/ntk/backend/gles2.h', 'include/ntk/backend/gles2/error.h', 'include/ntk/backend/gles2/renderer.h']
+  libntk_gles2_res = gnome.compile_resources('ntk-gles2-resources', libntk_gles2_res_source,
+    c_name: 'ntk_gles2')
+
+  libntk_gles2_src = ['lib/error.c', 'lib/font.c', 'lib/pixel-format.c', 'lib/renderer.c', 'lib/shaders.c', libntk_gles2_res]
+  libntk_gles2_headers = ['include/ntk/backend/gles2.h', 'include/ntk/backend/gles2/error.h', 'include/ntk/backend/gles2/font.h', 'include/ntk/backend/gles2/renderer.h']
   libntk_gles2_inc = include_directories('include')
-  libntk_gles2_deps = [gles2, libntk]
+  libntk_gles2_deps = [gles2, libntk, libntk_pango, libntk_hw]
   libntk_gles2_shlib = shared_library('ntk-gles2', libntk_gles2_src,
     c_args: ['-DG_LOG_DOMAIN="NtkGLES2"'],
     include_directories: libntk_gles2_inc,
@@ -28,9 +33,9 @@ if gles2.found()
       install: true)
     if use_vala
       libntk_gles2_vapi = gnome.generate_vapi('NtkGLES2-@0@'.format(shortver.split('-')[0]),
-        packages: ['Ntk-@0@'.format(shortver.split('-')[0])],
+        packages: ['Ntk-@0@'.format(shortver.split('-')[0]), 'NtkPango-@0@'.format(shortver.split('-')[0]), 'NtkHW-@0@'.format(shortver.split('-')[0])],
         sources: [libntk_gles2_gir[0], join_paths(meson.current_build_dir(), 'NtkGLES2-@0@-custom.vala'.format(shortver.split('-')[0]))],
-        vapi_dirs: [join_paths(meson.project_source_root(), 'nuklear', 'vapi'), join_paths(meson.project_build_root(), 'core')],
+        vapi_dirs: [join_paths(meson.project_source_root(), 'nuklear', 'vapi'), join_paths(meson.project_build_root(), 'core'), join_paths(meson.project_build_root(), 'fonts', 'pango'), join_paths(meson.project_build_root(), 'hw')],
         install: true)
     endif
   endif

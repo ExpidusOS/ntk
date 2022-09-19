@@ -45,7 +45,7 @@ if gtk4.found()
 
   if libtokyo.found()
     executable('ntk-gtk4-example-basic', ['examples/basic/main.vala'],
-      vala_args: ['--vapidir', meson.current_build_dir()],
+      vala_args: ['--vapidir', meson.current_build_dir(), '--vapidir', join_paths(meson.project_source_root(), 'fonts', 'pango', 'vapi')],
       dependencies: [libtokyo, libadwaita, nuklear, nuklear_vapi, libntk, libntk_vapi, libntk_gtk4, libntk_gtk4_vapi, libntk_pango, libntk_pango_vapi, libntk_cairo, libntk_cairo_vapi])
   endif
 endif

@@ -1,3 +1,9 @@
+pangoft2 = dependency('pangoft2', required: false)
+
+libntk_pango_conf = configuration_data()
+libntk_pango_conf.merge_from(conf_data)
+libntk_pango_conf.set('NTK_PANGO_HAS_FT2', pangoft2.found())
+
 configure_file(input: 'data/NtkPango.deps.in', output: 'NtkPango-@0@.deps'.format(shortver.split('-')[0]),
   configuration: conf_data)
 configure_file(input: 'data/NtkPango.metadata.in', output: 'NtkPango-@0@.metadata'.format(shortver.split('-')[0]),
@@ -13,7 +19,13 @@ libntk_pango_headers = ['include/ntk/font/pango.h', 'include/ntk/font/pango/layo
 libntk_pango_inc = [include_directories('include')]
 libntk_pango_deps = [libntk, pango]
 
-libntk_pango_cflags = ['-I', join_paths(meson.current_build_dir(), 'include')]
+if pangoft2.found()
+  libntk_pango_deps += [pangoft2]
+  libntk_pango_src += ['lib/ft2/object.c', 'lib/ft2/user.c']
+  libntk_pango_headers += ['include/ntk/font/pango/ft2.h', 'include/ntk/font/pango/ft2/object.h', 'include/ntk/font/pango/ft2/user.h']
+endif
+
+libntk_pango_cflags = ['-I @0@'.format(join_paths(meson.current_build_dir(), 'include'))]
 
 libntk_pango_shlib = shared_library('ntk-pango', libntk_pango_src,
   c_args: [libntk_pango_cflags, '-DG_LOG_DOMAIN="NtkPango"'],

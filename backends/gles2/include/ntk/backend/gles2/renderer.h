@@ -15,9 +15,11 @@ struct _NtkGLES2Renderer {
   struct _NtkGLES2RendererPrivate* priv;
 };
 
+typedef void* (*NtkGLES2RendererLoadProcHandler)(const char* name);
+
 /**
  * ntk_gles2_renderer_new: (constructor)
  */
-NtkRenderer* ntk_gles2_renderer_new(GError** error);
+NtkRenderer* ntk_gles2_renderer_new(NtkGLES2RendererLoadProcHandler proc_handler, GError** error);
 
 G_END_DECLS

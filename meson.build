@@ -36,6 +36,14 @@ if use_vala
   add_languages('vala')
 endif
 
+little_endian = target_machine.endian() == 'little'
+big_endian = target_machine.endian() == 'big'
+
+add_project_arguments([
+  '-DLITTLE_ENDIAN=@0@'.format(little_endian.to_int()),
+  '-DBIG_EDIAN=@0@'.format(big_endian.to_int())
+], language: 'c')
+
 glib = [dependency('glib-2.0'), dependency('gio-2.0')]
 gobject = dependency('gobject-2.0')
 pango = dependency('pango')

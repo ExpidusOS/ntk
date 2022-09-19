@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/com/expidus/ntk/backend/gles2">
+    <file alias="shaders/quad/vert.glsl">@SOURCEDIR@/backends/gles2/data/shaders/quad/vert.glsl</file>
+    <file alias="shaders/quad/frag.glsl">@SOURCEDIR@/backends/gles2/data/shaders/quad/frag.glsl</file>
+  </gresource>
+</gresources>

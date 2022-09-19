@@ -1,11 +1,9 @@
-#include "error-priv.h"
-#include "ntk/backend/gles2/renderer.h"
-#include "ntk/renderer.h"
-#include "renderer-priv.h"
 #include <gio/gio.h>
 #include <ntk/backend/egl/renderer.h>
 #include <ntk/font.h>
 #include <ntk/hw.h>
+#include "error-priv.h"
+#include "renderer-priv.h"
 
 #define NTK_EGL_RENDERER_PRIVATE(self) ((self)->priv == NULL ? ntk_egl_renderer_get_instance_private(self) : (self)->priv)
 
@@ -95,7 +93,20 @@ static void* ntk_egl_renderer_load_proc_handler(const char* name, GError** error
 static void ntk_egl_renderer_log(
   EGLenum error, const char* command, EGLint msg_type, EGLLabelKHR thread, EGLLabelKHR obj, const char* msg
 ) {
-  g_critical("EGL command: %s, error: %s (0x%x): %s", command, ntk_egl_renderer_error_stringify(error), error, msg);
+  switch (msg_type) {
+    case EGL_DEBUG_MSG_CRITICAL_KHR:
+      g_critical("EGL command: %s, error: %s (0x%x): %s", command, ntk_egl_renderer_error_stringify(error), error, msg);
+      break;
+    case EGL_DEBUG_MSG_ERROR_KHR:
+      g_error("EGL command: %s, error: %s (0x%x): %s", command, ntk_egl_renderer_error_stringify(error), error, msg);
+      break;
+    case EGL_DEBUG_MSG_WARN_KHR:
+      g_warning("EGL command: %s, error: %s (0x%x): %s", command, ntk_egl_renderer_error_stringify(error), error, msg);
+      break;
+    case EGL_DEBUG_MSG_INFO_KHR:
+      g_info("EGL command: %s, error: %s (0x%x): %s", command, ntk_egl_renderer_error_stringify(error), error, msg);
+      break;
+  }
 }
 
 #define ntk_egl_renderer_load_proc(priv, name, error) ((priv)->procs.name = ntk_egl_renderer_load_proc_handler(#name, error))
@@ -170,7 +181,13 @@ static gboolean ntk_egl_renderer_configure_vertex(NtkRenderer* renderer, struct 
   NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
 
   g_return_val_if_fail(ntk_egl_renderer_begin(self, error), FALSE);
-  gboolean result = ntk_renderer_configure_vertex(NTK_RENDERER(priv->gl_renderer), cfg, error);
+  NtkRendererClass* render_class = NTK_RENDERER_GET_CLASS(priv->gl_renderer);
+  
+  g_assert(render_class != NULL);
+  g_assert(render_class->configure_vertex != NULL);
+  
+  gboolean result = render_class->configure_vertex(NTK_RENDERER(priv->gl_renderer), cfg, error);
+
   g_return_val_if_fail(ntk_egl_renderer_end(self, error), FALSE);
   return result;
 }
@@ -179,15 +196,10 @@ static gboolean ntk_egl_renderer_render_vertex(NtkRenderer* renderer, NtkRendere
   NtkEGLRenderer* self = NTK_EGL_RENDERER(renderer);
   NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
 
-  g_return_val_if_fail(ntk_egl_renderer_begin(self, error), FALSE);
-
   NtkRendererClass* render_class = NTK_RENDERER_GET_CLASS(priv->gl_renderer);
   g_assert(render_class != NULL);
   g_assert(render_class->render_vertex != NULL);
-  gboolean result = render_class->render_vertex(NTK_RENDERER(priv->gl_renderer), cmd, error);
-
-  g_return_val_if_fail(ntk_egl_renderer_end(self, error), FALSE);
-  return result;
+  return render_class->render_vertex(NTK_RENDERER(priv->gl_renderer), cmd, error);
 }
 
 static void ntk_egl_renderer_set_size(NtkRenderer* renderer, int width, int height) {
@@ -241,6 +253,28 @@ static NtkFont* ntk_egl_renderer_get_font(NtkRenderer* renderer, gchar* name, in
   return result;
 }
 
+static gboolean ntk_egl_renderer_pre_render(NtkRenderer* renderer, GError** error) {
+  NtkEGLRenderer* self = NTK_EGL_RENDERER(renderer);
+  NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
+
+  g_return_val_if_fail(ntk_egl_renderer_begin(self, error), FALSE);
+  
+  NtkRendererClass* render_class = NTK_RENDERER_GET_CLASS(priv->gl_renderer);
+  if (render_class != NULL && render_class->pre_render != NULL) return render_class->pre_render(NTK_RENDERER(priv->gl_renderer), error);
+  return TRUE;
+}
+
+static gboolean ntk_egl_renderer_post_render(NtkRenderer* renderer, GError** error) {
+  NtkEGLRenderer* self = NTK_EGL_RENDERER(renderer);
+  NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
+  
+  NtkRendererClass* render_class = NTK_RENDERER_GET_CLASS(priv->gl_renderer);
+  gboolean result = TRUE;
+  if (render_class != NULL && render_class->post_render != NULL) result = render_class->post_render(NTK_RENDERER(priv->gl_renderer), error);
+  g_return_val_if_fail(ntk_egl_renderer_end(self, error), FALSE);
+  return result;
+}
+
 static void ntk_egl_renderer_finalize(GObject* obj) {
   NtkEGLRenderer* self = NTK_EGL_RENDERER(obj);
   NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
@@ -248,6 +282,8 @@ static void ntk_egl_renderer_finalize(GObject* obj) {
   if (priv->display != NULL) {
     if (priv->context != NULL) {
       if (priv->gl_renderer != NULL) {
+        g_debug("Destroying GLES2 renderer");
+
         GError* error = NULL;
         if (!ntk_egl_renderer_begin(self, &error)) g_error("Failed to begin OpenGL %s:%d: %s", g_quark_to_string(error->domain), error->code, error->message);
         else g_clear_object(&priv->gl_renderer);
@@ -405,6 +441,11 @@ static gboolean ntk_egl_renderer_display_init(NtkEGLRenderer* self, EGLenum plat
     if (ntk_egl_renderer_load_proc(priv, eglDestroyImageKHR, error) == NULL) return FALSE;
   }
 
+  if (!HAS_EXT("EGL_EXT_image_dma_buf_import")) {
+    ntk_egl_error_set_missing_ext(error, "extension is not supported", "EGL_EXT_image_dma_buf_import");
+    return FALSE;
+  }
+
   const char* device_exts = NULL;
   const char* driver_name = NULL;
   if (priv->exts.EXT_device_query) {
@@ -487,7 +528,7 @@ static gboolean ntk_egl_renderer_display_init(NtkEGLRenderer* self, EGLenum plat
   if (!ntk_egl_renderer_begin(self, error)) return FALSE;
 
   g_debug("Creating GLES2 renderer for EGL renderer");
-  priv->gl_renderer = NTK_GLES2_RENDERER(ntk_gles2_renderer_new(error));
+  priv->gl_renderer = NTK_GLES2_RENDERER(ntk_gles2_renderer_new((NtkGLES2RendererLoadProcHandler)eglGetProcAddress, error));
 
   if (!ntk_egl_renderer_end(self, error)) return FALSE;
   return TRUE;
@@ -554,6 +595,9 @@ static void ntk_egl_renderer_class_init(NtkEGLRendererClass* klass) {
   renderer_class->render_vertex = ntk_egl_renderer_render_vertex;
   renderer_class->set_size = ntk_egl_renderer_set_size;
   renderer_class->get_size = ntk_egl_renderer_get_size;
+  renderer_class->get_font = ntk_egl_renderer_get_font;
+  renderer_class->pre_render = ntk_egl_renderer_pre_render;
+  renderer_class->post_render = ntk_egl_renderer_post_render;
 }
 
 static void ntk_egl_renderer_init(NtkEGLRenderer* self) {

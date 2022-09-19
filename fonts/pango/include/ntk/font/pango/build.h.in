@@ -1,0 +1,3 @@
+#pragma once
+
+#mesondefine NTK_PANGO_HAS_FT2

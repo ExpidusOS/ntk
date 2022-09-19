@@ -60,6 +60,9 @@ typedef struct {
 struct _NtkRendererClass {
   GObjectClass parent_class;
 
+  gboolean (*pre_render)(NtkRenderer* self, GError** error);
+  gboolean (*post_render)(NtkRenderer* self, GError** error);
+
   NtkRendererType (*get_render_type)(NtkRenderer* self);
   gboolean (*configure_vertex)(NtkRenderer* self, struct nk_convert_config* cfg, GError** error);
   gboolean (*render_command)(NtkRenderer* self, const NtkRendererDrawCommand* cmd, GError** error);

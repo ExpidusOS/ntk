@@ -40,7 +40,7 @@ if cairo.found()
       libntk_cairo_vapi = gnome.generate_vapi('NtkCairo-@0@'.format(shortver.split('-')[0]),
         packages: ['Ntk-@0@'.format(shortver.split('-')[0]), 'cairo', 'pangocairo'],
         sources: [libntk_cairo_gir[0], join_paths(meson.current_build_dir(), 'NtkCairo-@0@-custom.vala'.format(shortver.split('-')[0]))],
-        vapi_dirs: [join_paths(meson.project_source_root(), 'nuklear', 'vapi'), join_paths(meson.project_build_root(), 'core')],
+        vapi_dirs: [join_paths(meson.project_source_root(), 'nuklear', 'vapi'), join_paths(meson.project_build_root(), 'core'), join_paths(meson.project_source_root(), 'fonts', 'pango', 'vapi')],
         install: true)
     endif
   endif
@@ -55,7 +55,7 @@ if cairo.found()
   if not cairo_examples.disabled()
     if use_gir and use_vala
       executable('ntk-cairo-example-basic', ['examples/basic/main.vala'],
-        vala_args: ['--vapidir', meson.current_build_dir()],
+        vala_args: ['--vapidir', meson.current_build_dir(), '--vapidir', join_paths(meson.project_source_root(), 'fonts', 'pango', 'vapi')],
         dependencies: [nuklear, nuklear_vapi, libntk, libntk_vapi, libntk_cairo, libntk_cairo_vapi, libntk_pango, libntk_pango_vapi, pangocairo])
     endif
   endif

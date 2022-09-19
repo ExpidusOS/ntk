@@ -32,7 +32,9 @@ if egl.found()
       libntk_egl_vapi = gnome.generate_vapi('NtkEGL-@0@'.format(shortver.split('-')[0]),
         packages: ['Ntk-@0@'.format(shortver.split('-')[0]), 'NtkHW-@0@'.format(shortver.split('-')[0]), 'NtkGLES2-@0@'.format(shortver.split('-')[0])],
         sources: [libntk_egl_gir[0], join_paths(meson.current_build_dir(), 'NtkEGL-@0@-custom.vala'.format(shortver.split('-')[0]))],
-        vapi_dirs: [join_paths(meson.project_source_root(), 'nuklear', 'vapi'), join_paths(meson.project_build_root(), 'core'), join_paths(meson.project_build_root(), 'hw'), join_paths(meson.project_build_root(), 'backends', 'gles2'), join_paths(meson.project_source_root(), 'backends', 'gles2', 'vapi')],
+        vapi_dirs: [join_paths(meson.project_source_root(), 'nuklear', 'vapi'), join_paths(meson.project_build_root(), 'core'),
+          join_paths(meson.project_build_root(), 'hw'), join_paths(meson.project_build_root(), 'backends', 'gles2'),
+          join_paths(meson.project_source_root(), 'backends', 'gles2', 'vapi')],
         install: true)
     endif
   endif
@@ -48,7 +50,9 @@ if egl.found()
     if use_gir and use_vala and cairo.found()
       executable('ntk-egl-example-basic', ['examples/basic/main.vala'],
         c_args: libntk_hw_cflags,
-        vala_args: ['--vapidir', meson.current_build_dir(), '--vapidir', join_paths(meson.current_source_dir(), 'vapi'), '--vapidir', join_paths(meson.project_source_root(), 'hw', 'vapi'), '--vapidir', join_paths(meson.project_source_root(), 'backends', 'gles2', 'vapi')],
+        vala_args: ['--vapidir', meson.current_build_dir(), '--vapidir', join_paths(meson.current_source_dir(), 'vapi'),
+          '--vapidir', join_paths(meson.project_source_root(), 'hw', 'vapi'), '--vapidir', join_paths(meson.project_source_root(), 'backends', 'gles2', 'vapi'),
+          '--vapidir', join_paths(meson.project_source_root(), 'fonts', 'pango', 'vapi')],
         dependencies: [
           glib,
           nuklear,
