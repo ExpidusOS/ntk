@@ -47,7 +47,7 @@ if egl.found()
     version: longver)
 
   if not egl_examples.disabled()
-    if use_gir and use_vala and cairo.found()
+    if use_gir and use_vala and cairo.found() and libdrm.found()
       executable('ntk-egl-example-basic', ['examples/basic/main.vala'],
         c_args: libntk_hw_cflags,
         vala_args: ['--vapidir', meson.current_build_dir(), '--vapidir', join_paths(meson.current_source_dir(), 'vapi'),
