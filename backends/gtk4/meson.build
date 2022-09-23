@@ -1,7 +1,7 @@
 gtk4 = dependency('gtk4', required: get_option('gtk4'))
 
 if gtk4.found()
-  gtk4_examples = get_option('gtk4_examples').require(get_option('examples'))
+  gtk4_examples = get_option('gtk4_examples').disable_auto_if(not get_option('examples'))
 
   libtokyo = dependency('tokyo-gtk4', required: gtk4_examples)
   libadwaita = dependency('libadwaita-1', required: libtokyo.found())
@@ -31,7 +31,7 @@ if gtk4.found()
     header: 'ntk/backend/gtk4.h',
     install: true)
   libntk_gtk4_vapi = gnome.generate_vapi('NtkGtk4-@0@'.format(shortver.split('-')[0]),
-    packages: ['Ntk-@0@'.format(shortver.split('-')[0]), 'NtkCairo-@0@'.format(shortver.split('-')[0]), 'gtk4', 'cairo'],
+    packages: [libntk_vapi, libntk_cairo_vapi, 'gtk4', 'cairo'],
     sources: [libntk_gtk4_gir[0], join_paths(meson.current_build_dir(), 'NtkGtk4-@0@-custom.vala'.format(shortver.split('-')[0]))],
     vapi_dirs: [join_paths(meson.project_source_root(), 'nuklear', 'vapi'), join_paths(meson.project_build_root(), 'core'), join_paths(meson.project_build_root(), 'backends', 'cairo')],
     install: true)

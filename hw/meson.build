@@ -45,7 +45,7 @@ if use_gir
     install: true)
   if use_vala
     libntk_hw_vapi = gnome.generate_vapi('NtkHW-@0@'.format(shortver.split('-')[0]),
-      packages: ['Ntk-@0@'.format(shortver.split('-')[0])],
+      packages: [libntk_vapi],
       sources: [libntk_hw_gir[0], join_paths(meson.current_build_dir(), 'NtkHW-@0@-custom.vala'.format(shortver.split('-')[0]))],
       vapi_dirs: [join_paths(meson.project_source_root(), 'nuklear', 'vapi'), join_paths(meson.project_build_root(), 'core')],
       install: true)

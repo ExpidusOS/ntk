@@ -51,8 +51,35 @@
           };
 
           packagesForSystem = systemPackages.${system};
-          mkDerivation = ({ name, buildInputs }: pkgs.stdenv.mkDerivation rec {
+
+          linuxFlags = {
+            default = ["-Ddrm=enabled"];
+            cairo = ["-Ddrm=disabled"];
+            gtk4 = ["-Ddrm=disabled"];
+            gl = ["-Ddrm=enabled"];
+          };
+
+          darwinFlags = {
+            default = ["-Ddrm=disabled"];
+            cairo = ["-Ddrm=disabled"];
+            gtk4 = ["-Ddrm=disabled"];
+            gl = ["-Ddrm=disabled"];
+          };
+
+          systemFlags = {
+            aarch64-linux = linuxFlags;
+            i686-linux = linuxFlags;
+            riscv64-linux = linuxFlags;
+            x86_64-linux = linuxFlags;
+            x86_64-darwin = darwinFlags;
+          };
+
+          flagsForSystem = systemFlags.${system};
+
+          mkDerivation = ({ name, buildInputs, mesonFlags ? [] }: pkgs.stdenv.mkDerivation {
             inherit name buildInputs;
+
+            mesonFlags = mesonFlags ++ ["-Dexamples=false" "-Dcairo_examples=disabled" "-Dgtk4_examples=disabled" "-Degl_examples=disabled"];
 
             src = self;
             enableParallelBuilding = true;
@@ -67,21 +94,25 @@
         in {
           default = mkDerivation {
             name = "ntk";
+            mesonFlags = flagsForSystem.default;
             buildInputs = with pkgs; [ cairo gtk4 libglvnd ] ++ packagesForSystem.default;
           };
 
           cairo = mkDerivation {
             name = "ntk-cairo";
+            mesonFlags = flagsForSystem.cairo;
             buildInputs = with pkgs; [ cairo ] ++ packagesForSystem.cairo;
           };
 
           gtk4 = mkDerivation {
             name = "ntk-gtk4";
+            mesonFlags = flagsForSystem.gtk4;
             buildInputs = with pkgs; [ gtk4 ] ++ packagesForSystem.gtk4;
           };
 
           gl = mkDerivation {
             name = "ntk-gl";
+            mesonFlags = flagsForSystem.gl;
             buildInputs = with pkgs; [ libglvnd ] ++ packagesForSystem.gl;
           };
         });

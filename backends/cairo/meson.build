@@ -1,7 +1,7 @@
 cairo = dependency('cairo', required: get_option('cairo'))
 
 if cairo.found()
-  cairo_examples = get_option('cairo_examples').require(get_option('examples'))
+  cairo_examples = get_option('cairo_examples').disable_auto_if(not get_option('examples'))
 
   pangocairo = dependency('pangocairo')
   cairo_gobject = dependency('cairo-gobject', required: false)
@@ -38,7 +38,7 @@ if cairo.found()
       install: true)
     if use_vala
       libntk_cairo_vapi = gnome.generate_vapi('NtkCairo-@0@'.format(shortver.split('-')[0]),
-        packages: ['Ntk-@0@'.format(shortver.split('-')[0]), 'cairo', 'pangocairo'],
+        packages: [libntk_vapi, 'cairo', 'pangocairo'],
         sources: [libntk_cairo_gir[0], join_paths(meson.current_build_dir(), 'NtkCairo-@0@-custom.vala'.format(shortver.split('-')[0]))],
         vapi_dirs: [join_paths(meson.project_source_root(), 'nuklear', 'vapi'), join_paths(meson.project_build_root(), 'core'), join_paths(meson.project_source_root(), 'fonts', 'pango', 'vapi')],
         install: true)

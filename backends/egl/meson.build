@@ -1,7 +1,7 @@
 egl = dependency('egl', required: get_option('egl').require(not get_option('gles2').disabled()))
 
 if egl.found()
-  egl_examples = get_option('egl_examples').require(get_option('examples'))
+  egl_examples = get_option('egl_examples').disable_auto_if(not get_option('examples'))
 
   configure_file(input: 'data/NtkEGL.deps.in', output: 'NtkEGL-@0@.deps'.format(shortver.split('-')[0]),
     configuration: conf_data)
@@ -30,7 +30,7 @@ if egl.found()
       install: true)
     if use_vala
       libntk_egl_vapi = gnome.generate_vapi('NtkEGL-@0@'.format(shortver.split('-')[0]),
-        packages: ['Ntk-@0@'.format(shortver.split('-')[0]), 'NtkHW-@0@'.format(shortver.split('-')[0]), 'NtkGLES2-@0@'.format(shortver.split('-')[0])],
+        packages: [libntk_vapi, libntk_hw_vapi, libntk_gles2_vapi],
         sources: [libntk_egl_gir[0], join_paths(meson.current_build_dir(), 'NtkEGL-@0@-custom.vala'.format(shortver.split('-')[0]))],
         vapi_dirs: [join_paths(meson.project_source_root(), 'nuklear', 'vapi'), join_paths(meson.project_build_root(), 'core'),
           join_paths(meson.project_build_root(), 'hw'), join_paths(meson.project_build_root(), 'backends', 'gles2'),
