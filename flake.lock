@@ -1,25 +1,5 @@
 {
   "nodes": {
-    "libtokyo": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1662247489,
-        "narHash": "sha256-bbgIJKfsusxq5D15U2ebZzO1RtY2u4n7bbN0e23LN/8=",
-        "owner": "ExpidusOS",
-        "repo": "libtokyo",
-        "rev": "2d0607822534f3030c57eea14a2ca4932e94683d",
-        "type": "github"
-      },
-      "original": {
-        "owner": "ExpidusOS",
-        "repo": "libtokyo",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1662818301,
@@ -36,7 +16,6 @@
     },
     "root": {
       "inputs": {
-        "libtokyo": "libtokyo",
         "nixpkgs": "nixpkgs"
       }
     }

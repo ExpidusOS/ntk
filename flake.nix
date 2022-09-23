@@ -1,14 +1,15 @@
 {
   description = "Nuklear Toolkit";
 
-  inputs.libtokyo = {
-    url = github:ExpidusOS/libtokyo;
-    inputs.nixpkgs.follows = "nixpkgs";
-  };
-
-  outputs = { self, libtokyo, nixpkgs, ... }:
+  outputs = { self, nixpkgs, ... }:
     let
-      supportedSystems = builtins.attrNames libtokyo.packages;
+      supportedSystems = [
+        "aarch64-linux"
+        "i686-linux"
+        "riscv64-linux"
+        "x86_64-linux"
+        "x86_64-darwin"
+      ];
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
       nixpkgsFor = forAllSystems (system: import nixpkgs { inherit system; });
     in
@@ -72,7 +73,6 @@
       devShells = forAllSystems (system:
         let
           pkgs = nixpkgsFor.${system};
-          tokyo = libtokyo.packages.${system}.gtk4;
 
           linuxPackages = {
             default = with pkgs; [
@@ -115,7 +115,6 @@
               pkg-config
               glib
               gtk4
-              tokyo
               vala
               libadwaita
             ] ++ packagesForSystem.default;
