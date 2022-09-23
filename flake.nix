@@ -12,6 +12,7 @@
       ];
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
       nixpkgsFor = forAllSystems (system: import nixpkgs { inherit system; });
+      src = self // { submodules = true; };
     in
     {
       packages = forAllSystems (system:
@@ -77,11 +78,9 @@
           flagsForSystem = systemFlags.${system};
 
           mkDerivation = ({ name, buildInputs, mesonFlags ? [] }: pkgs.stdenv.mkDerivation {
-            inherit name buildInputs;
+            inherit name buildInputs src;
 
             mesonFlags = mesonFlags ++ ["-Dexamples=false" "-Dcairo_examples=disabled" "-Dgtk4_examples=disabled" "-Degl_examples=disabled"];
-
-            src = self;
             enableParallelBuilding = true;
             nativeBuildInputs = with pkgs; [ meson vala ninja pkg-config gobject-introspection ];
 
@@ -122,9 +121,8 @@
           pkgs = nixpkgsFor.${system};
         in
         pkgs.stdenv.mkDerivation rec {
-          inherit name buildInputs;
+          inherit name buildInputs src;
 
-          src = self;
           enableParallelBuilding = true;
           nativeBuildInputs = with pkgs; [ meson vala ninja pkg-config gobject-introspection ];
 
