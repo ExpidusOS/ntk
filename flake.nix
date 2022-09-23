@@ -17,6 +17,40 @@
       packages = forAllSystems (system:
         let
           pkgs = nixpkgsFor.${system};
+
+          linuxPackages = {
+            default = with pkgs; [
+              libdrm
+            ];
+            cairo = [];
+            gtk4 = [];
+            gl = with pkgs; [
+              libdrm
+            ];
+          };
+
+          darwinPackages = {
+            default = with pkgs; [
+              mesa
+              mesa.drivers
+            ];
+            cairo = [];
+            gtk4 = [];
+            gl = with pkgs; [
+              mesa
+              mesa.drivers
+            ];
+          };
+
+          systemPackages = {
+            aarch64-linux = linuxPackages;
+            i686-linux = linuxPackages;
+            riscv64-linux = linuxPackages;
+            x86_64-linux = linuxPackages;
+            x86_64-darwin = darwinPackages;
+          };
+
+          packagesForSystem = systemPackages.${system};
           mkDerivation = ({ name, buildInputs }: pkgs.stdenv.mkDerivation rec {
             inherit name buildInputs;
 
@@ -33,22 +67,22 @@
         in {
           default = mkDerivation {
             name = "ntk";
-            buildInputs = with pkgs; [ cairo gtk4 libglvnd ];
+            buildInputs = with pkgs; [ cairo gtk4 libglvnd ] ++ packagesForSystem.default;
           };
 
           cairo = mkDerivation {
             name = "ntk-cairo";
-            buildInputs = with pkgs; [ cairo ];
+            buildInputs = with pkgs; [ cairo ] ++ packagesForSystem.cairo;
           };
 
           gtk4 = mkDerivation {
             name = "ntk-gtk4";
-            buildInputs = with pkgs; [ gtk4 ];
+            buildInputs = with pkgs; [ gtk4 ] ++ packagesForSystem.gtk4;
           };
 
           gl = mkDerivation {
             name = "ntk-gl";
-            buildInputs = with pkgs; [ libglvnd ];
+            buildInputs = with pkgs; [ libglvnd ] ++ packagesForSystem.gl;
           };
         });
 
@@ -77,7 +111,6 @@
           linuxPackages = {
             default = with pkgs; [
               libdrm
-              libglvnd
             ];
             minimal = with pkgs; [
               libdrm
@@ -86,7 +119,6 @@
 
           darwinPackages = {
             default = with pkgs; [
-              libglvnd
               mesa
               mesa.drivers
             ];
@@ -117,6 +149,7 @@
               gtk4
               vala
               libadwaita
+              libglvnd
             ] ++ packagesForSystem.default;
           };
           minimal = pkgs.mkShell {
