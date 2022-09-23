@@ -74,6 +74,10 @@ typedef enum _NtkStylerProperty {
 typedef struct _NtkStylerKey {
   NtkStylerProperty prop;
   NtkStylerState state;
+
+  /**
+   * NtkStylerKey.elem: (array zero-terminated=1): A zero-terminated array of #NtkStylerElement
+   */
   NtkStylerElement* elem;
 } NtkStylerKey;
 
@@ -119,7 +123,7 @@ struct _NtkStylerClass {
   GHashTable* (*export)(NtkStyler* self);
   gboolean (*has_style_property)(NtkStyler* self, NtkStylerKey key);
   gboolean (*get_style_property)(NtkStyler* self, NtkStylerKey key, GValue* value);
-  gboolean (*set_style_property)(NtkStyler* self, NtkStylerEntry entry);
+  gboolean (*set_style_property)(NtkStyler* self, NtkStylerKey key, const GValue* value);
 };
 
 NtkStyler* ntk_styler_new();

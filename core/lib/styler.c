@@ -11,7 +11,10 @@ size_t ntk_styler_element_get_depth(NtkStylerElement* elem) {
   g_return_val_if_fail(elem != NULL, -1);
 
   size_t i = 0;
-  while (elem[i] < NTK_STYLER_N_ELEMENTS && elem[i] > 0) i++;
+  while (elem[i] > 0) {
+    g_assert(elem[i] < NTK_STYLER_N_ELEMENTS);
+    i++;
+  }
   return i;
 }
 
@@ -129,34 +132,34 @@ static gboolean ntk_styler_default_get_style_property(NtkStyler* self, NtkStyler
   return srcval != NULL;
 }
 
-static gboolean ntk_styler_default_set_style_property(NtkStyler* self, NtkStylerEntry entry) {
+static gboolean ntk_styler_default_set_style_property(NtkStyler* self, NtkStylerKey key, const GValue* value) {
   NtkStylerPrivate* priv = NTK_STYLER_PRIVATE(self);
 
-  NtkStylerKey* key = g_try_malloc0(sizeof (NtkStylerKey));
-  g_return_val_if_fail(key != NULL, FALSE);
+  NtkStylerKey* impl_key = g_try_malloc0(sizeof (NtkStylerKey));
+  g_return_val_if_fail(impl_key != NULL, FALSE);
 
-  size_t n_elems = ntk_styler_element_get_depth(entry.key.elem);
+  size_t n_elems = ntk_styler_element_get_depth(key.elem);
 
-  key->elem = g_try_malloc(sizeof (NtkStylerElement) * n_elems);
-  if (key->elem == NULL) {
-    g_free(key);
+  impl_key->elem = g_try_malloc(sizeof (NtkStylerElement) * n_elems);
+  if (impl_key->elem == NULL) {
+    g_free(impl_key);
     g_return_val_if_reached(FALSE);
   }
 
-  for (size_t i = 0; i < n_elems; i++) key->elem[i] = entry.key.elem[i];
+  for (size_t i = 0; i < n_elems; i++) impl_key->elem[i] = key.elem[i];
 
-  key->state = entry.key.state;
-  key->prop = entry.key.prop;
+  impl_key->state = key.state;
+  impl_key->prop = key.prop;
 
-  GValue* value = g_try_malloc0(sizeof (GValue));
+  GValue* impl_value = g_try_malloc0(sizeof (GValue));
   if (value == NULL) {
-    g_free(key->elem);
-    g_free(key);
+    g_free(impl_key->elem);
+    g_free(impl_key);
     g_return_val_if_reached(FALSE);
   }
 
-  g_value_copy(&entry.value, value);
-  g_hash_table_insert(priv->styles, key, value);
+  g_value_copy(value, impl_value);
+  g_hash_table_insert(priv->styles, impl_key, impl_value);
   return TRUE;
 }
 
@@ -187,7 +190,7 @@ gboolean ntk_styler_import(NtkStyler* self, NtkStylerEntry* styles, size_t n_sty
 
   for (size_t i = 0; i < n_styles; i++) {
     NtkStylerEntry entry = styles[i];
-    g_return_val_if_fail(klass->set_style_property(self, entry), FALSE);
+    g_return_val_if_fail(klass->set_style_property(self, entry.key, &entry.value), FALSE);
   }
   return TRUE;
 }
@@ -222,12 +225,7 @@ gboolean ntk_styler_set_style_property(NtkStyler* self, NtkStylerKey key, const 
   g_return_val_if_fail(klass != NULL, FALSE);
   g_return_val_if_fail(klass->set_style_property != NULL, FALSE);
 
-  NtkStylerEntry entry = { .key = key };
-  g_value_copy(value, &entry.value);
-
-  gboolean result = klass->set_style_property(self, entry);
-  g_value_unset(&entry.value);
-  return result;
+  return klass->set_style_property(self, key, value);
 }
 
 gboolean ntk_styler_apply(NtkStyler* self, NtkContext* ctx) {
