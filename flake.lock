@@ -1,5 +1,26 @@
 {
   "nodes": {
+    "cssparser": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1663973475,
+        "narHash": "sha256-OUfAQQENQJqwZtJG+D3cWhQHheyuJtCYqM7vO1QgqxQ=",
+        "owner": "ExpidusOS",
+        "repo": "cssparser",
+        "rev": "04aeffe47b1c6b4343e739f5774bcba2fc3632b9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ExpidusOS",
+        "ref": "feat/nix",
+        "repo": "cssparser",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1663905476,
@@ -16,6 +37,7 @@
     },
     "root": {
       "inputs": {
+        "cssparser": "cssparser",
         "nixpkgs": "nixpkgs"
       }
     }

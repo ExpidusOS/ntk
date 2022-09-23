@@ -1,5 +1,7 @@
 option('tests', type: 'boolean', value: true, description: 'Run the tests')
 
+option('styling_css', type: 'feature', value: 'auto', description: 'Enable the CSS styler')
+
 option('gir', type: 'feature', value: 'auto', description: 'Enable GIR binding generation')
 option('vala', type: 'feature', value: 'auto', description: 'Enable Vala binding and compiling')
 

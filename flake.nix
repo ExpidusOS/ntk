@@ -1,7 +1,12 @@
 {
   description = "Nuklear Toolkit";
 
-  outputs = { self, nixpkgs, ... }:
+  inputs.cssparser = {
+    url = github:ExpidusOS/cssparser/feat/nix;
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+
+  outputs = { self, nixpkgs, cssparser, ... }:
     let
       supportedSystems = [
         "aarch64-linux"
@@ -18,6 +23,7 @@
       packages = forAllSystems (system:
         let
           pkgs = nixpkgsFor.${system};
+          cssparser-pkg = cssparser.packages.${system}.default;
 
           linuxPackages = {
             default = with pkgs; [
@@ -94,37 +100,38 @@
           default = mkDerivation {
             name = "ntk";
             mesonFlags = flagsForSystem.default;
-            buildInputs = with pkgs; [ cairo gtk4 libglvnd ] ++ packagesForSystem.default;
+            buildInputs = with pkgs; [ cairo gtk4 libglvnd cssparser-pkg ] ++ packagesForSystem.default;
           };
 
           cairo = mkDerivation {
             name = "ntk-cairo";
             mesonFlags = flagsForSystem.cairo;
-            buildInputs = with pkgs; [ cairo ] ++ packagesForSystem.cairo;
+            buildInputs = with pkgs; [ cairo cssparser-pkg ] ++ packagesForSystem.cairo;
           };
 
           gtk4 = mkDerivation {
             name = "ntk-gtk4";
             mesonFlags = flagsForSystem.gtk4;
-            buildInputs = with pkgs; [ gtk4 ] ++ packagesForSystem.gtk4;
+            buildInputs = with pkgs; [ gtk4 cssparser-pkg ] ++ packagesForSystem.gtk4;
           };
 
           gl = mkDerivation {
             name = "ntk-gl";
             mesonFlags = flagsForSystem.gl;
-            buildInputs = with pkgs; [ libglvnd ] ++ packagesForSystem.gl;
+            buildInputs = with pkgs; [ libglvnd cssparser-pkg ] ++ packagesForSystem.gl;
           };
         });
 
       mkDerivation = ({ name ? "ntk", buildInputs, system ? builtins.currentSystem }:
         let
           pkgs = nixpkgsFor.${system};
+          cssparser-pkg = cssparser.packages.${system}.default;
         in
         pkgs.stdenv.mkDerivation rec {
           inherit name buildInputs src;
 
           enableParallelBuilding = true;
-          nativeBuildInputs = with pkgs; [ meson vala ninja pkg-config gobject-introspection ];
+          nativeBuildInputs = with pkgs; [ meson vala ninja pkg-config gobject-introspection cssparser-pkg ];
 
           meta = with pkgs.lib; {
             homepage = "https://github.com/ExpidusOS/ntk";
@@ -136,6 +143,7 @@
       devShells = forAllSystems (system:
         let
           pkgs = nixpkgsFor.${system};
+          cssparser-pkg = cssparser.packages.${system}.default;
 
           linuxPackages = {
             default = with pkgs; [
@@ -179,6 +187,7 @@
               vala
               libadwaita
               libglvnd
+              cssparser-pkg
             ] ++ packagesForSystem.default;
           };
           minimal = pkgs.mkShell {
@@ -192,6 +201,7 @@
               pkg-config
               glib
               vala
+              cssparser-pkg
             ] ++ packagesForSystem.default;
           };
         });

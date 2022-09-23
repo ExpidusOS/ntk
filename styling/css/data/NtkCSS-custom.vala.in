@@ -1,0 +1,7 @@
+namespace NtkCSS {
+	[CCode (cheader_filename = "ntk/styling/css.h", type_id = "ntk_css_styler_get_type ()")]
+	[Version (since = "0.1.0")]
+	public class Styler : Ntk.Styler {
+		public Styler();
+	}
+}
