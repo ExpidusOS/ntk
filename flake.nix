@@ -195,5 +195,7 @@
             ] ++ packagesForSystem.default;
           };
         });
+
+      submodules = true;
     };
 }
