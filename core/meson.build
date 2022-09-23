@@ -7,9 +7,9 @@ configure_file(input: 'data/Ntk-custom.vala.in', output: 'Ntk-@0@-custom.vala'.f
 
 subdir('include/ntk')
 
-libntk_src = ['lib/context.c', 'lib/error.c', 'lib/input-dispatcher.c', 'lib/renderer.c', 'lib/utils.c',
+libntk_src = ['lib/context.c', 'lib/error.c', 'lib/input-dispatcher.c', 'lib/renderer.c', 'lib/styler.c', 'lib/utils.c',
   'lib/font/object.c', 'lib/font/user.c']
-libntk_headers = ['include/ntk/ntk.h', 'include/ntk/context.h', 'include/ntk/error.h', 'include/ntk/font.h', 'include/ntk/input-dispatcher.h', 'include/ntk/renderer.h', 'include/ntk/utils.h',
+libntk_headers = ['include/ntk/ntk.h', 'include/ntk/context.h', 'include/ntk/error.h', 'include/ntk/font.h', 'include/ntk/input-dispatcher.h', 'include/ntk/renderer.h', 'include/ntk/styler.h', 'include/ntk/utils.h',
   'include/ntk/font/object.h', 'include/ntk/font/user.h']
 
 libntk_inc = [include_directories('include')]
