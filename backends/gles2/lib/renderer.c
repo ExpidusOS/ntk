@@ -1,14 +1,15 @@
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
-#include <gio/gio.h>
-#include <ntk/backend/gles2/font.h>
-#include <ntk/backend/gles2/renderer.h>
-#include <ntk-gles2-resources.h>
 #include "error-priv.h"
 #include "renderer-priv.h"
 #include "shaders-priv.h"
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+#include <gio/gio.h>
+#include <ntk-gles2-resources.h>
+#include <ntk/backend/gles2/font.h>
+#include <ntk/backend/gles2/renderer.h>
 
-#define NTK_GLES2_RENDERER_PRIVATE(self) ((self)->priv == NULL ? ntk_gles2_renderer_get_instance_private(self) : (self)->priv)
+#define NTK_GLES2_RENDERER_PRIVATE(self)                                                                                    \
+  ((self)->priv == NULL ? ntk_gles2_renderer_get_instance_private(self) : (self)->priv)
 
 enum {
   PROP_0,
@@ -64,7 +65,9 @@ static gboolean ntk_gles2_renderer_has_ext(NtkGLES2Renderer* self, const char* e
   return FALSE;
 }
 
-static void ntk_gles2_renderer_log(GLenum src, GLenum type, GLuint id, GLenum severity, GLsizei len, const GLchar* msg, const void* user) {
+static void ntk_gles2_renderer_log(
+  GLenum src, GLenum type, GLuint id, GLenum severity, GLsizei len, const GLchar* msg, const void* user
+) {
   switch (type) {
     case GL_DEBUG_TYPE_ERROR_KHR:
     case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_KHR:
@@ -89,7 +92,8 @@ static void* ntk_gles2_renderer_load_proc_handler(NtkGLES2Renderer* self, const 
   return proc;
 }
 
-#define ntk_gles2_renderer_load_proc(self, name, error) ((self)->priv->procs.name = ntk_gles2_renderer_load_proc_handler(self, #name, error))
+#define ntk_gles2_renderer_load_proc(self, name, error)                                                                     \
+  ((self)->priv->procs.name = ntk_gles2_renderer_load_proc_handler(self, #name, error))
 
 static NtkRendererType ntk_gles2_renderer_get_render_type(NtkRenderer* renderer) {
   (void)renderer;
@@ -206,7 +210,7 @@ static gboolean ntk_gles2_renderer_initable_init(GInitable* initable, GCancellab
 
   if (priv->exts.KHR_debug) {
     glEnable(GL_DEBUG_OUTPUT_KHR);
-		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_KHR);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_KHR);
 
     priv->procs.glDebugMessageCallbackKHR(ntk_gles2_renderer_log, NULL);
     priv->procs.glDebugMessageControlKHR(GL_DONT_CARE, GL_DEBUG_TYPE_POP_GROUP_KHR, GL_DONT_CARE, 0, NULL, GL_FALSE);
@@ -215,7 +219,7 @@ static gboolean ntk_gles2_renderer_initable_init(GInitable* initable, GCancellab
 
   g_resources_register(ntk_gles2_get_resource());
 
-  GLuint prog = ntk_gles2_link_program_from_resource_path(NTK_GLES2_BASE_SHADERS_PATH"/quad", error);
+  GLuint prog = ntk_gles2_link_program_from_resource_path(NTK_GLES2_BASE_SHADERS_PATH "/quad", error);
   if (prog == 0) return FALSE;
 
   g_debug("GL version: %s", glGetString(GL_VERSION));
@@ -234,11 +238,14 @@ static void ntk_gles2_renderer_class_init(NtkGLES2RendererClass* klass) {
   NtkRendererClass* renderer_class = NTK_RENDERER_CLASS(klass);
 
   object_class->finalize = ntk_gles2_renderer_finalize;
-  
+
   object_class->set_property = ntk_gles2_renderer_set_property;
   object_class->get_property = ntk_gles2_renderer_get_property;
 
-  obj_props[PROP_PROC_LOADER] = g_param_spec_pointer("proc-loader", "GL Proc Loader", "The function used for loading any functions for GL which are not already available", G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
+  obj_props[PROP_PROC_LOADER] = g_param_spec_pointer(
+    "proc-loader", "GL Proc Loader", "The function used for loading any functions for GL which are not already available",
+    G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE
+  );
   g_object_class_install_properties(object_class, N_PROPERTIES, obj_props);
 
   renderer_class->get_render_type = ntk_gles2_renderer_get_render_type;

@@ -1,7 +1,7 @@
-#include <ntk/styler.h>
-#include <math.h>
 #include "context-priv.h"
 #include "styler-priv.h"
+#include <math.h>
+#include <ntk/styler.h>
 
 #define NTK_STYLER_PRIVATE(self) ntk_styler_get_instance_private(self)
 
@@ -39,14 +39,16 @@ guint ntk_styler_key_hash(NtkStylerKey* key) {
   size_t elem_digits = floor(log10((10 * n_elem_digits) + elem_count)) + 1;
   gint elem = 0;
 
-  for (size_t i = 0; i < elem_count; i++) elem += (10 * elem_digits) + key->elem[i];
+  for (size_t i = 0; i < elem_count; i++)
+    elem += (10 * elem_digits) + key->elem[i];
 
   size_t state_count = ntk_styler_state_get_depth(key->state);
   size_t n_state_digits = floor(log10(NTK_STYLER_N_STATES)) + 1;
   size_t state_digits = floor(log10((10 * n_state_digits) + state_count)) + 1;
   gint state = 0;
 
-  for (size_t i = 0; i < state_count; i++) state += (10 * state_digits) + key->state[i];
+  for (size_t i = 0; i < state_count; i++)
+    state += (10 * state_digits) + key->state[i];
 
   size_t n_prop_digits = floor(log10(NTK_STYLER_N_PROPERTIES)) + 1;
   return (elem << elem_digits) + (state << state_digits) + (key->prop << n_prop_digits);
@@ -98,7 +100,10 @@ static void ntk_styler_constructed(GObject* obj) {
   NtkStyler* self = NTK_STYLER(obj);
   NtkStylerPrivate* priv = NTK_STYLER_PRIVATE(self);
 
-  priv->styles = g_hash_table_new_full((GHashFunc)ntk_styler_key_hash, (GEqualFunc)ntk_styler_key_equal, (GDestroyNotify)ntk_styler_default_key_free, (GDestroyNotify)ntk_styler_default_value_free);
+  priv->styles = g_hash_table_new_full(
+    (GHashFunc)ntk_styler_key_hash, (GEqualFunc)ntk_styler_key_equal, (GDestroyNotify)ntk_styler_default_key_free,
+    (GDestroyNotify)ntk_styler_default_value_free
+  );
 }
 
 static void ntk_styler_finalize(GObject* obj) {
@@ -118,29 +123,31 @@ static GHashTable* ntk_styler_default_export(NtkStyler* self) {
 static gboolean ntk_styler_default_has_style_property(NtkStyler* self, NtkStylerKey key) {
   NtkStylerPrivate* priv = NTK_STYLER_PRIVATE(self);
 
-  NtkStylerKey* impl_key = g_try_malloc0(sizeof (NtkStylerKey));
+  NtkStylerKey* impl_key = g_try_malloc0(sizeof(NtkStylerKey));
   g_return_val_if_fail(impl_key != NULL, FALSE);
 
   size_t n_elems = ntk_styler_element_get_depth(key.elem);
 
-  impl_key->elem = g_try_malloc(sizeof (NtkStylerElement) * n_elems);
+  impl_key->elem = g_try_malloc(sizeof(NtkStylerElement) * n_elems);
   if (impl_key->elem == NULL) {
     g_free(impl_key);
     g_return_val_if_reached(FALSE);
   }
 
-  for (size_t i = 0; i < n_elems; i++) impl_key->elem[i] = key.elem[i];
+  for (size_t i = 0; i < n_elems; i++)
+    impl_key->elem[i] = key.elem[i];
 
   size_t n_states = ntk_styler_state_get_depth(key.state);
 
-  impl_key->state = g_try_malloc(sizeof (NtkStylerState) * n_states);
+  impl_key->state = g_try_malloc(sizeof(NtkStylerState) * n_states);
   if (impl_key->state == NULL) {
     g_free(impl_key->elem);
     g_free(impl_key);
     g_return_val_if_reached(FALSE);
   }
 
-  for (size_t i = 0; i < n_states; i++) impl_key->state[i] = key.state[i];
+  for (size_t i = 0; i < n_states; i++)
+    impl_key->state[i] = key.state[i];
 
   impl_key->prop = key.prop;
 
@@ -154,29 +161,31 @@ static gboolean ntk_styler_default_has_style_property(NtkStyler* self, NtkStyler
 static gboolean ntk_styler_default_get_style_property(NtkStyler* self, NtkStylerKey key, GValue* value) {
   NtkStylerPrivate* priv = NTK_STYLER_PRIVATE(self);
 
-  NtkStylerKey* impl_key = g_try_malloc0(sizeof (NtkStylerKey));
+  NtkStylerKey* impl_key = g_try_malloc0(sizeof(NtkStylerKey));
   g_return_val_if_fail(impl_key != NULL, FALSE);
 
   size_t n_elems = ntk_styler_element_get_depth(key.elem);
 
-  impl_key->elem = g_try_malloc(sizeof (NtkStylerElement) * n_elems);
+  impl_key->elem = g_try_malloc(sizeof(NtkStylerElement) * n_elems);
   if (impl_key->elem == NULL) {
     g_free(impl_key);
     g_return_val_if_reached(FALSE);
   }
 
-  for (size_t i = 0; i < n_elems; i++) impl_key->elem[i] = key.elem[i];
+  for (size_t i = 0; i < n_elems; i++)
+    impl_key->elem[i] = key.elem[i];
 
   size_t n_states = ntk_styler_state_get_depth(key.state);
 
-  impl_key->state = g_try_malloc(sizeof (NtkStylerState) * n_states);
+  impl_key->state = g_try_malloc(sizeof(NtkStylerState) * n_states);
   if (impl_key->state == NULL) {
     g_free(impl_key->elem);
     g_free(impl_key);
     g_return_val_if_reached(FALSE);
   }
 
-  for (size_t i = 0; i < n_states; i++) impl_key->state[i] = key.state[i];
+  for (size_t i = 0; i < n_states; i++)
+    impl_key->state[i] = key.state[i];
 
   impl_key->prop = key.prop;
 
@@ -192,33 +201,35 @@ static gboolean ntk_styler_default_get_style_property(NtkStyler* self, NtkStyler
 static gboolean ntk_styler_default_set_style_property(NtkStyler* self, NtkStylerKey key, const GValue* value) {
   NtkStylerPrivate* priv = NTK_STYLER_PRIVATE(self);
 
-  NtkStylerKey* impl_key = g_try_malloc0(sizeof (NtkStylerKey));
+  NtkStylerKey* impl_key = g_try_malloc0(sizeof(NtkStylerKey));
   g_return_val_if_fail(impl_key != NULL, FALSE);
 
   size_t n_elems = ntk_styler_element_get_depth(key.elem);
 
-  impl_key->elem = g_try_malloc(sizeof (NtkStylerElement) * n_elems);
+  impl_key->elem = g_try_malloc(sizeof(NtkStylerElement) * n_elems);
   if (impl_key->elem == NULL) {
     g_free(impl_key);
     g_return_val_if_reached(FALSE);
   }
 
-  for (size_t i = 0; i < n_elems; i++) impl_key->elem[i] = key.elem[i];
+  for (size_t i = 0; i < n_elems; i++)
+    impl_key->elem[i] = key.elem[i];
 
   size_t n_states = ntk_styler_state_get_depth(key.state);
 
-  impl_key->state = g_try_malloc(sizeof (NtkStylerState) * n_states);
+  impl_key->state = g_try_malloc(sizeof(NtkStylerState) * n_states);
   if (impl_key->state == NULL) {
     g_free(impl_key->elem);
     g_free(impl_key);
     g_return_val_if_reached(FALSE);
   }
 
-  for (size_t i = 0; i < n_states; i++) impl_key->state[i] = key.state[i];
+  for (size_t i = 0; i < n_states; i++)
+    impl_key->state[i] = key.state[i];
 
   impl_key->prop = key.prop;
 
-  GValue* impl_value = g_try_malloc0(sizeof (GValue));
+  GValue* impl_value = g_try_malloc0(sizeof(GValue));
   if (value == NULL) {
     g_free(impl_key->state);
     g_free(impl_key->elem);

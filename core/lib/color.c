@@ -11,7 +11,7 @@ NtkColor* ntk_color_new(NtkColorFormat fmt, ...) {
 }
 
 NtkColor* ntk_color_newv(NtkColorFormat fmt, va_list ap) {
-  NtkColor* self = g_try_malloc0(sizeof (NtkColor));
+  NtkColor* self = g_try_malloc0(sizeof(NtkColor));
   g_return_val_if_fail(self != NULL, NULL);
 
   self->fmt = fmt;
@@ -22,7 +22,7 @@ NtkColor* ntk_color_newv(NtkColorFormat fmt, va_list ap) {
 NtkColor* ntk_color_copy(NtkColor* self) {
   g_return_val_if_fail(self != NULL, NULL);
 
-  NtkColor* c = g_try_malloc0(sizeof (NtkColor));
+  NtkColor* c = g_try_malloc0(sizeof(NtkColor));
   g_return_val_if_fail(c != NULL, NULL);
 
   c->fmt = self->fmt;
@@ -41,7 +41,7 @@ NtkColor* ntk_color_copy(NtkColor* self) {
       c->value.rgba.i.a = self->value.rgba.i.a;
       break;
     case NTK_COLOR_FORMAT_RGBA_HEX:
-      memcpy(c->value.rgba.h, self->value.rgba.h, sizeof (char) * 8);
+      memcpy(c->value.rgba.h, self->value.rgba.h, sizeof(char) * 8);
       break;
     case NTK_COLOR_FORMAT_RGB_FLOAT:
       c->value.rgb.f.r = self->value.rgb.f.r;
@@ -54,7 +54,7 @@ NtkColor* ntk_color_copy(NtkColor* self) {
       c->value.rgb.i.b = self->value.rgb.i.b;
       break;
     case NTK_COLOR_FORMAT_RGB_HEX:
-      memcpy(c->value.rgb.h, self->value.rgb.h, sizeof (char) * 6);
+      memcpy(c->value.rgb.h, self->value.rgb.h, sizeof(char) * 6);
       break;
     case NTK_COLOR_FORMAT_HSVA_FLOAT:
       c->value.hsva.f.h = self->value.hsva.f.h;
@@ -98,11 +98,7 @@ NtkColor* ntk_color_convert(NtkColor* self, NtkColorFormat fmt) {
 
   switch (fmt) {
     case NTK_COLOR_FORMAT_RGBA_FLOAT:
-      nk_color_f(&self->value.rgba.f.r,
-          &self->value.rgba.f.g,
-          &self->value.rgba.f.b,
-          &self->value.rgba.f.a,
-          color);
+      nk_color_f(&self->value.rgba.f.r, &self->value.rgba.f.g, &self->value.rgba.f.b, &self->value.rgba.f.a, color);
       break;
     case NTK_COLOR_FORMAT_RGBA_INT:
       self->value.rgba.i.r = color.r;
@@ -130,30 +126,16 @@ NtkColor* ntk_color_convert(NtkColor* self, NtkColorFormat fmt) {
       nk_color_hex_rgb(self->value.rgb.h, color);
       break;
     case NTK_COLOR_FORMAT_HSVA_FLOAT:
-      nk_color_hsva_f(&self->value.hsva.f.h,
-          &self->value.hsva.f.s,
-          &self->value.hsva.f.v,
-          &self->value.hsva.f.a,
-          color);
+      nk_color_hsva_f(&self->value.hsva.f.h, &self->value.hsva.f.s, &self->value.hsva.f.v, &self->value.hsva.f.a, color);
       break;
     case NTK_COLOR_FORMAT_HSVA_INT:
-      nk_color_hsva_i(&self->value.hsva.i.h,
-          &self->value.hsva.i.s,
-          &self->value.hsva.i.v,
-          &self->value.hsva.i.a,
-          color);
+      nk_color_hsva_i(&self->value.hsva.i.h, &self->value.hsva.i.s, &self->value.hsva.i.v, &self->value.hsva.i.a, color);
       break;
     case NTK_COLOR_FORMAT_HSV_FLOAT:
-      nk_color_hsv_f(&self->value.hsv.f.h,
-          &self->value.hsv.f.s,
-          &self->value.hsv.f.v,
-          color);
+      nk_color_hsv_f(&self->value.hsv.f.h, &self->value.hsv.f.s, &self->value.hsv.f.v, color);
       break;
     case NTK_COLOR_FORMAT_HSV_INT:
-      nk_color_hsv_i(&self->value.hsv.i.h,
-          &self->value.hsv.i.s,
-          &self->value.hsv.i.v,
-          color);
+      nk_color_hsv_i(&self->value.hsv.i.h, &self->value.hsv.i.s, &self->value.hsv.i.v, color);
       break;
   }
   return c;
@@ -188,7 +170,7 @@ void ntk_color_setv(NtkColor* self, va_list ap) {
       {
         char* hex = va_arg(ap, char*);
         g_return_if_fail(strlen(hex) == 8);
-        memcpy(self->value.rgba.h, hex, sizeof (char) * 8);
+        memcpy(self->value.rgba.h, hex, sizeof(char) * 8);
       }
       break;
     case NTK_COLOR_FORMAT_RGB_FLOAT:
@@ -205,7 +187,7 @@ void ntk_color_setv(NtkColor* self, va_list ap) {
       {
         char* hex = va_arg(ap, char*);
         g_return_if_fail(strlen(hex) == 6);
-        memcpy(self->value.rgb.h, hex, sizeof (char) * 6);
+        memcpy(self->value.rgb.h, hex, sizeof(char) * 6);
       }
       break;
     case NTK_COLOR_FORMAT_HSVA_FLOAT:

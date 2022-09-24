@@ -1,8 +1,8 @@
 #pragma once
 
-#include <pango/pangoft2.h>
 #include <ntk/font.h>
 #include <nuklear.h>
+#include <pango/pangoft2.h>
 
 typedef struct _NtkPangoFT2FontPrivate {
   PangoFont* font;

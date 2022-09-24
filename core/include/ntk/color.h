@@ -34,12 +34,14 @@ typedef union {
     float b;
     float a;
   } f;
+
   struct {
     int r;
     int g;
     int b;
     int a;
   } i;
+
   gchar h[8];
 } NtkColorRGBA;
 
@@ -54,11 +56,13 @@ typedef union {
     float g;
     float b;
   } f;
+
   struct {
     int r;
     int g;
     int b;
   } i;
+
   gchar h[8];
 } NtkColorRGB;
 
@@ -74,6 +78,7 @@ typedef union {
     float v;
     float a;
   } f;
+
   struct {
     int h;
     int s;
@@ -93,6 +98,7 @@ typedef union {
     float s;
     float v;
   } f;
+
   struct {
     int h;
     int s;

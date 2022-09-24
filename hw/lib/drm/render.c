@@ -1,11 +1,11 @@
+#include "../error-priv.h"
 #include "render-priv.h"
+#include <fcntl.h>
 #include <gio/gio.h>
+#include <limits.h>
 #include <ntk/hw/device.h>
 #include <ntk/hw/drm/render.h>
-#include <limits.h>
-#include <fcntl.h>
 #include <unistd.h>
-#include "../error-priv.h"
 
 #define NTK_HW_DRM_RENDER_PRIVATE(self) ((self)->priv == NULL ? ntk_hw_drm_render_get_instance_private(self) : (self)->priv)
 
@@ -121,8 +121,12 @@ static void ntk_hw_drm_render_class_init(NtkHWDrmRenderClass* klass) {
   object_class->set_property = ntk_hw_drm_render_set_property;
   object_class->get_property = ntk_hw_drm_render_get_property;
 
-  obj_props[PROP_FD] = g_param_spec_int("fd", "File descriptor", "The file descriptor utilized with this device", 0, INT_MAX, 0, G_PARAM_READABLE);
-  obj_props[PROP_PATH] = g_param_spec_string("path", "Device path", "The path to the DRM render device node", NULL, G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
+  obj_props[PROP_FD] = g_param_spec_int(
+    "fd", "File descriptor", "The file descriptor utilized with this device", 0, INT_MAX, 0, G_PARAM_READABLE
+  );
+  obj_props[PROP_PATH] = g_param_spec_string(
+    "path", "Device path", "The path to the DRM render device node", NULL, G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE
+  );
   obj_props[PROP_DEVICE] = g_param_spec_pointer("device", "Device", "The DRM device instance", G_PARAM_READABLE);
   g_object_class_install_properties(object_class, N_PROPERTIES, obj_props);
 }
@@ -138,7 +142,7 @@ NtkHWDisplay* ntk_hw_drm_render_new(GError** error) {
     return NULL;
   }
 
-  drmDevice** devices = calloc(device_count, sizeof (drmDevice*));
+  drmDevice** devices = calloc(device_count, sizeof(drmDevice*));
   if (devices == NULL) {
     ntk_hw_error_set_bad_device(error, "failed to allocate the device array for DRM", NULL);
     return NULL;
@@ -163,14 +167,16 @@ NtkHWDisplay* ntk_hw_drm_render_new(GError** error) {
       }
 
       NtkHWDisplay* display = ntk_hw_drm_render_new_with_path(name, error);
-      for (int i = 0; i < device_count; i++) drmFreeDevice(&devices[i]);
+      for (int i = 0; i < device_count; i++)
+        drmFreeDevice(&devices[i]);
       close(fd);
       free(devices);
       return display;
     }
   }
 
-  for (int i = 0; i < device_count; i++) drmFreeDevice(&devices[i]);
+  for (int i = 0; i < device_count; i++)
+    drmFreeDevice(&devices[i]);
   free(devices);
   ntk_hw_error_set_bad_device(error, "failed to find a DRM device with a render node", NULL);
   return NULL;

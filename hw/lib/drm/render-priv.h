@@ -1,8 +1,8 @@
 #pragma once
 
 #include <drm/drm.h>
-#include <xf86drm.h>
 #include <glib.h>
+#include <xf86drm.h>
 
 typedef struct _NtkHWDrmRenderPrivate {
   drmDevicePtr device;

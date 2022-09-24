@@ -7,8 +7,8 @@
 #endif
 
 #include <glib-object.h>
-#include <pango/pango.h>
 #include <ntk/font/user.h>
+#include <pango/pango.h>
 
 #define NTK_PANGO_TYPE_FT2_FONT ntk_pango_ft2_font_get_type()
 
@@ -26,7 +26,8 @@ typedef struct _NtkPangoFT2Font {
 
 GType ntk_pango_ft2_font_get_type();
 
-NtkPangoFT2Font* ntk_pango_ft2_font_new(PangoFontDescription* desc, NtkFontUploadGPUCallback gpu_upload, gpointer gpu_upload_target);
+NtkPangoFT2Font*
+ntk_pango_ft2_font_new(PangoFontDescription* desc, NtkFontUploadGPUCallback gpu_upload, gpointer gpu_upload_target);
 
 NtkPangoFT2Font* ntk_pango_ft2_font_copy(NtkPangoFT2Font* self);
 void ntk_pango_ft2_font_free(NtkPangoFT2Font* self);

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <glib-object.h>
 #include "context.h"
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 

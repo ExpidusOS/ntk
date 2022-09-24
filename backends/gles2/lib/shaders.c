@@ -12,7 +12,7 @@ GLuint ntk_gles2_compile_shader(GLuint type, const GLchar* src, GError** error) 
     GLint log_len = 0;
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_len);
 
-    gchar* log = g_malloc0(sizeof (char) * log_len);
+    gchar* log = g_malloc0(sizeof(char) * log_len);
     glGetShaderInfoLog(shader, log_len, &log_len, (GLchar*)log);
     gchar* message = g_strdup_printf("Failed to compile shader: %s", log);
     g_free(log);
@@ -43,9 +43,9 @@ GLuint ntk_gles2_link_program(const GLchar* vert_src, const GLchar* frag_src, GE
   glLinkProgram(prog);
 
   glDetachShader(prog, vert);
-	glDetachShader(prog, frag);
-	glDeleteShader(vert);
-	glDeleteShader(frag);
+  glDetachShader(prog, frag);
+  glDeleteShader(vert);
+  glDeleteShader(frag);
 
   GLint ok;
   glGetProgramiv(prog, GL_LINK_STATUS, &ok);
@@ -68,7 +68,7 @@ GLuint ntk_gles2_link_program_from_resource_path(const gchar* path, GError** err
     g_clear_pointer(&vert_path, g_free);
     return 0;
   }
-  
+
   g_debug("Creating shader program (vert path: %s, frag path: %s)", vert_path, frag_path);
 
   GBytes* vert_bytes = g_resources_lookup_data(vert_path, G_RESOURCE_LOOKUP_FLAGS_NONE, error);

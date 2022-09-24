@@ -7,11 +7,11 @@
 #endif
 
 #include <drm/drm.h>
-#include <xf86drm.h>
 #include <glib-object.h>
 #include <ntk/hw/build.h>
 #include <ntk/hw/device.h>
 #include <ntk/hw/display.h>
+#include <xf86drm.h>
 
 G_BEGIN_DECLS
 

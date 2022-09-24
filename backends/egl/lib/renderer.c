@@ -1,9 +1,9 @@
+#include "error-priv.h"
+#include "renderer-priv.h"
 #include <gio/gio.h>
 #include <ntk/backend/egl/renderer.h>
 #include <ntk/font.h>
 #include <ntk/hw.h>
-#include "error-priv.h"
-#include "renderer-priv.h"
 
 #define NTK_EGL_RENDERER_PRIVATE(self) ((self)->priv == NULL ? ntk_egl_renderer_get_instance_private(self) : (self)->priv)
 
@@ -182,10 +182,10 @@ static gboolean ntk_egl_renderer_configure_vertex(NtkRenderer* renderer, struct 
 
   g_return_val_if_fail(ntk_egl_renderer_begin(self, error), FALSE);
   NtkRendererClass* render_class = NTK_RENDERER_GET_CLASS(priv->gl_renderer);
-  
+
   g_assert(render_class != NULL);
   g_assert(render_class->configure_vertex != NULL);
-  
+
   gboolean result = render_class->configure_vertex(NTK_RENDERER(priv->gl_renderer), cfg, error);
 
   g_return_val_if_fail(ntk_egl_renderer_end(self, error), FALSE);
@@ -258,19 +258,21 @@ static gboolean ntk_egl_renderer_pre_render(NtkRenderer* renderer, GError** erro
   NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
 
   g_return_val_if_fail(ntk_egl_renderer_begin(self, error), FALSE);
-  
+
   NtkRendererClass* render_class = NTK_RENDERER_GET_CLASS(priv->gl_renderer);
-  if (render_class != NULL && render_class->pre_render != NULL) return render_class->pre_render(NTK_RENDERER(priv->gl_renderer), error);
+  if (render_class != NULL && render_class->pre_render != NULL)
+    return render_class->pre_render(NTK_RENDERER(priv->gl_renderer), error);
   return TRUE;
 }
 
 static gboolean ntk_egl_renderer_post_render(NtkRenderer* renderer, GError** error) {
   NtkEGLRenderer* self = NTK_EGL_RENDERER(renderer);
   NtkEGLRendererPrivate* priv = NTK_EGL_RENDERER_PRIVATE(self);
-  
+
   NtkRendererClass* render_class = NTK_RENDERER_GET_CLASS(priv->gl_renderer);
   gboolean result = TRUE;
-  if (render_class != NULL && render_class->post_render != NULL) result = render_class->post_render(NTK_RENDERER(priv->gl_renderer), error);
+  if (render_class != NULL && render_class->post_render != NULL)
+    result = render_class->post_render(NTK_RENDERER(priv->gl_renderer), error);
   g_return_val_if_fail(ntk_egl_renderer_end(self, error), FALSE);
   return result;
 }
@@ -285,9 +287,12 @@ static void ntk_egl_renderer_finalize(GObject* obj) {
         g_debug("Destroying GLES2 renderer");
 
         GError* error = NULL;
-        if (!ntk_egl_renderer_begin(self, &error)) g_error("Failed to begin OpenGL %s:%d: %s", g_quark_to_string(error->domain), error->code, error->message);
-        else g_clear_object(&priv->gl_renderer);
-        if (!ntk_egl_renderer_end(self, &error)) g_error("Failed to end OpenGL %s:%d: %s", g_quark_to_string(error->domain), error->code, error->message);
+        if (!ntk_egl_renderer_begin(self, &error))
+          g_error("Failed to begin OpenGL %s:%d: %s", g_quark_to_string(error->domain), error->code, error->message);
+        else
+          g_clear_object(&priv->gl_renderer);
+        if (!ntk_egl_renderer_end(self, &error))
+          g_error("Failed to end OpenGL %s:%d: %s", g_quark_to_string(error->domain), error->code, error->message);
       }
 
       g_debug("Destroying EGL context");
@@ -476,7 +481,8 @@ static gboolean ntk_egl_renderer_display_init(NtkEGLRenderer* self, EGLenum plat
     priv->exts.EXT_device_drm = HAS_EXT("EGL_EXT_device_drm");
     priv->exts.EXT_device_drm_render_node = HAS_EXT("EGL_EXT_device_drm_render_node");
 #else
-    if (HAS_EXT("EGL_EXT_device_drm") || HAS_EXT("EGL_EXT_device_drm_render_node")) g_warning("Device supports DRM but DRM support is disabled");
+    if (HAS_EXT("EGL_EXT_device_drm") || HAS_EXT("EGL_EXT_device_drm_render_node"))
+      g_warning("Device supports DRM but DRM support is disabled");
 #endif
 
 #undef HAS_EXT
@@ -484,7 +490,9 @@ static gboolean ntk_egl_renderer_display_init(NtkEGLRenderer* self, EGLenum plat
 #define HAS_EXT(name) ntk_egl_renderer_has_ext(display_exts, name)
 
   if (!HAS_EXT("EGL_KHR_no_config_context") && !HAS_EXT("EGL_MESA_configless_context")) {
-    ntk_egl_error_set_missing_ext(error, "extensions not supported", "EGL_KHR_no_config_context/EGL_MESA_configless_context");
+    ntk_egl_error_set_missing_ext(
+      error, "extensions not supported", "EGL_KHR_no_config_context/EGL_MESA_configless_context"
+    );
     return FALSE;
   }
 
@@ -510,7 +518,7 @@ static gboolean ntk_egl_renderer_display_init(NtkEGLRenderer* self, EGLenum plat
   }
 
   attribs[atti++] = EGL_NONE;
-  g_assert(atti <= sizeof(attribs)/sizeof(attribs[0]));
+  g_assert(atti <= sizeof(attribs) / sizeof(attribs[0]));
 
   priv->context = eglCreateContext(priv->display, EGL_NO_CONFIG_KHR, EGL_NO_CONTEXT, attribs);
   if (priv->context == EGL_NO_CONTEXT) {
@@ -521,8 +529,10 @@ static gboolean ntk_egl_renderer_display_init(NtkEGLRenderer* self, EGLenum plat
   if (priv->exts.IMG_context_priority) {
     EGLint priority = EGL_CONTEXT_PRIORITY_MEDIUM_IMG;
     eglQueryContext(priv->display, priv->context, EGL_CONTEXT_PRIORITY_LEVEL_IMG, &priority);
-    if (priority != EGL_CONTEXT_PRIORITY_HIGH_IMG) g_error("Failed to obtain a high priority context");
-    else g_debug("Obtained high priority context");
+    if (priority != EGL_CONTEXT_PRIORITY_HIGH_IMG)
+      g_error("Failed to obtain a high priority context");
+    else
+      g_debug("Obtained high priority context");
   }
 
   if (!ntk_egl_renderer_begin(self, error)) return FALSE;
@@ -585,9 +595,8 @@ static void ntk_egl_renderer_class_init(NtkEGLRendererClass* klass) {
   /**
    * NtkEGLRenderer:display: (skip)
    */
-  obj_props[PROP_DISPLAY] = g_param_spec_pointer(
-    "display", "EGL Display", "The EGL Display Snapshot to render onto.", G_PARAM_READABLE
-  );
+  obj_props[PROP_DISPLAY] =
+    g_param_spec_pointer("display", "EGL Display", "The EGL Display Snapshot to render onto.", G_PARAM_READABLE);
   g_object_class_install_properties(object_class, N_PROPERTIES, obj_props);
 
   renderer_class->get_render_type = ntk_egl_renderer_get_render_type;

@@ -9,7 +9,7 @@ static struct nk_image ntk_gles2_font_upload(struct nk_image* src, gpointer user
   glGenTextures(1, &texture);
   glBindTexture(GL_TEXTURE_2D, texture);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (GLsizei)src->w, (GLsizei)src->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, src->handle.ptr);
   glBindTexture(GL_TEXTURE_2D, 0);
   g_debug("Uploading font to GPU with texture ID: %d", texture);

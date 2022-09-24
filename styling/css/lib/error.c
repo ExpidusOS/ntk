@@ -1,5 +1,5 @@
-#include <ntk/styling/css/error.h>
 #include "error-priv.h"
+#include <ntk/styling/css/error.h>
 
 typedef struct {
   CssError error;
@@ -22,7 +22,10 @@ G_DEFINE_EXTENDED_ERROR(NtkCSSError, ntk_css_error);
 
 void ntk_css_error_set(GError** error, CssError* cerror) {
   NtkCSSErrorPrivate* priv;
-  g_set_error(error, NTK_CSS_ERROR, NTK_CSS_ERROR_PARSER, "CSS parsing failed on (%d:%d) - (%d:%d): %s", cerror->first_line, cerror->first_column, cerror->last_line, cerror->last_column, cerror->message);
+  g_set_error(
+    error, NTK_CSS_ERROR, NTK_CSS_ERROR_PARSER, "CSS parsing failed on (%d:%d) - (%d:%d): %s", cerror->first_line,
+    cerror->first_column, cerror->last_line, cerror->last_column, cerror->message
+  );
   if (error != NULL && *error != NULL) {
     priv = ntk_css_error_get_private(*error);
     g_return_if_fail(priv != NULL);

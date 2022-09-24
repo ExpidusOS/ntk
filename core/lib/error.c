@@ -3,6 +3,7 @@
 
 typedef struct {
   int type;
+
   union {
     NtkRenderer* renderer;
     NtkContext* context;

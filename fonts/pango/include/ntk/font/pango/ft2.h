@@ -6,5 +6,5 @@
 #error "NtkPango was not compiled with FT2 support"
 #endif
 
-#include "ft2/user.h"
 #include "ft2/object.h"
+#include "ft2/user.h"

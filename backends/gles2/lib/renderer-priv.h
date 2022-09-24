@@ -1,9 +1,9 @@
 #pragma once
 
-#include <glib.h>
-#include <ntk/backend/gles2/renderer.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
+#include <glib.h>
+#include <ntk/backend/gles2/renderer.h>
 
 typedef struct _NtkGLES2RendererPrivate {
   const char* exts_str;

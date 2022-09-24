@@ -1,6 +1,6 @@
+#include "user-priv.h"
 #include <ntk/font/pango/ft2/user.h>
 #include <pango/pangoft2.h>
-#include "user-priv.h"
 
 G_DEFINE_BOXED_TYPE(NtkPangoFT2Font, ntk_pango_ft2_font, ntk_pango_ft2_font_copy, ntk_pango_ft2_font_free);
 
@@ -21,17 +21,18 @@ static void ntk_pango_ft2_font_impl_free(NtkUserFont* font) {
   free(self);
 }
 
-NtkPangoFT2Font* ntk_pango_ft2_font_new(PangoFontDescription* desc, NtkFontUploadGPUCallback gpu_upload, gpointer gpu_upload_target) {
+NtkPangoFT2Font*
+ntk_pango_ft2_font_new(PangoFontDescription* desc, NtkFontUploadGPUCallback gpu_upload, gpointer gpu_upload_target) {
   g_return_val_if_fail(desc != NULL, NULL);
   g_return_val_if_fail(gpu_upload != NULL, NULL);
 
-  NtkPangoFT2Font* self = g_try_malloc0(sizeof (NtkPangoFT2Font));
+  NtkPangoFT2Font* self = g_try_malloc0(sizeof(NtkPangoFT2Font));
   if (self == NULL) {
     g_critical("Failed to allocate NtkPangoFT2Font");
     return NULL;
   }
 
-  NtkPangoFT2FontPrivate* priv = g_try_malloc0(sizeof (NtkPangoFT2FontPrivate));
+  NtkPangoFT2FontPrivate* priv = g_try_malloc0(sizeof(NtkPangoFT2FontPrivate));
   if (priv == NULL) {
     free(self);
     g_critical("Failed to allocate NtkPangoFT2FontPrivate");
@@ -95,8 +96,9 @@ NtkPangoFT2Font* ntk_pango_ft2_font_new(PangoFontDescription* desc, NtkFontUploa
 
   nk_font_atlas_init_default(&priv->atlas);
   nk_font_atlas_begin(&priv->atlas);
-  priv->nk_font = nk_font_atlas_add_from_file(&priv->atlas, filename, pango_font_description_get_size(desc) / PANGO_SCALE, &priv->cfg);
-  
+  priv->nk_font =
+    nk_font_atlas_add_from_file(&priv->atlas, filename, pango_font_description_get_size(desc) / PANGO_SCALE, &priv->cfg);
+
   int atlas_width;
   int atlas_height;
   const void* img_data = nk_font_atlas_bake(&priv->atlas, &atlas_width, &atlas_height, NK_FONT_ATLAS_RGBA32);

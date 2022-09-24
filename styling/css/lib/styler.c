@@ -1,8 +1,7 @@
-#include <ntk/styling/css/styler.h>
 #include "styler-priv.h"
+#include <ntk/styling/css/styler.h>
 
-#define NTK_CSS_STYLER_PRIVATE(self)                                                                                 \
-  ((self)->priv == NULL ? ntk_css_styler_get_instance_private(self) : (self)->priv)
+#define NTK_CSS_STYLER_PRIVATE(self) ((self)->priv == NULL ? ntk_css_styler_get_instance_private(self) : (self)->priv)
 
 G_DEFINE_TYPE_WITH_PRIVATE(NtkCSSStyler, ntk_css_styler, NTK_TYPE_STYLER);
 
@@ -16,8 +15,9 @@ static void ntk_css_styler_default_value_free(GValue* value) {
   g_free(value);
 }
 
-static gboolean ntk_css_styler_entry_create(CssStyleRule* rule, CssDeclaration* declaration, NtkStylerKey** key_out, GValue** value_out) {
-  NtkStylerKey* key = g_try_malloc0(sizeof (NtkStylerKey));
+static gboolean
+ntk_css_styler_entry_create(CssStyleRule* rule, CssDeclaration* declaration, NtkStylerKey** key_out, GValue** value_out) {
+  NtkStylerKey* key = g_try_malloc0(sizeof(NtkStylerKey));
   g_return_val_if_fail(key != NULL, FALSE);
 
   size_t n_elems = 0;
@@ -37,13 +37,13 @@ static gboolean ntk_css_styler_entry_create(CssStyleRule* rule, CssDeclaration* 
     }
   }
 
-  key->elem = g_try_malloc0(sizeof (NtkStylerElement) * n_elems);
+  key->elem = g_try_malloc0(sizeof(NtkStylerElement) * n_elems);
   if (key->elem == NULL) {
     g_free(key);
     g_return_val_if_reached(FALSE);
   }
 
-  key->state = g_try_malloc0(sizeof (NtkStylerState) * n_states);
+  key->state = g_try_malloc0(sizeof(NtkStylerState) * n_states);
   if (key->state == NULL) {
     g_free(key->elem);
     g_free(key);
@@ -119,7 +119,10 @@ static GHashTable* ntk_css_styler_export(NtkStyler* styler) {
   NtkCSSStyler* self = NTK_CSS_STYLER(styler);
   NtkCSSStylerPrivate* priv = NTK_CSS_STYLER_PRIVATE(self);
 
-  GHashTable* tbl = g_hash_table_new_full((GHashFunc)ntk_styler_key_hash, (GEqualFunc)ntk_styler_key_equal, (GDestroyNotify)ntk_css_styler_default_key_free, (GDestroyNotify)ntk_css_styler_default_value_free);
+  GHashTable* tbl = g_hash_table_new_full(
+    (GHashFunc)ntk_styler_key_hash, (GEqualFunc)ntk_styler_key_equal, (GDestroyNotify)ntk_css_styler_default_key_free,
+    (GDestroyNotify)ntk_css_styler_default_value_free
+  );
   g_return_val_if_fail(tbl != NULL, NULL);
 
   for (size_t i = 0; i < priv->output->stylesheet->rules.length; i++) {

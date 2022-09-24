@@ -3,6 +3,7 @@
 
 typedef struct {
   int type;
+
   union {
     char* name;
     EGLint egl_error;

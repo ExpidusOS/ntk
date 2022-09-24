@@ -3,6 +3,7 @@
 
 typedef struct {
   int type;
+
   union {
     char* name;
     GLint gl_error;
@@ -51,8 +52,8 @@ void ntk_gles2_error_set_missing_ext(GError** error, const char* reason, const c
 void ntk_gles2_error_set_bad_proc(GError** error, const char* reason, const char* name) {
   NtkGLES2ErrorPrivate* priv;
   g_set_error(
-    error, NTK_GLES2_ERROR, NTK_GLES2_ERROR_BAD_PROC, "Failed to get the proc address for GLES2 provided function \"%s\": %s",
-    name, reason
+    error, NTK_GLES2_ERROR, NTK_GLES2_ERROR_BAD_PROC,
+    "Failed to get the proc address for GLES2 provided function \"%s\": %s", name, reason
   );
   if (error != NULL && *error != NULL) {
     priv = ntk_gles2_error_get_private(*error);
