@@ -52,6 +52,7 @@ namespace Ntk {
 	[CCode (cheader_filename = "ntk/ntk.h", has_type_id = false)]
 	[Version (since = "0.1.0")]
 	public struct StylerKey {
+		[CCode (array_length = false, array_null_terminated = true)] public Ntk.StylerState[] state;
 		[CCode (array_length = false, array_null_terminated = true)] public Ntk.StylerElement[] elem;
 	}
 

@@ -18,9 +18,21 @@ size_t ntk_styler_element_get_depth(NtkStylerElement* elem) {
   return i;
 }
 
+size_t ntk_styler_state_get_depth(NtkStylerState* state) {
+  g_return_val_if_fail(state != NULL, -1);
+
+  size_t i = 0;
+  while (state[i] > 0) {
+    g_assert(state[i] < NTK_STYLER_N_STATES);
+    i++;
+  }
+  return i;
+}
+
 guint ntk_styler_key_hash(NtkStylerKey* key) {
   g_return_val_if_fail(key != NULL, -1);
   g_return_val_if_fail(key->elem != NULL, -1);
+  g_return_val_if_fail(key->state != NULL, -1);
 
   size_t elem_count = ntk_styler_element_get_depth(key->elem);
   size_t n_elem_digits = floor(log10(NTK_STYLER_N_ELEMENTS)) + 1;
@@ -29,13 +41,35 @@ guint ntk_styler_key_hash(NtkStylerKey* key) {
 
   for (size_t i = 0; i < elem_count; i++) elem += (10 * elem_digits) + key->elem[i];
 
-  size_t n_prop_digits = floor(log10(NTK_STYLER_N_PROPERTIES)) + 1;
+  size_t state_count = ntk_styler_state_get_depth(key->state);
   size_t n_state_digits = floor(log10(NTK_STYLER_N_STATES)) + 1;
-  return (elem << n_elem_digits) + (key->prop << n_prop_digits) + (key->state << n_state_digits);
+  size_t state_digits = floor(log10((10 * n_state_digits) + state_count)) + 1;
+  gint state = 0;
+
+  for (size_t i = 0; i < state_count; i++) state += (10 * state_digits) + key->state[i];
+
+  size_t n_prop_digits = floor(log10(NTK_STYLER_N_PROPERTIES)) + 1;
+  return (elem << elem_digits) + (state << state_digits) + (key->prop << n_prop_digits);
 }
 
 gboolean ntk_styler_key_equal(NtkStylerKey* a, NtkStylerKey* b) {
-  return (a->elem == b->elem) && (a->prop == b->prop) && (a->state == b->state);
+  size_t a_elem_count = ntk_styler_element_get_depth(a->elem);
+  size_t b_elem_count = ntk_styler_element_get_depth(b->elem);
+  if (a_elem_count != b_elem_count) return FALSE;
+
+  size_t a_state_count = ntk_styler_state_get_depth(a->state);
+  size_t b_state_count = ntk_styler_state_get_depth(b->state);
+  if (a_state_count != b_state_count) return FALSE;
+
+  for (size_t i = 0; i < a_elem_count; i++) {
+    if (a->elem[i] != b->elem[i]) return FALSE;
+  }
+
+  for (size_t i = 0; i < a_state_count; i++) {
+    if (a->state[i] != b->state[i]) return FALSE;
+  }
+
+  return a->prop == b->prop;
 }
 
 static gboolean ntk_styler_apply_internal(NtkStyler* self, NtkContext* ctx, struct nk_style style) {
@@ -48,6 +82,7 @@ static gboolean ntk_styler_apply_internal(NtkStyler* self, NtkContext* ctx, stru
 }
 
 static void ntk_styler_default_key_free(NtkStylerKey* key) {
+  g_free(key->state);
   g_free(key->elem);
   g_free(key);
 }
@@ -96,10 +131,21 @@ static gboolean ntk_styler_default_has_style_property(NtkStyler* self, NtkStyler
 
   for (size_t i = 0; i < n_elems; i++) impl_key->elem[i] = key.elem[i];
 
-  impl_key->state = key.state;
+  size_t n_states = ntk_styler_state_get_depth(key.state);
+
+  impl_key->state = g_try_malloc(sizeof (NtkStylerState) * n_states);
+  if (impl_key->state == NULL) {
+    g_free(impl_key->elem);
+    g_free(impl_key);
+    g_return_val_if_reached(FALSE);
+  }
+
+  for (size_t i = 0; i < n_states; i++) impl_key->state[i] = key.state[i];
+
   impl_key->prop = key.prop;
 
   gboolean result = g_hash_table_contains(priv->styles, impl_key);
+  g_free(impl_key->state);
   g_free(impl_key->elem);
   g_free(impl_key);
   return result;
@@ -121,12 +167,23 @@ static gboolean ntk_styler_default_get_style_property(NtkStyler* self, NtkStyler
 
   for (size_t i = 0; i < n_elems; i++) impl_key->elem[i] = key.elem[i];
 
-  impl_key->state = key.state;
+  size_t n_states = ntk_styler_state_get_depth(key.state);
+
+  impl_key->state = g_try_malloc(sizeof (NtkStylerState) * n_states);
+  if (impl_key->state == NULL) {
+    g_free(impl_key->elem);
+    g_free(impl_key);
+    g_return_val_if_reached(FALSE);
+  }
+
+  for (size_t i = 0; i < n_states; i++) impl_key->state[i] = key.state[i];
+
   impl_key->prop = key.prop;
 
   const GValue* srcval = g_hash_table_lookup(priv->styles, impl_key);
   if (srcval != NULL) g_value_copy(srcval, value);
 
+  g_free(impl_key->state);
   g_free(impl_key->elem);
   g_free(impl_key);
   return srcval != NULL;
@@ -148,11 +205,22 @@ static gboolean ntk_styler_default_set_style_property(NtkStyler* self, NtkStyler
 
   for (size_t i = 0; i < n_elems; i++) impl_key->elem[i] = key.elem[i];
 
-  impl_key->state = key.state;
+  size_t n_states = ntk_styler_state_get_depth(key.state);
+
+  impl_key->state = g_try_malloc(sizeof (NtkStylerState) * n_states);
+  if (impl_key->state == NULL) {
+    g_free(impl_key->elem);
+    g_free(impl_key);
+    g_return_val_if_reached(FALSE);
+  }
+
+  for (size_t i = 0; i < n_states; i++) impl_key->state[i] = key.state[i];
+
   impl_key->prop = key.prop;
 
   GValue* impl_value = g_try_malloc0(sizeof (GValue));
   if (value == NULL) {
+    g_free(impl_key->state);
     g_free(impl_key->elem);
     g_free(impl_key);
     g_return_val_if_reached(FALSE);

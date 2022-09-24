@@ -16,12 +16,102 @@ static void ntk_css_styler_default_value_free(GValue* value) {
   g_free(value);
 }
 
-static gboolean ntk_css_styler_entry_create(CssRule* rule, NtkStylerKey** key_out, GValue** value_out) {
-  switch (rule->type) {
-    case CssRuleUnkown: return FALSE;
-    case CssRuleImport: return FALSE;
+static gboolean ntk_css_styler_entry_create(CssStyleRule* rule, CssDeclaration* declaration, NtkStylerKey** key_out, GValue** value_out) {
+  NtkStylerKey* key = g_try_malloc0(sizeof (NtkStylerKey));
+  g_return_val_if_fail(key != NULL, FALSE);
+
+  size_t n_elems = 0;
+  size_t n_states = 0;
+  for (size_t i = 0; i < rule->selectors->length; i++) {
+    CssSelector* selector = rule->selectors->data[i];
+    if (selector->match == CssSelMatchTag) n_elems++;
+    switch (selector->pseudo) {
+      case CssPseudoHover:
+      case CssPseudoActive:
+      case CssPseudoSelection:
+      case CssPseudoDefault:
+        n_states++;
+        break;
+      default:
+        break;
+    }
   }
 
+  key->elem = g_try_malloc0(sizeof (NtkStylerElement) * n_elems);
+  if (key->elem == NULL) {
+    g_free(key);
+    g_return_val_if_reached(FALSE);
+  }
+
+  key->state = g_try_malloc0(sizeof (NtkStylerState) * n_states);
+  if (key->state == NULL) {
+    g_free(key->elem);
+    g_free(key);
+    g_return_val_if_reached(FALSE);
+  }
+
+  n_elems = 0;
+  for (size_t i = 0; i < rule->selectors->length; i++) {
+    CssSelector* selector = rule->selectors->data[i];
+    if (selector->match != CssSelMatchTag) continue;
+
+    if (g_strcmp0(selector->data->value, "p")) {
+      key->elem[n_elems] = NTK_STYLER_ELEMENT_TEXT;
+    } else if (g_strcmp0(selector->data->value, "button")) {
+      key->elem[n_elems] = NTK_STYLER_ELEMENT_BUTTON;
+    } else if (g_strcmp0(selector->data->value, "context-button")) {
+      key->elem[n_elems] = NTK_STYLER_ELEMENT_CONTEXT_BUTTON;
+    } else {
+      continue;
+    }
+
+    n_elems++;
+  }
+
+  n_states = 0;
+  for (size_t i = 0; i < rule->selectors->length; i++) {
+    CssSelector* selector = rule->selectors->data[i];
+    if (selector->match == CssSelMatchTag) n_elems++;
+    switch (selector->pseudo) {
+      case CssPseudoHover:
+        key->state[n_states++] = NTK_STYLER_STATE_HOVER;
+        break;
+      case CssPseudoActive:
+        key->state[n_states++] = NTK_STYLER_STATE_ACTIVE;
+        break;
+      case CssPseudoSelection:
+        key->state[n_states++] = NTK_STYLER_STATE_SELECTION;
+        break;
+      case CssPseudoDefault:
+        key->state[n_states++] = NTK_STYLER_STATE_NORMAL;
+        break;
+      default:
+        break;
+    }
+  }
+
+  if (g_strcmp0(declaration->property, "color")) {
+    key->prop = NTK_STYLER_PROPERTY_COLOR;
+  } else if (g_strcmp0(declaration->property, "background-color")) {
+    key->prop = NTK_STYLER_PROPERTY_BACKGROUND_COLOR;
+  } else if (g_strcmp0(declaration->property, "border-color")) {
+    key->prop = NTK_STYLER_PROPERTY_BORDER_COLOR;
+  } else if (g_strcmp0(declaration->property, "padding")) {
+    key->prop = NTK_STYLER_PROPERTY_PADDING;
+  } else if (g_strcmp0(declaration->property, "border-radius")) {
+    key->prop = NTK_STYLER_PROPERTY_BORDER_COLOR;
+  } else if (g_strcmp0(declaration->property, "visibility")) {
+    key->prop = NTK_STYLER_PROPERTY_VISIBILITY;
+  } else if (g_strcmp0(declaration->property, "border-width")) {
+    key->prop = NTK_STYLER_PROPERTY_BORDER_WIDTH;
+  } else {
+    g_free(key->state);
+    g_free(key->elem);
+    g_free(key);
+    g_return_val_if_reached(FALSE);
+  }
+
+  *key_out = key;
   return TRUE;
 }
 
@@ -35,13 +125,32 @@ static GHashTable* ntk_css_styler_export(NtkStyler* styler) {
   for (size_t i = 0; i < priv->output->stylesheet->rules.length; i++) {
     CssRule* rule = priv->output->stylesheet->rules.data[i];
     if (rule == NULL) continue;
+    if (rule->type != CssRuleStyle) continue;
 
-    NtkStylerKey* key = NULL;
-    GValue* value = NULL;
-    if (!ntk_css_styler_entry_create(rule, &key, &value)) continue;
-    g_hash_table_insert(tbl, key, value);
+    CssStyleRule* style_rule = (CssStyleRule*)rule;
+    for (size_t c = 0; c < style_rule->declarations->length; c++) {
+      CssDeclaration* declaration = style_rule->declarations->data[c];
+      if (declaration == NULL) continue;
+
+      NtkStylerKey* key = NULL;
+      GValue* value = NULL;
+      if (!ntk_css_styler_entry_create(style_rule, declaration, &key, &value)) continue;
+      g_hash_table_insert(tbl, key, value);
+    }
   }
   return tbl;
+}
+
+static gboolean ntk_css_styler_has_style_property(NtkStyler* styler, NtkStylerKey key) {
+  return FALSE;
+}
+
+static gboolean ntk_css_styler_get_style_property(NtkStyler* styler, NtkStylerKey key, GValue* value) {
+  return FALSE;
+}
+
+static gboolean ntk_css_styler_set_style_property(NtkStyler* styler, NtkStylerKey key, const GValue* value) {
+  return FALSE;
 }
 
 static void ntk_css_styler_finalize(GObject* obj) {
@@ -59,7 +168,10 @@ static void ntk_css_styler_class_init(NtkCSSStylerClass* klass) {
 
   object_class->finalize = ntk_css_styler_finalize;
 
-  styler->export = ntk_css_styler_export;
+  styler_class->export = ntk_css_styler_export;
+  styler_class->has_style_property = ntk_css_styler_has_style_property;
+  styler_class->get_style_property = ntk_css_styler_get_style_property;
+  styler_class->set_style_property = ntk_css_styler_set_style_property;
 }
 
 static void ntk_css_styler_init(NtkCSSStyler* self) {

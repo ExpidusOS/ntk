@@ -45,6 +45,16 @@ typedef enum _NtkStylerState {
 } NtkStylerState;
 
 /**
+ * ntk_styler_state_get_depth:
+ * @elem: (array zero-terminated=1): A zero-terminated array of #NtkStylerState
+ *
+ * Computes the number of elements.
+ *
+ * Returns: The number of elements
+ */
+size_t ntk_styler_state_get_depth(NtkStylerState* state);
+
+/**
  * NtkStylerProperty:
  *
  * Since: 0.1.0
@@ -73,7 +83,11 @@ typedef enum _NtkStylerProperty {
  */
 typedef struct _NtkStylerKey {
   NtkStylerProperty prop;
-  NtkStylerState state;
+
+  /**
+   * NtkStylerKey.state: (array zero-terminated=1): A zero-terminated array of #NtkStylerState
+   */
+  NtkStylerState* state;
 
   /**
    * NtkStylerKey.elem: (array zero-terminated=1): A zero-terminated array of #NtkStylerElement
