@@ -2,6 +2,7 @@
 
 #include <glib-object.h>
 #include <ntk/styler.h>
+#include <gio/gio.h>
 
 G_BEGIN_DECLS
 
@@ -33,5 +34,38 @@ NtkStyler* ntk_css_styler_new();
  * Returns: True if the CSS was loaded in
  */
 gboolean ntk_css_styler_load(NtkCSSStyler* self, const gchar* str, size_t length, GError** error);
+
+/**
+ * ntk_css_styler_load_path:
+ * @self: An #NtkCSSStyler
+ * @path: The path to the file
+ * @error: (out): The #GError which was outputted
+ *
+ * Since: 0.1.0
+ * Returns: True if the CSS was loaded in
+ */
+gboolean ntk_css_styler_load_path(NtkCSSStyler* self, const gchar* path, GError** error);
+
+/**
+ * ntk_css_styler_load_file:
+ * @self: An #NtkCSSStyler
+ * @file: The GIO File
+ * @error: (out): The #GError which was outputted
+ *
+ * Since: 0.1.0
+ * Returns: True if the CSS was loaded in
+ */
+gboolean ntk_css_styler_load_file(NtkCSSStyler* self, GFile* file, GError** error);
+
+/**
+ * ntk_css_styler_load_resource:
+ * @self: An #NtkCSSStyler
+ * @path: The resource path
+ * @error: (out): The #GError which was outputted
+ *
+ * Since: 0.1.0
+ * Returns: True if the CSS was loaded in
+ */
+gboolean ntk_css_styler_load_resource(NtkCSSStyler* self, const gchar* path, GError** error);
 
 G_END_DECLS

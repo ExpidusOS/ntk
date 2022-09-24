@@ -122,15 +122,21 @@ static GHashTable* ntk_styler_default_export(NtkStyler* self) {
 
 static gboolean ntk_styler_default_has_style_property(NtkStyler* self, NtkStylerKey key) {
   NtkStylerPrivate* priv = NTK_STYLER_PRIVATE(self);
+  GHashTable* tbl = ntk_styler_export(self);
+  g_return_val_if_fail(tbl != NULL, FALSE);
 
   NtkStylerKey* impl_key = g_try_malloc0(sizeof(NtkStylerKey));
-  g_return_val_if_fail(impl_key != NULL, FALSE);
+  if (impl_key == NULL) {
+    g_hash_table_unref(tbl);
+    g_return_val_if_reached(FALSE);
+  }
 
   size_t n_elems = ntk_styler_element_get_depth(key.elem);
 
   impl_key->elem = g_try_malloc(sizeof(NtkStylerElement) * n_elems);
   if (impl_key->elem == NULL) {
     g_free(impl_key);
+    g_hash_table_unref(tbl);
     g_return_val_if_reached(FALSE);
   }
 
@@ -143,6 +149,7 @@ static gboolean ntk_styler_default_has_style_property(NtkStyler* self, NtkStyler
   if (impl_key->state == NULL) {
     g_free(impl_key->elem);
     g_free(impl_key);
+    g_hash_table_unref(tbl);
     g_return_val_if_reached(FALSE);
   }
 
@@ -151,24 +158,32 @@ static gboolean ntk_styler_default_has_style_property(NtkStyler* self, NtkStyler
 
   impl_key->prop = key.prop;
 
-  gboolean result = g_hash_table_contains(priv->styles, impl_key);
+  gboolean result = g_hash_table_contains(tbl, impl_key);
+
   g_free(impl_key->state);
   g_free(impl_key->elem);
   g_free(impl_key);
+  g_hash_table_unref(tbl);
   return result;
 }
 
 static gboolean ntk_styler_default_get_style_property(NtkStyler* self, NtkStylerKey key, GValue* value) {
   NtkStylerPrivate* priv = NTK_STYLER_PRIVATE(self);
+  GHashTable* tbl = ntk_styler_export(self);
+  g_return_val_if_fail(tbl != NULL, FALSE);
 
   NtkStylerKey* impl_key = g_try_malloc0(sizeof(NtkStylerKey));
-  g_return_val_if_fail(impl_key != NULL, FALSE);
+  if (impl_key == NULL) {
+    g_hash_table_unref(tbl);
+    g_return_val_if_reached(FALSE);
+  }
 
   size_t n_elems = ntk_styler_element_get_depth(key.elem);
 
   impl_key->elem = g_try_malloc(sizeof(NtkStylerElement) * n_elems);
   if (impl_key->elem == NULL) {
     g_free(impl_key);
+    g_hash_table_unref(tbl);
     g_return_val_if_reached(FALSE);
   }
 
@@ -181,6 +196,7 @@ static gboolean ntk_styler_default_get_style_property(NtkStyler* self, NtkStyler
   if (impl_key->state == NULL) {
     g_free(impl_key->elem);
     g_free(impl_key);
+    g_hash_table_unref(tbl);
     g_return_val_if_reached(FALSE);
   }
 
@@ -189,26 +205,33 @@ static gboolean ntk_styler_default_get_style_property(NtkStyler* self, NtkStyler
 
   impl_key->prop = key.prop;
 
-  const GValue* srcval = g_hash_table_lookup(priv->styles, impl_key);
+  const GValue* srcval = g_hash_table_lookup(tbl, impl_key);
   if (srcval != NULL) g_value_copy(srcval, value);
 
   g_free(impl_key->state);
   g_free(impl_key->elem);
   g_free(impl_key);
+  g_hash_table_unref(tbl);
   return srcval != NULL;
 }
 
 static gboolean ntk_styler_default_set_style_property(NtkStyler* self, NtkStylerKey key, const GValue* value) {
   NtkStylerPrivate* priv = NTK_STYLER_PRIVATE(self);
+  GHashTable* tbl = ntk_styler_export(self);
+  g_return_val_if_fail(tbl != NULL, FALSE);
 
   NtkStylerKey* impl_key = g_try_malloc0(sizeof(NtkStylerKey));
-  g_return_val_if_fail(impl_key != NULL, FALSE);
+  if (impl_key == NULL) {
+    g_hash_table_unref(tbl);
+    g_return_val_if_reached(FALSE);
+  }
 
   size_t n_elems = ntk_styler_element_get_depth(key.elem);
 
   impl_key->elem = g_try_malloc(sizeof(NtkStylerElement) * n_elems);
   if (impl_key->elem == NULL) {
     g_free(impl_key);
+    g_hash_table_unref(tbl);
     g_return_val_if_reached(FALSE);
   }
 
@@ -221,6 +244,7 @@ static gboolean ntk_styler_default_set_style_property(NtkStyler* self, NtkStyler
   if (impl_key->state == NULL) {
     g_free(impl_key->elem);
     g_free(impl_key);
+    g_hash_table_unref(tbl);
     g_return_val_if_reached(FALSE);
   }
 
@@ -234,11 +258,13 @@ static gboolean ntk_styler_default_set_style_property(NtkStyler* self, NtkStyler
     g_free(impl_key->state);
     g_free(impl_key->elem);
     g_free(impl_key);
+    g_hash_table_unref(tbl);
     g_return_val_if_reached(FALSE);
   }
 
   g_value_copy(value, impl_value);
-  g_hash_table_insert(priv->styles, impl_key, impl_value);
+  g_hash_table_insert(tbl, impl_key, impl_value);
+  g_hash_table_unref(tbl);
   return TRUE;
 }
 
