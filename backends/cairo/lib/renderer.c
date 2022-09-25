@@ -289,15 +289,15 @@ static gboolean ntk_cairo_renderer_render_command(NtkRenderer* renderer, const s
           priv->cr, c->foreground.r / 255.0, c->foreground.g / 255.0, c->foreground.b / 255.0, c->foreground.a / 255.0
         );
 
-        NtkPangoLayoutFont* font = ntk_pango_layout_font_copy((NtkPangoLayoutFont*)c->font);
-        PangoLayout* layout = PANGO_LAYOUT(font->userdata.ptr);
+        NtkUserFont* font = ntk_user_font_copy((NtkUserFont*)c->font);
+        PangoLayout* layout = PANGO_LAYOUT(font->parent_instance.userdata.ptr);
 
         pango_cairo_update_layout(priv->cr, layout);
         cairo_move_to(priv->cr, c->x, c->y);
         pango_layout_set_text(layout, c->string, c->length);
         pango_cairo_show_layout(priv->cr, layout);
 
-        ntk_pango_layout_font_free(font);
+        ntk_user_font_free(font);
       }
       break;
     case NK_COMMAND_CUSTOM:
