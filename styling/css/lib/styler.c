@@ -7,7 +7,12 @@
 G_DEFINE_TYPE_WITH_PRIVATE(NtkCSSStyler, ntk_css_styler, NTK_TYPE_STYLER);
 
 static void ntk_css_styler_default_key_free(NtkStylerKey* key) {
-  g_clear_pointer(&key->class_name, g_free);
+  if (key->classes != NULL) {
+    size_t i = 0;
+    while (key->classes[i] != NULL) g_clear_pointer(&key->classes[i++], g_free);
+  }
+
+  g_clear_pointer(&key->classes, g_free);
   g_clear_pointer(&key->state, g_free);
   g_free(key->elem);
   g_free(key);
@@ -36,7 +41,7 @@ static NtkColor* ntk_css_styler_new_color(CssValue* value) {
   return NULL;
 }
 
-static gboolean ntk_css_styler_entry_select(NtkStylerKey* key, CssSelector* parent, CssSelector* selector, size_t* n_elems, size_t* n_states) {
+static gboolean ntk_css_styler_entry_select(NtkStylerKey* key, CssSelector* parent, CssSelector* selector, size_t* n_elems, size_t* n_states, size_t* n_classes) {
   if (selector->match == CssSelMatchTag) {
     if (g_str_equal(selector->tag->local, "p")) {
       ntk_styler_key_build_element(key, NTK_STYLER_ELEMENT_TEXT, n_elems);
@@ -74,7 +79,8 @@ static gboolean ntk_css_styler_entry_select(NtkStylerKey* key, CssSelector* pare
   while (TRUE) {
     switch (cs->match) {
       case CssSelMatchClass:
-        if (key != NULL && key->class_name == NULL) key->class_name = g_strdup(cs->data->value);
+        if (key != NULL && key->classes != NULL) key->classes[*n_classes] = g_strdup(cs->data->value);
+        *n_classes = (*n_classes) + 1;
         break;
       case CssSelMatchPseudoClass:
       case CssSelMatchPagePseudoClass:
@@ -147,7 +153,7 @@ static gboolean ntk_css_styler_entry_select(NtkStylerKey* key, CssSelector* pare
   if (tag_history != NULL) {
     switch (cs->relation) {
       case CssSelRelChild:
-        g_return_val_if_fail(ntk_css_styler_entry_select(key, cs, tag_history, n_elems, n_states), FALSE);
+        g_return_val_if_fail(ntk_css_styler_entry_select(key, cs, tag_history, n_elems, n_states, n_classes), FALSE);
         break;
       default:
         break;
@@ -166,16 +172,17 @@ static gboolean ntk_css_styler_entry_create(
 
   size_t n_elems = 0;
   size_t n_states = 0;
+  size_t n_classes = 0;
   g_debug("Creating entry for (rule: %p, declaration: %p, selector: %p)", rule, declaration, selector);
 
-  if (!ntk_css_styler_entry_select(NULL, NULL, selector, &n_elems, &n_states)) {
+  if (!ntk_css_styler_entry_select(NULL, NULL, selector, &n_elems, &n_states, &n_classes)) {
     g_free(key);
     g_return_val_if_reached(FALSE);
   }
 
   g_debug(
-    "Entry for (rule: %p, declaration: %p, selector: %p) will have %ld elements and %ld states", rule, declaration, selector,
-    n_elems, n_states
+    "Entry for (rule: %p, declaration: %p, selector: %p) will have %ld elements, %ld states, and %ld classes", rule, declaration, selector,
+    n_elems, n_states, n_classes
   );
 
   key->elem = g_try_malloc0(sizeof(NtkStylerElement) * n_elems);
@@ -191,12 +198,22 @@ static gboolean ntk_css_styler_entry_create(
     g_return_val_if_reached(FALSE);
   }
 
+  key->classes = g_try_malloc0(sizeof(char*) * n_classes);
+  if (key->classes == NULL && n_classes > 0) {
+    g_clear_pointer(&key->state, g_free);
+    g_free(key->elem);
+    g_free(key);
+    g_return_val_if_reached(FALSE);
+  }
+
   size_t counted_n_elems = n_elems;
   size_t counted_n_states = n_states;
+  size_t counted_n_classes = n_classes;
   n_elems = 0;
   n_states = 0;
+  n_classes = 0;
 
-  if (!ntk_css_styler_entry_select(key, NULL, selector, &n_elems, &n_states)) {
+  if (!ntk_css_styler_entry_select(key, NULL, selector, &n_elems, &n_states, &n_classes)) {
     g_clear_pointer(&key->state, g_free);
     g_free(key->elem);
     g_free(key);
@@ -506,6 +523,7 @@ static gboolean ntk_css_styler_entry_create(
 
   g_assert_cmpint(counted_n_elems, ==, n_elems);
   g_assert_cmpint(counted_n_states, ==, n_states);
+  g_assert_cmpint(counted_n_classes, ==, n_classes);
 
   g_assert_cmpint(ntk_styler_element_get_depth(key->elem), ==, counted_n_elems);
   g_assert_cmpint(ntk_styler_state_get_depth(key->state), ==, counted_n_states);

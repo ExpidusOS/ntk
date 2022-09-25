@@ -151,7 +151,11 @@ const char* ntk_styler_property_to_string(NtkStylerProperty prop);
  */
 typedef struct _NtkStylerKey {
   NtkStylerProperty prop;
-  char* class_name;
+
+  /**
+   * NtkStylerKey.classes: (array zero-terminated=1): A zero-terminated array of strings
+   */
+  char** classes;
 
   /**
    * NtkStylerKey.state: (array zero-terminated=1): A zero-terminated array of #NtkStylerState

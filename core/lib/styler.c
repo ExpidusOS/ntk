@@ -185,9 +185,20 @@ const char* ntk_styler_key_to_string(NtkStylerKey* key) {
   }
   if (n_states > 0) g_string_append_c(str, ')');
 
+  size_t n_classes = key->classes == NULL ? 0 : g_strv_length(key->classes);
   g_string_append_printf(
-    str, ", Property: %s:%d, Class Name: %s", ntk_styler_property_to_string(key->prop), key->prop, key->class_name
+    str, ", Property: %s:%d, Class Names: %ld", ntk_styler_property_to_string(key->prop), key->prop,
+    n_classes
   );
+
+  if (n_classes > 0) {
+    g_string_append(str, " (");
+    for (size_t i = 0; i < n_classes; i++) {
+      g_string_append_printf(str, "%s", key->classes[i]);
+      if ((i + 1) < n_classes) g_string_append(str, ", ");
+    }
+    g_string_append_c(str, ')');
+  }
   return g_string_free(str, FALSE);
 }
 
@@ -211,8 +222,11 @@ guint ntk_styler_key_hash(NtkStylerKey* key) {
     state += (10 * state_digits) + key->state[i];
 
   size_t n_prop_digits = floor(log10(NTK_STYLER_N_PROPERTIES)) + 1;
-  return (elem << elem_digits) + (state << state_digits) + (key->prop << n_prop_digits) +
-         (key->class_name == NULL ? 0 : g_str_hash(key->class_name));
+
+  size_t n_classes = key->classes == NULL ? 0 : g_strv_length(key->classes);
+  guint classes = 0;
+  for (size_t i = 0; i < n_classes; i++) classes += g_str_hash(key->classes[i]);
+  return (elem << elem_digits) + (state << state_digits) + (key->prop << n_prop_digits) + classes;
 }
 
 gboolean ntk_styler_key_equal(NtkStylerKey* a, NtkStylerKey* b) {
@@ -224,6 +238,10 @@ gboolean ntk_styler_key_equal(NtkStylerKey* a, NtkStylerKey* b) {
   size_t b_state_count = ntk_styler_state_get_depth(b->state);
   if (a_state_count != b_state_count) return FALSE;
 
+  size_t a_class_count = a->classes == NULL ? 0 : g_strv_length(a->classes);
+  size_t b_class_count = b->classes == NULL ? 0 : g_strv_length(b->classes);
+  if (a_class_count != b_class_count) return FALSE;
+
   for (size_t i = 0; i < a_elem_count; i++) {
     if (a->elem[i] != b->elem[i]) return FALSE;
   }
@@ -232,7 +250,10 @@ gboolean ntk_styler_key_equal(NtkStylerKey* a, NtkStylerKey* b) {
     if (a->state[i] != b->state[i]) return FALSE;
   }
 
-  return a->prop == b->prop && !g_strcmp0(a->class_name, b->class_name);
+  for (size_t i = 0; i < a_class_count; i++) {
+    if (!g_str_equal(a->classes[i], b->classes[i])) return FALSE;
+  }
+  return a->prop == b->prop;
 }
 
 static gboolean ntk_styler_apply_internal(NtkStyler* self, NtkContext* ctx, struct nk_style style) {
@@ -245,7 +266,12 @@ static gboolean ntk_styler_apply_internal(NtkStyler* self, NtkContext* ctx, stru
 }
 
 static void ntk_styler_default_key_free(NtkStylerKey* key) {
-  g_clear_pointer(&key->class_name, g_free);
+  if (key->classes != NULL) {
+    size_t i = 0;
+    while (key->classes[i] != NULL) g_clear_pointer(&key->classes[i++], g_free);
+  }
+
+  g_clear_pointer(&key->classes, g_free);
   g_clear_pointer(&key->state, g_free);
   g_free(key->elem);
   g_free(key);
@@ -318,11 +344,18 @@ static gboolean ntk_styler_default_has_style_property(NtkStyler* self, NtkStyler
     impl_key->state[i] = key.state[i];
 
   impl_key->prop = key.prop;
-  impl_key->class_name = key.class_name == NULL ? NULL : g_strdup(key.class_name);
+  impl_key->classes = key.classes == NULL ? NULL : g_try_malloc0(sizeof (char*) * g_strv_length(key.classes));
+  if (impl_key->classes != NULL) {
+    for (size_t i = 0; i < g_strv_length(key.classes); i++) impl_key->classes[i] = g_strdup(key.classes[i]);
+  }
 
   gboolean result = g_hash_table_contains(tbl, impl_key);
 
-  g_clear_pointer(&impl_key->class_name, g_free);
+  if (impl_key->classes != NULL) {
+    for (size_t i = 0; i < g_strv_length(impl_key->classes); i++) g_clear_pointer(&impl_key->classes[i], g_free);
+  }
+
+  g_clear_pointer(&impl_key->classes, g_free);
   g_clear_pointer(&impl_key->state, g_free);
   g_clear_pointer(&impl_key->elem, g_free);
   g_free(impl_key);
@@ -366,12 +399,19 @@ static gboolean ntk_styler_default_get_style_property(NtkStyler* self, NtkStyler
     impl_key->state[i] = key.state[i];
 
   impl_key->prop = key.prop;
-  impl_key->class_name = key.class_name == NULL ? NULL : g_strdup(key.class_name);
+  impl_key->classes = key.classes == NULL ? NULL : g_try_malloc0(sizeof (char*) * g_strv_length(key.classes));
+  if (impl_key->classes != NULL) {
+    for (size_t i = 0; i < g_strv_length(key.classes); i++) impl_key->classes[i] = g_strdup(key.classes[i]);
+  }
 
   const GValue* srcval = g_hash_table_lookup(tbl, impl_key);
   if (srcval != NULL) g_value_copy(srcval, value);
 
-  g_clear_pointer(&impl_key->class_name, g_free);
+  if (impl_key->classes != NULL) {
+    for (size_t i = 0; i < g_strv_length(impl_key->classes); i++) g_clear_pointer(&impl_key->classes[i], g_free);
+  }
+
+  g_clear_pointer(&impl_key->classes, g_free);
   g_clear_pointer(&impl_key->state, g_free);
   g_clear_pointer(&impl_key->elem, g_free);
   g_free(impl_key);
@@ -415,11 +455,18 @@ static gboolean ntk_styler_default_set_style_property(NtkStyler* self, NtkStyler
     impl_key->state[i] = key.state[i];
 
   impl_key->prop = key.prop;
-  impl_key->class_name = key.class_name == NULL ? NULL : g_strdup(key.class_name);
+  impl_key->classes = key.classes == NULL ? NULL : g_try_malloc0(sizeof (char*) * g_strv_length(key.classes));
+  if (impl_key->classes != NULL) {
+    for (size_t i = 0; i < g_strv_length(key.classes); i++) impl_key->classes[i] = g_strdup(key.classes[i]);
+  }
 
   GValue* impl_value = g_try_malloc0(sizeof(GValue));
   if (value == NULL) {
-    g_clear_pointer(&impl_key->class_name, g_free);
+    if (impl_key->classes != NULL) {
+      for (size_t i = 0; i < g_strv_length(impl_key->classes); i++) g_clear_pointer(&impl_key->classes[i], g_free);
+    }
+
+    g_clear_pointer(&impl_key->classes, g_free);
     g_clear_pointer(&impl_key->state, g_free);
     g_clear_pointer(&impl_key->elem, g_free);
     g_free(impl_key);
