@@ -627,8 +627,10 @@ static gboolean ntk_css_styler_entry_create(
 
   g_assert_cmpint(counted_n_elems, ==, n_elems);
   g_assert_cmpint(counted_n_states, ==, n_states);
+
   g_assert_cmpint(ntk_styler_element_get_depth(key->elem), ==, counted_n_elems);
-  g_assert_cmpint(ntk_styler_state_get_depth(key->state), ==, counted_n_elems);
+  g_assert_cmpint(ntk_styler_state_get_depth(key->state), ==, counted_n_states);
+
   g_assert_cmpint(ntk_styler_element_get_depth(key->elem), ==, n_elems);
   g_assert_cmpint(ntk_styler_state_get_depth(key->state), ==, n_states);
 
