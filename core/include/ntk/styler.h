@@ -45,6 +45,16 @@ typedef enum _NtkStylerElement {
 NtkStylerElement* ntk_styler_element_extend(NtkStylerElement* base, NtkStylerElement* extend);
 
 /**
+ * ntk_styler_element_has:
+ * @elem: (array zero-terminated=1): A zero-terminated array of #NtkStylerElement
+ * @wants: The #NtkStylerElement that is being looked for
+ *
+ * Since: 0.1.0
+ * Returns: True or false if the element specified is included
+ */
+gboolean ntk_styler_element_has(NtkStylerElement* elem, NtkStylerElement wants);
+
+/**
  * ntk_styler_element_get_depth:
  * @elem: (array zero-terminated=1): A zero-terminated array of #NtkStylerElement
  *

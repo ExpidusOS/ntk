@@ -203,6 +203,10 @@ static gboolean ntk_css_styler_entry_create(
     g_return_val_if_reached(FALSE);
   }
 
+  if (ntk_styler_element_has(key->elem, NTK_STYLER_ELEMENT_WINDOW_HEADER) && !ntk_styler_element_has(key->elem, NTK_STYLER_ELEMENT_WINDOW)) {
+    g_warning("Selection must include window to specify window-header");
+  }
+
   GValue* value = g_try_malloc0(sizeof(GValue));
   if (value == NULL) {
     g_free(key->state);

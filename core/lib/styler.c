@@ -25,6 +25,14 @@ NtkStylerElement* ntk_styler_element_extend(NtkStylerElement* base, NtkStylerEle
   return value;
 }
 
+gboolean ntk_styler_element_has(NtkStylerElement* elem, NtkStylerElement wants) {
+  size_t n_elems = ntk_styler_element_get_depth(elem);
+  for (size_t i = 0; i < n_elems; i++) {
+    if (elem[i] == wants) return TRUE;
+  }
+  return FALSE;
+}
+
 size_t ntk_styler_element_get_depth(NtkStylerElement* elem) {
   if (elem == NULL) return 0;
 
