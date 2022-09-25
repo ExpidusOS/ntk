@@ -155,6 +155,26 @@ typedef struct _NtkStylerKey {
 } NtkStylerKey;
 
 /**
+ * ntk_styler_key_build_element:
+ * @key: An #NtkStylerKey
+ * @elem: The element to append
+ * @n_elems: The element size
+ *
+ * Since: 0.1.0
+ */
+void ntk_styler_key_build_element(NtkStylerKey* key, NtkStylerElement elem, size_t* n_elems);
+
+/**
+ * ntk_styler_key_build_state:
+ * @key: An #NtkStylerKey
+ * @elem: The state to append
+ * @n_elems: The state size
+ *
+ * Since: 0.1.0
+ */
+void ntk_styler_key_build_state(NtkStylerKey* key, NtkStylerState state, size_t* n_states);
+
+/**
  * ntk_styler_key_to_string:
  * @key: An #NtkStylerKey
  *

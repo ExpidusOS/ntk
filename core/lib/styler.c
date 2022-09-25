@@ -143,6 +143,16 @@ const char* ntk_styler_property_to_string(NtkStylerProperty prop) {
   }
 }
 
+void ntk_styler_key_build_element(NtkStylerKey* key, NtkStylerElement elem, size_t* n_elems) {
+  if (key != NULL && key->elem != NULL) key->elem[*n_elems] = elem;
+  *n_elems = (*n_elems) + 1;
+}
+
+void ntk_styler_key_build_state(NtkStylerKey* key, NtkStylerState state, size_t* n_states) {
+  if (key != NULL && key->state != NULL) key->state[*n_states] = state;
+  *n_states = (*n_states) + 1;
+}
+
 const char* ntk_styler_key_to_string(NtkStylerKey* key) {
   GString* str = g_string_new(NULL);
   g_return_val_if_fail(str != NULL, NULL);
@@ -167,7 +177,9 @@ const char* ntk_styler_key_to_string(NtkStylerKey* key) {
   }
   if (n_states > 0) g_string_append_c(str, ')');
 
-  g_string_append_printf(str, ", Property: %s:%d, Class Name: %s", ntk_styler_property_to_string(key->prop), key->prop, key->class_name);
+  g_string_append_printf(
+    str, ", Property: %s:%d, Class Name: %s", ntk_styler_property_to_string(key->prop), key->prop, key->class_name
+  );
   return g_string_free(str, FALSE);
 }
 
@@ -191,7 +203,8 @@ guint ntk_styler_key_hash(NtkStylerKey* key) {
     state += (10 * state_digits) + key->state[i];
 
   size_t n_prop_digits = floor(log10(NTK_STYLER_N_PROPERTIES)) + 1;
-  return (elem << elem_digits) + (state << state_digits) + (key->prop << n_prop_digits) + (key->class_name == NULL ? 0 : g_str_hash(key->class_name));
+  return (elem << elem_digits) + (state << state_digits) + (key->prop << n_prop_digits) +
+         (key->class_name == NULL ? 0 : g_str_hash(key->class_name));
 }
 
 gboolean ntk_styler_key_equal(NtkStylerKey* a, NtkStylerKey* b) {

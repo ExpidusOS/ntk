@@ -45,8 +45,12 @@ NtkPangoLayoutFont* ntk_pango_layout_font_new(PangoLayout* layout, PangoFontDesc
   font->parent_instance.impl_copy = ntk_pango_layout_font_impl_copy;
   font->parent_instance.impl_free = ntk_pango_layout_font_impl_free;
 
-  g_debug("Font %p created: layout: %p, height: %f", font, font->parent_instance.parent_instance.userdata.ptr, font->parent_instance.parent_instance.height);
+  g_debug(
+    "Font %p created: layout: %p, height: %f", font, font->parent_instance.parent_instance.userdata.ptr,
+    font->parent_instance.parent_instance.height
+  );
 
-  if (font_desc != NULL) pango_layout_set_font_description(PANGO_LAYOUT(font->parent_instance.parent_instance.userdata.ptr), font_desc);
+  if (font_desc != NULL)
+    pango_layout_set_font_description(PANGO_LAYOUT(font->parent_instance.parent_instance.userdata.ptr), font_desc);
   return font;
 }

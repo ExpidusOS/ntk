@@ -5,47 +5,50 @@ gboolean ntk_styler_create_selectable_style(NtkStyler* self, NtkStylerElement* e
   g_return_val_if_fail(NTK_IS_STYLER(self), FALSE);
   g_return_val_if_fail(style != NULL, FALSE);
 
-  NtkStylerElement* full_elems = ntk_styler_element_extend(elems, (NtkStylerElement[]){ NTK_STYLER_ELEMENT_INPUT_TEXT, NTK_STYLER_ELEMENT_NONE });
+  NtkStylerElement* full_elems =
+    ntk_styler_element_extend(elems, (NtkStylerElement[]){NTK_STYLER_ELEMENT_INPUT_TEXT, NTK_STYLER_ELEMENT_NONE});
   g_return_val_if_fail(full_elems != NULL, FALSE);
 
   if (!ntk_styler_create_item_style(
-      self, full_elems, (NtkStylerState[]){NTK_STYLER_STATE_NORMAL, NTK_STYLER_STATE_NONE}, &style->normal
-    )) {
+        self, full_elems, (NtkStylerState[]){NTK_STYLER_STATE_NORMAL, NTK_STYLER_STATE_NONE}, &style->normal
+      )) {
     g_free(full_elems);
     g_return_val_if_reached(FALSE);
   }
 
   if (!ntk_styler_create_item_style(
-      self, full_elems, (NtkStylerState[]){NTK_STYLER_STATE_HOVER, NTK_STYLER_STATE_NONE}, &style->hover
-    )) {
+        self, full_elems, (NtkStylerState[]){NTK_STYLER_STATE_HOVER, NTK_STYLER_STATE_NONE}, &style->hover
+      )) {
     g_free(full_elems);
     g_return_val_if_reached(FALSE);
   }
 
   if (!ntk_styler_create_item_style(
-      self, full_elems, (NtkStylerState[]){NTK_STYLER_STATE_PRESSED, NTK_STYLER_STATE_NONE}, &style->pressed
-    )) {
+        self, full_elems, (NtkStylerState[]){NTK_STYLER_STATE_PRESSED, NTK_STYLER_STATE_NONE}, &style->pressed
+      )) {
     g_free(full_elems);
     g_return_val_if_reached(FALSE);
   }
 
   if (!ntk_styler_create_item_style(
-      self, full_elems, (NtkStylerState[]){NTK_STYLER_STATE_ACTIVE, NTK_STYLER_STATE_NONE}, &style->normal_active
-    )) {
+        self, full_elems, (NtkStylerState[]){NTK_STYLER_STATE_ACTIVE, NTK_STYLER_STATE_NONE}, &style->normal_active
+      )) {
     g_free(full_elems);
     g_return_val_if_reached(FALSE);
   }
 
   if (!ntk_styler_create_item_style(
-      self, full_elems, (NtkStylerState[]){NTK_STYLER_STATE_ACTIVE, NTK_STYLER_STATE_HOVER, NTK_STYLER_STATE_NONE}, &style->hover_active
-    )) {
+        self, full_elems, (NtkStylerState[]){NTK_STYLER_STATE_ACTIVE, NTK_STYLER_STATE_HOVER, NTK_STYLER_STATE_NONE},
+        &style->hover_active
+      )) {
     g_free(full_elems);
     g_return_val_if_reached(FALSE);
   }
 
   if (!ntk_styler_create_item_style(
-      self, full_elems, (NtkStylerState[]){NTK_STYLER_STATE_ACTIVE, NTK_STYLER_STATE_PRESSED, NTK_STYLER_STATE_NONE}, &style->pressed_active
-    )) {
+        self, full_elems, (NtkStylerState[]){NTK_STYLER_STATE_ACTIVE, NTK_STYLER_STATE_PRESSED, NTK_STYLER_STATE_NONE},
+        &style->pressed_active
+      )) {
     g_free(full_elems);
     g_return_val_if_reached(FALSE);
   }

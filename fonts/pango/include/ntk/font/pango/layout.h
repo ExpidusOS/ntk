@@ -1,8 +1,8 @@
 #pragma once
 
+#include <ntk/font/user.h>
 #include <nuklear.h>
 #include <pango/pango.h>
-#include <ntk/font/user.h>
 
 #define NTK_PANGO_TYPE_LAYOUT_FONT ntk_pango_layout_font_get_type()
 
