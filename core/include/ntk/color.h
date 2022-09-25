@@ -128,6 +128,25 @@ typedef struct {
   } value;
 } NtkColor;
 
+/**
+ * ntk_colormap: (array length=ntk_colormap_size):
+ *
+ * A 2-D array of two strings, [0] is the color name and [1] is the hex color.
+ * This is used by #NtkColor for named color support with the NTK_COLOR_FORMAT_NAMED color format.
+ *
+ * Since: 0.1.0
+ */
+extern const char* ntk_colormap[][2];
+
+/**
+ * ntk_colormap_size:
+ *
+ * The number of elements in ntk_colormap.
+ *
+ * Since: 0.1.0
+ */
+extern const size_t ntk_colormap_size;
+
 NtkColor* ntk_color_new(NtkColorFormat fmt, ...);
 NtkColor* ntk_color_newv(NtkColorFormat fmt, va_list ap);
 

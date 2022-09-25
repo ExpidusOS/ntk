@@ -2,8 +2,10 @@
 
 G_DEFINE_BOXED_TYPE(NtkColor, ntk_color, ntk_color_copy, ntk_color_free);
 
-static const char* ntk_colormap[][2] = {
+const char* ntk_colormap[][2] = {
   {"white", "#ffffff"}, {"red", "#ff0000"}, {"green", "#00ff00"}, {"blue", "#0000ff"}, {"black", "#000000"}};
+
+const size_t ntk_colormap_size = sizeof ntk_colormap / sizeof ntk_colormap[0];
 
 NtkColor* ntk_color_new(NtkColorFormat fmt, ...) {
   va_list ap;
@@ -220,7 +222,7 @@ void ntk_color_setv(NtkColor* self, va_list ap) {
     case NTK_COLOR_FORMAT_NAMED:
       {
         char* name = va_arg(ap, char*);
-        for (size_t i = 0; i < (sizeof ntk_colormap / sizeof ntk_colormap[0]); i++) {
+        for (size_t i = 0; i < ntk_colormap_size; i++) {
           if (g_str_equal(ntk_colormap[i][0], name)) {
             memcpy(self->value.rgb.h, ntk_colormap[i][1] + 1, sizeof(char) * 6);
             break;
@@ -283,7 +285,7 @@ const char* ntk_color_to_string(NtkColor* self) {
   g_return_val_if_fail(self != NULL, NULL);
 
   if (self->fmt == NTK_COLOR_FORMAT_NAMED) {
-    for (size_t i = 0; i < (sizeof ntk_colormap / sizeof ntk_colormap[0]); i++) {
+    for (size_t i = 0; i < ntk_colormap_size; i++) {
       if (g_str_equal(ntk_colormap[i][1] + 1, self->value.rgb.h)) return g_strdup(ntk_colormap[i][0]);
     }
   }
