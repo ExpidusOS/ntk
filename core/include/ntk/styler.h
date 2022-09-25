@@ -90,6 +90,16 @@ typedef enum _NtkStylerState {
 } NtkStylerState;
 
 /**
+ * ntk_styler_state_has:
+ * @state: (array zero-terminated=1): A zero-terminated array of #NtkStylerState
+ * @wants: The #NtkStylerState that is being looked for
+ *
+ * Since: 0.1.0
+ * Returns: True or false if the state specified is included
+ */
+gboolean ntk_styler_state_has(NtkStylerState* state, NtkStylerState wants);
+
+/**
  * ntk_styler_state_get_depth:
  * @elem: (array zero-terminated=1): A zero-terminated array of #NtkStylerState
  *
@@ -217,6 +227,18 @@ guint ntk_styler_key_hash(NtkStylerKey* key);
  * Returns: True if the keys match
  */
 gboolean ntk_styler_key_equal(NtkStylerKey* a, NtkStylerKey* b);
+
+/**
+ * ntk_styler_key_equal:
+ * @item: The key we should check
+ * @sm: The key which we want to reference for the match.
+ *
+ * Checks if the @item key roughtly matches what we want in @sm.
+ *
+ * Since: 0.1.0
+ * Returns: True if @item is the best match for @sm
+ */
+gboolean ntk_styler_key_best_match(NtkStylerKey* item, NtkStylerKey* sm);
 
 /**
  * NtkStylerEntry:

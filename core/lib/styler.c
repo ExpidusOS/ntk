@@ -33,6 +33,14 @@ gboolean ntk_styler_element_has(NtkStylerElement* elem, NtkStylerElement wants) 
   return FALSE;
 }
 
+gboolean ntk_styler_state_has(NtkStylerState* state, NtkStylerState wants) {
+  size_t n_state = ntk_styler_state_get_depth(state);
+  for (size_t i = 0; i < n_state; i++) {
+    if (state[i] == wants) return TRUE;
+  }
+  return FALSE;
+}
+
 size_t ntk_styler_element_get_depth(NtkStylerElement* elem) {
   if (elem == NULL) return 0;
 
@@ -256,6 +264,33 @@ gboolean ntk_styler_key_equal(NtkStylerKey* a, NtkStylerKey* b) {
   return a->prop == b->prop;
 }
 
+gboolean ntk_styler_key_best_match(NtkStylerKey* item, NtkStylerKey* sm) {
+  size_t item_elem_count = ntk_styler_element_get_depth(item->elem);
+  size_t sm_elem_count = ntk_styler_element_get_depth(sm->elem);
+  if (sm_elem_count > item_elem_count) return FALSE;
+
+  size_t item_state_count = ntk_styler_state_get_depth(sm->state);
+  size_t sm_state_count = ntk_styler_state_get_depth(sm->state);
+  if (sm_state_count > item_state_count) return FALSE;
+
+  size_t item_class_count = item->classes == NULL ? 0 : g_strv_length(item->classes);
+  size_t sm_class_count = sm->classes == NULL ? 0 : g_strv_length(sm->classes);
+  if (sm_class_count > item_class_count) return FALSE;
+
+  for (size_t i = 0; i < sm_elem_count; i++) {
+    if (!ntk_styler_element_has(item->elem, sm->elem[i])) return FALSE;
+  }
+
+  for (size_t i = 0; i < sm_state_count; i++) {
+    if (!ntk_styler_state_has(item->state, sm->state[i])) return FALSE;
+  }
+
+  for (size_t i = 0; i < sm_class_count; i++) {
+    if (!g_strv_contains((const gchar**)item->classes, sm->classes[i])) return FALSE;
+  }
+  return item->prop == sm->prop;
+}
+
 static gboolean ntk_styler_apply_internal(NtkStyler* self, NtkContext* ctx, struct nk_style style) {
   NtkStylerPrivate* priv = NTK_STYLER_PRIVATE(self);
 
@@ -349,7 +384,7 @@ static gboolean ntk_styler_default_has_style_property(NtkStyler* self, NtkStyler
     for (size_t i = 0; i < g_strv_length(key.classes); i++) impl_key->classes[i] = g_strdup(key.classes[i]);
   }
 
-  gboolean result = g_hash_table_contains(tbl, impl_key);
+  GValue* result = g_hash_table_find(tbl, (GHRFunc)ntk_styler_key_best_match, impl_key);
 
   if (impl_key->classes != NULL) {
     for (size_t i = 0; i < g_strv_length(impl_key->classes); i++) g_clear_pointer(&impl_key->classes[i], g_free);
@@ -360,7 +395,7 @@ static gboolean ntk_styler_default_has_style_property(NtkStyler* self, NtkStyler
   g_clear_pointer(&impl_key->elem, g_free);
   g_free(impl_key);
   g_hash_table_unref(tbl);
-  return result;
+  return result != NULL;
 }
 
 static gboolean ntk_styler_default_get_style_property(NtkStyler* self, NtkStylerKey key, GValue* value) {
@@ -404,7 +439,7 @@ static gboolean ntk_styler_default_get_style_property(NtkStyler* self, NtkStyler
     for (size_t i = 0; i < g_strv_length(key.classes); i++) impl_key->classes[i] = g_strdup(key.classes[i]);
   }
 
-  const GValue* srcval = g_hash_table_lookup(tbl, impl_key);
+  const GValue* srcval = g_hash_table_find(tbl, (GHRFunc)ntk_styler_key_best_match, impl_key);
   if (srcval != NULL) g_value_copy(srcval, value);
 
   if (impl_key->classes != NULL) {
