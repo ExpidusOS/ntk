@@ -132,7 +132,10 @@ static gboolean ntk_css_styler_entry_create(
       break;
   }
 
-  g_debug("Entry for (rule: %p, declaration: %p, selector: %p) will have %ld elements and %ld states", rule, declaration, selector, n_elems, n_states);
+  g_debug(
+    "Entry for (rule: %p, declaration: %p, selector: %p) will have %ld elements and %ld states", rule, declaration, selector,
+    n_elems, n_states
+  );
 
   key->elem = g_try_malloc0(sizeof(NtkStylerElement) * n_elems);
   if (key->elem == NULL && n_elems > 0) {

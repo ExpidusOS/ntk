@@ -12,11 +12,13 @@ NtkStylerElement* ntk_styler_element_extend(NtkStylerElement* base, NtkStylerEle
   size_t base_size = ntk_styler_element_get_depth(base);
   size_t extend_size = ntk_styler_element_get_depth(extend);
 
-  NtkStylerElement* value = g_try_malloc0(sizeof (NtkStylerElement) * (base_size + extend_size + 1));
+  NtkStylerElement* value = g_try_malloc0(sizeof(NtkStylerElement) * (base_size + extend_size + 1));
   if (value == NULL) return NULL;
 
-  for (size_t i = 0; i < base_size; i++) value[i] = base[i];
-  for (size_t i = 0; i < extend_size; i++) value[i + base_size] = extend[i];
+  for (size_t i = 0; i < base_size; i++)
+    value[i] = base[i];
+  for (size_t i = 0; i < extend_size; i++)
+    value[i + base_size] = extend[i];
   value[base_size + extend_size] = NTK_STYLER_ELEMENT_NONE;
 
   g_assert_cmpint(ntk_styler_element_get_depth(value), ==, base_size + extend_size);

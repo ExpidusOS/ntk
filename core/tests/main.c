@@ -1,5 +1,5 @@
-#include <ntk/color.h>
 #include <glib.h>
+#include <ntk/color.h>
 
 /* FIXME: We copy this from lib/color.c but we should define the values inside a macro */
 static const char* ntk_colormap[][2] = {
@@ -22,7 +22,9 @@ int main(int argc, char** argv) {
   g_test_init(&argc, &argv, NULL);
 
   for (size_t i = 0; i < (sizeof ntk_colormap / sizeof ntk_colormap[0]); i++) {
-    g_test_add_data_func(g_strdup_printf("/color/name/%s", ntk_colormap[i][0]), ntk_colormap[i], (GTestDataFunc)test_color_name);
+    g_test_add_data_func(
+      g_strdup_printf("/color/name/%s", ntk_colormap[i][0]), ntk_colormap[i], (GTestDataFunc)test_color_name
+    );
   }
   return g_test_run();
 }
