@@ -99,6 +99,8 @@ const char* ntk_styler_state_to_string(NtkStylerState state) {
       return "Hover";
     case NTK_STYLER_STATE_ACTIVE:
       return "Active";
+    case NTK_STYLER_STATE_PRESSED:
+      return "Pressed";
     case NTK_STYLER_STATE_SELECTION:
       return "Selection";
     case NTK_STYLER_N_STATES:
@@ -165,7 +167,7 @@ const char* ntk_styler_key_to_string(NtkStylerKey* key) {
   }
   if (n_states > 0) g_string_append_c(str, ')');
 
-  g_string_append_printf(str, ", Property: %s:%d", ntk_styler_property_to_string(key->prop), key->prop);
+  g_string_append_printf(str, ", Property: %s:%d, Class Name: %s", ntk_styler_property_to_string(key->prop), key->prop, key->class_name);
   return g_string_free(str, FALSE);
 }
 
@@ -189,7 +191,7 @@ guint ntk_styler_key_hash(NtkStylerKey* key) {
     state += (10 * state_digits) + key->state[i];
 
   size_t n_prop_digits = floor(log10(NTK_STYLER_N_PROPERTIES)) + 1;
-  return (elem << elem_digits) + (state << state_digits) + (key->prop << n_prop_digits);
+  return (elem << elem_digits) + (state << state_digits) + (key->prop << n_prop_digits) + (key->class_name == NULL ? 0 : g_str_hash(key->class_name));
 }
 
 gboolean ntk_styler_key_equal(NtkStylerKey* a, NtkStylerKey* b) {
@@ -209,7 +211,7 @@ gboolean ntk_styler_key_equal(NtkStylerKey* a, NtkStylerKey* b) {
     if (a->state[i] != b->state[i]) return FALSE;
   }
 
-  return a->prop == b->prop;
+  return a->prop == b->prop && !g_strcmp0(a->class_name, b->class_name);
 }
 
 static gboolean ntk_styler_apply_internal(NtkStyler* self, NtkContext* ctx, struct nk_style style) {
@@ -222,7 +224,8 @@ static gboolean ntk_styler_apply_internal(NtkStyler* self, NtkContext* ctx, stru
 }
 
 static void ntk_styler_default_key_free(NtkStylerKey* key) {
-  g_free(key->state);
+  g_clear_pointer(&key->class_name, g_free);
+  g_clear_pointer(&key->state, g_free);
   g_free(key->elem);
   g_free(key);
 }
@@ -294,11 +297,13 @@ static gboolean ntk_styler_default_has_style_property(NtkStyler* self, NtkStyler
     impl_key->state[i] = key.state[i];
 
   impl_key->prop = key.prop;
+  impl_key->class_name = key.class_name == NULL ? NULL : g_strdup(key.class_name);
 
   gboolean result = g_hash_table_contains(tbl, impl_key);
 
-  g_free(impl_key->state);
-  g_free(impl_key->elem);
+  g_clear_pointer(&impl_key->class_name, g_free);
+  g_clear_pointer(&impl_key->state, g_free);
+  g_clear_pointer(&impl_key->elem, g_free);
   g_free(impl_key);
   g_hash_table_unref(tbl);
   return result;
@@ -340,12 +345,14 @@ static gboolean ntk_styler_default_get_style_property(NtkStyler* self, NtkStyler
     impl_key->state[i] = key.state[i];
 
   impl_key->prop = key.prop;
+  impl_key->class_name = key.class_name == NULL ? NULL : g_strdup(key.class_name);
 
   const GValue* srcval = g_hash_table_lookup(tbl, impl_key);
   if (srcval != NULL) g_value_copy(srcval, value);
 
-  g_free(impl_key->state);
-  g_free(impl_key->elem);
+  g_clear_pointer(&impl_key->class_name, g_free);
+  g_clear_pointer(&impl_key->state, g_free);
+  g_clear_pointer(&impl_key->elem, g_free);
   g_free(impl_key);
   g_hash_table_unref(tbl);
   return srcval != NULL;
@@ -387,11 +394,13 @@ static gboolean ntk_styler_default_set_style_property(NtkStyler* self, NtkStyler
     impl_key->state[i] = key.state[i];
 
   impl_key->prop = key.prop;
+  impl_key->class_name = key.class_name == NULL ? NULL : g_strdup(key.class_name);
 
   GValue* impl_value = g_try_malloc0(sizeof(GValue));
   if (value == NULL) {
-    g_free(impl_key->state);
-    g_free(impl_key->elem);
+    g_clear_pointer(&impl_key->class_name, g_free);
+    g_clear_pointer(&impl_key->state, g_free);
+    g_clear_pointer(&impl_key->elem, g_free);
     g_free(impl_key);
     g_hash_table_unref(tbl);
     g_return_val_if_reached(FALSE);
@@ -506,6 +515,7 @@ gboolean ntk_styler_apply(NtkStyler* self, NtkContext* ctx) {
     ),
     FALSE
   );
+  g_return_val_if_fail(ntk_styler_create_selectable_style(self, NULL, &styles.selectable), FALSE);
   return ntk_styler_apply_internal(self, ctx, styles);
 }
 

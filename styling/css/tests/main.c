@@ -2,7 +2,7 @@
 #include <ntk/color.h>
 #include <ntk/styling/css.h>
 
-#define BASIC_STYLING_PROP_COUNT 8
+#define BASIC_STYLING_PROP_COUNT 10
 static const char BASIC_STYLING[] = "window, p {\n"
                                     "  background-image: url(\"~/path/to/image.png\");\n"
                                     "}\n"
@@ -15,6 +15,10 @@ static const char BASIC_STYLING[] = "window, p {\n"
                                     "  color: red;\n"
                                     "}\n"
                                     "window > window-header {\n"
+                                    "  background-color: #a9a9a9;\n"
+                                    "  color: red;\n"
+                                    "}\n"
+                                    "scrollbar > button.inc {\n"
                                     "  background-color: #a9a9a9;\n"
                                     "  color: red;\n"
                                     "}";

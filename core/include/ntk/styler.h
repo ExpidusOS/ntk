@@ -74,6 +74,7 @@ typedef enum _NtkStylerState {
   NTK_STYLER_STATE_NORMAL,
   NTK_STYLER_STATE_HOVER,
   NTK_STYLER_STATE_ACTIVE,
+  NTK_STYLER_STATE_PRESSED,
   NTK_STYLER_STATE_SELECTION,
   NTK_STYLER_N_STATES
 } NtkStylerState;
@@ -140,6 +141,7 @@ const char* ntk_styler_property_to_string(NtkStylerProperty prop);
  */
 typedef struct _NtkStylerKey {
   NtkStylerProperty prop;
+  char* class_name;
 
   /**
    * NtkStylerKey.state: (array zero-terminated=1): A zero-terminated array of #NtkStylerState
@@ -332,5 +334,16 @@ gboolean ntk_styler_create_button_style(NtkStyler* self, NtkStylerElement* elems
  * Returns: True if the style was created
  */
 gboolean ntk_styler_create_toggle_style(NtkStyler* self, NtkStylerElement* elems, struct nk_style_toggle* style);
+
+/**
+ * ntk_styler_create_selectable_style:
+ * @self: An #NtkStyler
+ * @elems: (array zero-terminated=1): A zero-terminated array of #NtkStylerElement
+ * @style: (out): The selectable style for Nuklear
+ *
+ * Since: 0.1.0
+ * Returns: True if the style was created
+ */
+gboolean ntk_styler_create_selectable_style(NtkStyler* self, NtkStylerElement* elems, struct nk_style_selectable* style);
 
 G_END_DECLS
