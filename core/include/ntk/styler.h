@@ -35,11 +35,22 @@ typedef enum _NtkStylerElement {
 } NtkStylerElement;
 
 /**
+ * ntk_styler_element_extend:
+ * @base: (array zero-terminated=1): A zero-terminated array of #NtkStylerElement
+ * @extend: (array zero-terminated=1): A zero-terminated array of #NtkStylerElement
+ *
+ * Since: 0.1.0
+ * Returns: (transfer full): A new array the size of both @base and @extend
+ */
+NtkStylerElement* ntk_styler_element_extend(NtkStylerElement* base, NtkStylerElement* extend);
+
+/**
  * ntk_styler_element_get_depth:
  * @elem: (array zero-terminated=1): A zero-terminated array of #NtkStylerElement
  *
  * Computes the number of elements.
  *
+ * Since: 0.1.0
  * Returns: The number of elements
  */
 size_t ntk_styler_element_get_depth(NtkStylerElement* elem);
@@ -59,7 +70,8 @@ const char* ntk_styler_element_to_string(NtkStylerElement elem);
  * Since: 0.1.0
  */
 typedef enum _NtkStylerState {
-  NTK_STYLER_STATE_NORMAL = 0,
+  NTK_STYLER_STATE_NONE = 0,
+  NTK_STYLER_STATE_NORMAL,
   NTK_STYLER_STATE_HOVER,
   NTK_STYLER_STATE_ACTIVE,
   NTK_STYLER_STATE_SELECTION,
@@ -274,5 +286,7 @@ gboolean ntk_styler_apply(NtkStyler* self, NtkContext* ctx);
  * Since: 0.1.0
  */
 void ntk_styler_restore(NtkStyler* self, NtkContext* ctx);
+
+#include "styler-styles.h"
 
 G_END_DECLS

@@ -125,6 +125,7 @@ static gboolean ntk_css_styler_entry_create(
     case CssPseudoActive:
     case CssPseudoSelection:
     case CssPseudoDefault:
+    case CssPseudoNotParsed:
       n_states++;
       break;
     default:
@@ -239,6 +240,7 @@ static gboolean ntk_css_styler_entry_create(
     case CssPseudoSelection:
       key->state[n_states++] = NTK_STYLER_STATE_SELECTION;
       break;
+    case CssPseudoNotParsed:
     case CssPseudoDefault:
       key->state[n_states++] = NTK_STYLER_STATE_NORMAL;
       break;

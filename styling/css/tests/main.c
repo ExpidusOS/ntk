@@ -2,6 +2,7 @@
 #include <ntk/color.h>
 #include <ntk/styling/css.h>
 
+#define BASIC_STYLING_PROP_COUNT 8
 static const char BASIC_STYLING[] = "window, p {\n"
                                     "  background-image: url(\"~/path/to/image.png\");\n"
                                     "}\n"
@@ -45,6 +46,8 @@ static void test_styler_load() {
       g_debug("Key: (%s), Value: %s", ntk_styler_key_to_string(key), g_strdup_value_contents(value));
     }
   }
+
+  g_assert_cmpint(g_hash_table_size(tbl), ==, BASIC_STYLING_PROP_COUNT);
 
   g_hash_table_unref(tbl);
   g_object_unref(styler);

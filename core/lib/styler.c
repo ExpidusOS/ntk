@@ -1,11 +1,27 @@
 #include "context-priv.h"
 #include "styler-priv.h"
 #include <math.h>
+#include <ntk/color.h>
 #include <ntk/styler.h>
 
 #define NTK_STYLER_PRIVATE(self) ntk_styler_get_instance_private(self)
 
 G_DEFINE_TYPE_WITH_PRIVATE(NtkStyler, ntk_styler, G_TYPE_OBJECT);
+
+NtkStylerElement* ntk_styler_element_extend(NtkStylerElement* base, NtkStylerElement* extend) {
+  size_t base_size = ntk_styler_element_get_depth(base);
+  size_t extend_size = ntk_styler_element_get_depth(extend);
+
+  NtkStylerElement* value = g_try_malloc0(sizeof (NtkStylerElement) * (base_size + extend_size + 1));
+  if (value == NULL) return NULL;
+
+  for (size_t i = 0; i < base_size; i++) value[i] = base[i];
+  for (size_t i = 0; i < extend_size; i++) value[i + base_size] = extend[i];
+  value[base_size + extend_size] = NTK_STYLER_ELEMENT_NONE;
+
+  g_assert_cmpint(ntk_styler_element_get_depth(value), ==, base_size + extend_size);
+  return value;
+}
 
 size_t ntk_styler_element_get_depth(NtkStylerElement* elem) {
   if (elem == NULL) return 0;
@@ -73,6 +89,8 @@ size_t ntk_styler_state_get_depth(NtkStylerState* state) {
 
 const char* ntk_styler_state_to_string(NtkStylerState state) {
   switch (state) {
+    case NTK_STYLER_STATE_NONE:
+      return "None";
     case NTK_STYLER_STATE_NORMAL:
       return "Normal";
     case NTK_STYLER_STATE_HOVER:
@@ -454,6 +472,8 @@ gboolean ntk_styler_apply(NtkStyler* self, NtkContext* ctx) {
 
   struct nk_style styles = {};
   styles.font = ctx->priv->nk.style.font;
+
+  g_return_val_if_fail(ntk_styler_create_text_style(self, NULL, &styles.text), FALSE);
   return ntk_styler_apply_internal(self, ctx, styles);
 }
 
