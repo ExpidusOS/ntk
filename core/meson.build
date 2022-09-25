@@ -54,4 +54,9 @@ pkg.generate(libntk_shlib, description: 'GObject based UI toolkit for Nuklear',
 if get_option('tests')
   test_prog = executable('ntk-tests', ['tests/main.c'],
     dependencies: libntk)
+
+  test('core', test_prog, env: [
+    'G_TEST_SRCDIR=@0@'.format(meson.current_source_dir()),
+    'G_TEST_BUILDDIR=@0@'.format(meson.current_build_dir())
+  ], protocol: 'tap')
 endif
