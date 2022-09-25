@@ -33,7 +33,7 @@ static void test_styler_load() {
 
     if (G_VALUE_TYPE(value) == NTK_TYPE_COLOR) {
       NtkColor* color = g_value_get_boxed(value);
-      g_debug("Key: (%s), Value: #%s", ntk_styler_key_to_string(key), ntk_color_to_string(color));
+      g_debug("Key: (%s), Value: %s", ntk_styler_key_to_string(key), ntk_color_to_string(color));
     } else {
       g_debug("Key: (%s), Value: %s", ntk_styler_key_to_string(key), g_strdup_value_contents(value));
     }

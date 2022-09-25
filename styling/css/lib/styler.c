@@ -6,15 +6,6 @@
 
 G_DEFINE_TYPE_WITH_PRIVATE(NtkCSSStyler, ntk_css_styler, NTK_TYPE_STYLER);
 
-/** Color Map (Values are prefixed with # for editors) **/
-static const char* css_styler_colormap[][2] = {
-  { "white", "#ffffff" },
-  { "red", "#ff0000" },
-  { "green", "#00ff00" },
-  { "blue", "#0000ff" },
-  { "black", "#000000" }
-};
-
 static void ntk_css_styler_default_key_free(NtkStylerKey* key) {
   g_free(key->state);
   g_free(key->elem);
@@ -36,10 +27,7 @@ static NtkColor* ntk_css_styler_new_color(CssValue* value) {
       }
       break;
     case CSS_VALUE_IDENT:
-      for (size_t i = 0; i < (sizeof (css_styler_colormap) / sizeof (css_styler_colormap[0])); i++) {
-        if (g_str_equal(css_styler_colormap[i][0], value->string)) return ntk_color_new(NTK_COLOR_FORMAT_RGB_HEX, css_styler_colormap[i][1] + 1);
-      }
-      break;
+      return ntk_color_new(NTK_COLOR_FORMAT_NAMED, value->string);
     default:
       g_warning("Unsupported unit %d for color (%s)", value->unit, value->string);
       return NULL;

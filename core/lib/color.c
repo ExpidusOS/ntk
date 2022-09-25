@@ -2,6 +2,14 @@
 
 G_DEFINE_BOXED_TYPE(NtkColor, ntk_color, ntk_color_copy, ntk_color_free);
 
+static const char* ntk_colormap[][2] = {
+  { "white", "#ffffff" },
+  { "red", "#ff0000" },
+  { "green", "#00ff00" },
+  { "blue", "#0000ff" },
+  { "black", "#000000" }
+};
+
 NtkColor* ntk_color_new(NtkColorFormat fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
@@ -54,6 +62,7 @@ NtkColor* ntk_color_copy(NtkColor* self) {
       c->value.rgb.i.b = self->value.rgb.i.b;
       break;
     case NTK_COLOR_FORMAT_RGB_HEX:
+    case NTK_COLOR_FORMAT_NAMED:
       memcpy(c->value.rgb.h, self->value.rgb.h, sizeof(char) * 6);
       break;
     case NTK_COLOR_FORMAT_HSVA_FLOAT:
@@ -123,6 +132,7 @@ NtkColor* ntk_color_convert(NtkColor* self, NtkColorFormat fmt) {
       self->value.rgb.i.b = color.b;
       break;
     case NTK_COLOR_FORMAT_RGB_HEX:
+    case NTK_COLOR_FORMAT_NAMED:
       nk_color_hex_rgb(self->value.rgb.h, color);
       break;
     case NTK_COLOR_FORMAT_HSVA_FLOAT:
@@ -212,6 +222,17 @@ void ntk_color_setv(NtkColor* self, va_list ap) {
       self->value.hsv.i.s = va_arg(ap, int);
       self->value.hsv.i.v = va_arg(ap, int);
       break;
+    case NTK_COLOR_FORMAT_NAMED:
+      {
+        char* name = va_arg(ap, char*);
+        for (size_t i = 0; i < (sizeof ntk_colormap / sizeof ntk_colormap[0]); i++) {
+          if (g_str_equal(ntk_colormap[i][0], name)) {
+            memcpy(self->value.rgb.h, ntk_colormap[i][1] + 1, sizeof(char) * 6);
+            break;
+          }
+        }
+      }
+      break;
   }
 }
 
@@ -236,6 +257,7 @@ void ntk_color_nuke(NtkColor* self, struct nk_color* color_out) {
       *color_out = nk_rgb(self->value.rgb.i.r, self->value.rgb.i.g, self->value.rgb.i.b);
       break;
     case NTK_COLOR_FORMAT_RGB_HEX:
+    case NTK_COLOR_FORMAT_NAMED:
       *color_out = nk_rgb_hex(self->value.rgb.h);
       break;
     case NTK_COLOR_FORMAT_HSVA_FLOAT:
@@ -265,6 +287,12 @@ void ntk_color_nukef(NtkColor* self, struct nk_colorf* colorf_out) {
 const char* ntk_color_to_string(NtkColor* self) {
   g_return_val_if_fail(self != NULL, NULL);
 
+  if (self->fmt == NTK_COLOR_FORMAT_NAMED) {
+    for (size_t i = 0; i < (sizeof ntk_colormap / sizeof ntk_colormap[0]); i++) {
+      if (g_str_equal(ntk_colormap[i][1] + 1, self->value.rgb.h)) return g_strdup(ntk_colormap[i][0]);
+    }
+  }
+
   NtkColor* c = NULL;
   switch (self->fmt) {
     case NTK_COLOR_FORMAT_RGBA_FLOAT:
@@ -279,12 +307,13 @@ const char* ntk_color_to_string(NtkColor* self) {
     case NTK_COLOR_FORMAT_RGB_HEX:
     case NTK_COLOR_FORMAT_HSV_FLOAT:
     case NTK_COLOR_FORMAT_HSV_INT:
+    case NTK_COLOR_FORMAT_NAMED:
       c = ntk_color_convert(self, NTK_COLOR_FORMAT_RGB_HEX);
       break;
   }
 
   g_return_val_if_fail(c != NULL, NULL);
-  const gchar* value = g_strdup(c->fmt == NTK_COLOR_FORMAT_RGBA_HEX ? c->value.rgba.h : c->value.rgb.h);
+  const gchar* value = g_strdup_printf("#%s", c->fmt == NTK_COLOR_FORMAT_RGBA_HEX ? c->value.rgba.h : c->value.rgb.h);
   ntk_color_free(c);
   return value;
 }
