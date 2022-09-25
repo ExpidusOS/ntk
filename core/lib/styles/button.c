@@ -5,13 +5,28 @@ gboolean ntk_styler_create_button_style(NtkStyler* self, NtkStylerElement* elems
   g_return_val_if_fail(NTK_IS_STYLER(self), FALSE);
   g_return_val_if_fail(style != NULL, FALSE);
 
-  g_return_val_if_fail(ntk_styler_create_item_style(self, elems, (NtkStylerState[]){ NTK_STYLER_STATE_NORMAL, NTK_STYLER_STATE_NONE }, &style->normal), FALSE);
-  g_return_val_if_fail(ntk_styler_create_item_style(self, elems, (NtkStylerState[]){ NTK_STYLER_STATE_HOVER, NTK_STYLER_STATE_NONE }, &style->hover), FALSE);
-  g_return_val_if_fail(ntk_styler_create_item_style(self, elems, (NtkStylerState[]){ NTK_STYLER_STATE_ACTIVE, NTK_STYLER_STATE_NONE }, &style->active), FALSE);
+  g_return_val_if_fail(
+    ntk_styler_create_item_style(
+      self, elems, (NtkStylerState[]){NTK_STYLER_STATE_NORMAL, NTK_STYLER_STATE_NONE}, &style->normal
+    ),
+    FALSE
+  );
+  g_return_val_if_fail(
+    ntk_styler_create_item_style(
+      self, elems, (NtkStylerState[]){NTK_STYLER_STATE_HOVER, NTK_STYLER_STATE_NONE}, &style->hover
+    ),
+    FALSE
+  );
+  g_return_val_if_fail(
+    ntk_styler_create_item_style(
+      self, elems, (NtkStylerState[]){NTK_STYLER_STATE_ACTIVE, NTK_STYLER_STATE_NONE}, &style->active
+    ),
+    FALSE
+  );
 
   NtkStylerKey key = {};
   key.elem = elems;
-  key.state = (NtkStylerState[]){ NTK_STYLER_STATE_NORMAL, NTK_STYLER_STATE_NONE };
+  key.state = (NtkStylerState[]){NTK_STYLER_STATE_NORMAL, NTK_STYLER_STATE_NONE};
   key.prop = NTK_STYLER_PROPERTY_BORDER_COLOR;
 
   if (ntk_styler_has_style_property(self, key)) {
@@ -48,7 +63,7 @@ gboolean ntk_styler_create_button_style(NtkStyler* self, NtkStylerElement* elems
     ntk_color_nuke(color, &style->text_active);
   }
 
-  key.state = (NtkStylerState[]){ NTK_STYLER_STATE_HOVER, NTK_STYLER_STATE_NONE };
+  key.state = (NtkStylerState[]){NTK_STYLER_STATE_HOVER, NTK_STYLER_STATE_NONE};
   key.prop = NTK_STYLER_PROPERTY_COLOR;
   if (ntk_styler_has_style_property(self, key)) {
     GValue value = G_VALUE_INIT;
@@ -60,7 +75,7 @@ gboolean ntk_styler_create_button_style(NtkStyler* self, NtkStylerElement* elems
     ntk_color_nuke(color, &style->text_hover);
   }
 
-  key.state = (NtkStylerState[]){ NTK_STYLER_STATE_ACTIVE, NTK_STYLER_STATE_NONE };
+  key.state = (NtkStylerState[]){NTK_STYLER_STATE_ACTIVE, NTK_STYLER_STATE_NONE};
   key.prop = NTK_STYLER_PROPERTY_COLOR;
   if (ntk_styler_has_style_property(self, key)) {
     GValue value = G_VALUE_INIT;
@@ -72,7 +87,7 @@ gboolean ntk_styler_create_button_style(NtkStyler* self, NtkStylerElement* elems
     ntk_color_nuke(color, &style->text_active);
   }
 
-  key.state = (NtkStylerState[]){ NTK_STYLER_STATE_NORMAL, NTK_STYLER_STATE_NONE };
+  key.state = (NtkStylerState[]){NTK_STYLER_STATE_NORMAL, NTK_STYLER_STATE_NONE};
   key.prop = NTK_STYLER_PROPERTY_BORDER_WIDTH;
   if (ntk_styler_has_style_property(self, key)) {
     GValue value = G_VALUE_INIT;
@@ -114,13 +129,16 @@ gboolean ntk_styler_create_button_style(NtkStyler* self, NtkStylerElement* elems
     GValue value = G_VALUE_INIT;
     g_return_val_if_fail(ntk_styler_get_style_property(self, key, &value), FALSE);
     g_assert_cmpint(G_VALUE_TYPE(&value), ==, G_TYPE_STRING);
-    
+
     const gchar* str = g_value_get_string(&value);
     g_assert(str != NULL);
 
-    if (g_str_equal(str, "center")) style->text_alignment = NK_TEXT_CENTERED;
-    else if (g_str_equal(str, "left")) style->text_alignment = NK_TEXT_LEFT;
-    else if (g_str_equal(str, "right")) style->text_alignment = NK_TEXT_RIGHT;
+    if (g_str_equal(str, "center"))
+      style->text_alignment = NK_TEXT_CENTERED;
+    else if (g_str_equal(str, "left"))
+      style->text_alignment = NK_TEXT_LEFT;
+    else if (g_str_equal(str, "right"))
+      style->text_alignment = NK_TEXT_RIGHT;
   }
   return TRUE;
 }

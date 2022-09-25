@@ -476,6 +476,36 @@ gboolean ntk_styler_apply(NtkStyler* self, NtkContext* ctx) {
   styles.font = ctx->priv->nk.style.font;
 
   g_return_val_if_fail(ntk_styler_create_text_style(self, NULL, &styles.text), FALSE);
+  g_return_val_if_fail(
+    ntk_styler_create_button_style(
+      self, (NtkStylerElement[]){NTK_STYLER_ELEMENT_BUTTON, NTK_STYLER_ELEMENT_NONE}, &styles.button
+    ),
+    FALSE
+  );
+  g_return_val_if_fail(
+    ntk_styler_create_button_style(
+      self, (NtkStylerElement[]){NTK_STYLER_ELEMENT_BUTTON_CONTEXT, NTK_STYLER_ELEMENT_NONE}, &styles.contextual_button
+    ),
+    FALSE
+  );
+  g_return_val_if_fail(
+    ntk_styler_create_button_style(
+      self, (NtkStylerElement[]){NTK_STYLER_ELEMENT_BUTTON_MENU, NTK_STYLER_ELEMENT_NONE}, &styles.menu_button
+    ),
+    FALSE
+  );
+  g_return_val_if_fail(
+    ntk_styler_create_toggle_style(
+      self, (NtkStylerElement[]){NTK_STYLER_ELEMENT_OPTION, NTK_STYLER_ELEMENT_NONE}, &styles.option
+    ),
+    FALSE
+  );
+  g_return_val_if_fail(
+    ntk_styler_create_toggle_style(
+      self, (NtkStylerElement[]){NTK_STYLER_ELEMENT_INPUT_CHECKBOX, NTK_STYLER_ELEMENT_NONE}, &styles.checkbox
+    ),
+    FALSE
+  );
   return ntk_styler_apply_internal(self, ctx, styles);
 }
 
