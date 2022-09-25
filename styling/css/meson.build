@@ -46,4 +46,14 @@ if cssparser.found()
     name: 'ntk-css',
     url: 'https://github.com/ExpidusOS/ntk',
     version: longver)
+
+  if get_option('tests')
+    test_prog = executable('ntk-tests', ['tests/main.c'],
+      dependencies: libntk_css)
+
+    test('css-styler', test_prog, env: [
+      'G_TEST_SRCDIR=@0@'.format(meson.current_source_dir()),
+      'G_TEST_BUILDDIR=@0@'.format(meson.current_build_dir())
+    ], protocol: 'tap')
+  endif
 endif

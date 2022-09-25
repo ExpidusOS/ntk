@@ -261,3 +261,30 @@ void ntk_color_nukef(NtkColor* self, struct nk_colorf* colorf_out) {
   ntk_color_nuke(self, &color);
   *colorf_out = nk_color_cf(color);
 }
+
+const char* ntk_color_to_string(NtkColor* self) {
+  g_return_val_if_fail(self != NULL, NULL);
+
+  NtkColor* c = NULL;
+  switch (self->fmt) {
+    case NTK_COLOR_FORMAT_RGBA_FLOAT:
+    case NTK_COLOR_FORMAT_RGBA_INT:
+    case NTK_COLOR_FORMAT_RGBA_HEX:
+    case NTK_COLOR_FORMAT_HSVA_FLOAT:
+    case NTK_COLOR_FORMAT_HSVA_INT:
+      c = ntk_color_convert(self, NTK_COLOR_FORMAT_RGBA_HEX);
+      break;
+    case NTK_COLOR_FORMAT_RGB_FLOAT:
+    case NTK_COLOR_FORMAT_RGB_INT:
+    case NTK_COLOR_FORMAT_RGB_HEX:
+    case NTK_COLOR_FORMAT_HSV_FLOAT:
+    case NTK_COLOR_FORMAT_HSV_INT:
+      c = ntk_color_convert(self, NTK_COLOR_FORMAT_RGB_HEX);
+      break;
+  }
+
+  g_return_val_if_fail(c != NULL, NULL);
+  const gchar* value = g_strdup(c->fmt == NTK_COLOR_FORMAT_RGBA_HEX ? c->value.rgba.h : c->value.rgb.h);
+  ntk_color_free(c);
+  return value;
+}

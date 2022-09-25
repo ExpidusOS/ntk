@@ -4,6 +4,11 @@
 #include <nuklear.h>
 #include <stdarg.h>
 
+G_BEGIN_DECLS
+
+#define NTK_TYPE_COLOR ntk_color_get_type()
+GType ntk_color_get_type();
+
 /**
  * NtkColorFormat:
  *
@@ -154,3 +159,14 @@ void ntk_color_nuke(NtkColor* self, struct nk_color* color_out);
  * Since: 0.1.0
  */
 void ntk_color_fnuke(NtkColor* self, struct nk_colorf* colorf_out);
+
+/**
+ * ntk_color_to_string:
+ * @self: An #NtkColor
+ *
+ * Since: 0.1.0
+ * Returns: (transfer full): String representation of the color
+ */
+const char* ntk_color_to_string(NtkColor* self);
+
+G_END_DECLS

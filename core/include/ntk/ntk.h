@@ -1,5 +1,6 @@
 #pragma once
 
+#include "color.h"
 #include "context.h"
 #include "error.h"
 #include "font.h"

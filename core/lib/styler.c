@@ -8,7 +8,7 @@
 G_DEFINE_TYPE_WITH_PRIVATE(NtkStyler, ntk_styler, G_TYPE_OBJECT);
 
 size_t ntk_styler_element_get_depth(NtkStylerElement* elem) {
-  g_return_val_if_fail(elem != NULL, -1);
+  if (elem == NULL) return 0;
 
   size_t i = 0;
   while (elem[i] > 0) {
@@ -18,8 +18,46 @@ size_t ntk_styler_element_get_depth(NtkStylerElement* elem) {
   return i;
 }
 
+const char* ntk_styler_element_to_string(NtkStylerElement elem) {
+  switch (elem) {
+    case NTK_STYLER_ELEMENT_NONE:
+      return "None";
+    case NTK_STYLER_ELEMENT_TEXT:
+      return "Text";
+    case NTK_STYLER_ELEMENT_BUTTON:
+      return "Button";
+    case NTK_STYLER_ELEMENT_INPUT_TEXT:
+      return "Input Text";
+    case NTK_STYLER_ELEMENT_INPUT_TOGGLE:
+      return "Input Toggle";
+    case NTK_STYLER_ELEMENT_INPUT_SLIDER:
+      return "Input Slider";
+    case NTK_STYLER_ELEMENT_INPUT_CHECKBOX:
+      return "Input Checkbox";
+    case NTK_STYLER_ELEMENT_PROGRESS:
+      return "Progress";
+    case NTK_STYLER_ELEMENT_SCROLLBAR_VERTICAL:
+      return "Vertical Scrollbar";
+    case NTK_STYLER_ELEMENT_SCROLLBAR_HORIZONTAL:
+      return "Horizontal Scrollbar";
+    case NTK_STYLER_ELEMENT_TEXTAREA:
+      return "Text Area";
+    case NTK_STYLER_ELEMENT_TAB:
+      return "Tab";
+    case NTK_STYLER_ELEMENT_OPTION:
+      return "Option";
+    case NTK_STYLER_ELEMENT_WINDOW:
+      return "Window";
+    case NTK_STYLER_ELEMENT_WINDOW_HEADER:
+      return "Window Header";
+    case NTK_STYLER_N_ELEMENTS:
+    default:
+      return NULL;
+  }
+}
+
 size_t ntk_styler_state_get_depth(NtkStylerState* state) {
-  g_return_val_if_fail(state != NULL, -1);
+  if (state == NULL) return 0;
 
   size_t i = 0;
   while (state[i] > 0) {
@@ -29,10 +67,86 @@ size_t ntk_styler_state_get_depth(NtkStylerState* state) {
   return i;
 }
 
+const char* ntk_styler_state_to_string(NtkStylerState state) {
+  switch (state) {
+    case NTK_STYLER_STATE_NORMAL:
+      return "Normal";
+    case NTK_STYLER_STATE_HOVER:
+      return "Hover";
+    case NTK_STYLER_STATE_ACTIVE:
+      return "Active";
+    case NTK_STYLER_STATE_SELECTION:
+      return "Selection";
+    case NTK_STYLER_N_STATES:
+    default:
+      return NULL;
+  }
+}
+
+const char* ntk_styler_property_to_string(NtkStylerProperty prop) {
+  switch (prop) {
+    case NTK_STYLER_PROPERTY_UNKNOWN:
+      return "Unknown";
+    case NTK_STYLER_PROPERTY_COLOR:
+      return "Color";
+    case NTK_STYLER_PROPERTY_BACKGROUND_COLOR:
+      return "Background Color";
+    case NTK_STYLER_PROPERTY_BACKGROUND_IMAGE:
+      return "Background Image";
+    case NTK_STYLER_PROPERTY_BORDER_COLOR:
+      return "Border Color";
+    case NTK_STYLER_PROPERTY_SPACING_TOP:
+      return "Spacing Top";
+    case NTK_STYLER_PROPERTY_SPACING_LEFT:
+      return "Spacing Left";
+    case NTK_STYLER_PROPERTY_PADDING_TOP:
+      return "Padding Top";
+    case NTK_STYLER_PROPERTY_PADDING_LEFT:
+      return "Padding Left";
+    case NTK_STYLER_PROPERTY_BORDER_RADIUS:
+      return "Border Radius";
+    case NTK_STYLER_PROPERTY_VISIBILITY:
+      return "Visibility";
+    case NTK_STYLER_PROPERTY_BORDER_WIDTH:
+      return "Border Width";
+    case NTK_STYLER_PROPERTY_TEXT_ALIGN:
+      return "Text Align";
+    case NTK_STYLER_N_PROPERTIES:
+    default:
+      return NULL;
+  }
+}
+
+const char* ntk_styler_key_to_string(NtkStylerKey* key) {
+  GString* str = g_string_new(NULL);
+  g_return_val_if_fail(str != NULL, NULL);
+
+  size_t n_elems = ntk_styler_element_get_depth(key->elem);
+  g_string_append_printf(str, "Elements: %ld", n_elems);
+
+  if (n_elems > 0) g_string_append(str, " (");
+  for (size_t i = 0; i < n_elems; i++) {
+    g_string_append_printf(str, "%s:%d", ntk_styler_element_to_string(key->elem[i]), key->elem[i]);
+    if ((i + 1) < n_elems) g_string_append(str, ", ");
+  }
+  if (n_elems > 0) g_string_append_c(str, ')');
+
+  size_t n_states = ntk_styler_state_get_depth(key->state);
+  g_string_append_printf(str, ", State: %ld", n_states);
+
+  if (n_states > 0) g_string_append(str, " (");
+  for (size_t i = 0; i < n_states; i++) {
+    g_string_append_printf(str, "%s:%d", ntk_styler_state_to_string(key->state[i]), key->state[i]);
+    if ((i + 1) < n_states) g_string_append(str, ", ");
+  }
+  if (n_states > 0) g_string_append_c(str, ')');
+
+  g_string_append_printf(str, ", Property: %s:%d", ntk_styler_property_to_string(key->prop), key->prop);
+  return g_string_free(str, FALSE);
+}
+
 guint ntk_styler_key_hash(NtkStylerKey* key) {
   g_return_val_if_fail(key != NULL, -1);
-  g_return_val_if_fail(key->elem != NULL, -1);
-  g_return_val_if_fail(key->state != NULL, -1);
 
   size_t elem_count = ntk_styler_element_get_depth(key->elem);
   size_t n_elem_digits = floor(log10(NTK_STYLER_N_ELEMENTS)) + 1;

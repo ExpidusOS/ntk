@@ -43,6 +43,15 @@ typedef enum _NtkStylerElement {
 size_t ntk_styler_element_get_depth(NtkStylerElement* elem);
 
 /**
+ * ntk_styler_element_to_string:
+ * @key: An #NtkStylerElement
+ *
+ * Since: 0.1.0
+ * Returns: (transfer none): The string representation of the element
+ */
+const char* ntk_styler_element_to_string(NtkStylerElement elem);
+
+/**
  * NtkStylerState:
  *
  * Since: 0.1.0
@@ -64,6 +73,15 @@ typedef enum _NtkStylerState {
  * Returns: The number of elements
  */
 size_t ntk_styler_state_get_depth(NtkStylerState* state);
+
+/**
+ * ntk_styler_state_to_string:
+ * @key: An #NtkStylerState
+ *
+ * Since: 0.1.0
+ * Returns: (transfer none): The string representation of the state
+ */
+const char* ntk_styler_state_to_string(NtkStylerState state);
 
 /**
  * NtkStylerProperty:
@@ -93,6 +111,15 @@ typedef enum _NtkStylerProperty {
 } NtkStylerProperty;
 
 /**
+ * ntk_styler_property_to_string:
+ * @key: An #NtkStylerProperty
+ *
+ * Since: 0.1.0
+ * Returns: (transfer full): The string representation of the property
+ */
+const char* ntk_styler_property_to_string(NtkStylerProperty prop);
+
+/**
  * NtkStylerKey:
  *
  * Since: 0.1.0
@@ -110,6 +137,15 @@ typedef struct _NtkStylerKey {
    */
   NtkStylerElement* elem;
 } NtkStylerKey;
+
+/**
+ * ntk_styler_key_to_string:
+ * @key: An #NtkStylerKey
+ *
+ * Since: 0.1.0
+ * Returns: (transfer full): The string representation of the key
+ */
+const char* ntk_styler_key_to_string(NtkStylerKey* key);
 
 /**
  * ntk_styler_key_hash:

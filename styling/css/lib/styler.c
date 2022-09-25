@@ -1,11 +1,22 @@
 #include "styler-priv.h"
 #include <ntk/styling/css/styler.h>
+#include <ntk/color.h>
 
 #define NTK_CSS_STYLER_PRIVATE(self) ((self)->priv == NULL ? ntk_css_styler_get_instance_private(self) : (self)->priv)
 
 G_DEFINE_TYPE_WITH_PRIVATE(NtkCSSStyler, ntk_css_styler, NTK_TYPE_STYLER);
 
+/** Color Map (Values are prefixed with # for editors) **/
+static const char* css_styler_colormap[][2] = {
+  { "white", "#ffffff" },
+  { "red", "#ff0000" },
+  { "green", "#00ff00" },
+  { "blue", "#0000ff" },
+  { "black", "#000000" }
+};
+
 static void ntk_css_styler_default_key_free(NtkStylerKey* key) {
+  g_free(key->state);
   g_free(key->elem);
   g_free(key);
 }
@@ -15,6 +26,27 @@ static void ntk_css_styler_default_value_free(GValue* value) {
   g_free(value);
 }
 
+static NtkColor* ntk_css_styler_new_color(CssValue* value) {
+  switch (value->unit) {
+    case CSS_VALUE_PARSER_HEXCOLOR:
+      if (strlen(value->string) == 6) {
+        return ntk_color_new(NTK_COLOR_FORMAT_RGB_HEX, value->string);
+      } else if (strlen(value->string) == 8) {
+        return ntk_color_new(NTK_COLOR_FORMAT_RGBA_HEX, value->string);
+      }
+      break;
+    case CSS_VALUE_IDENT:
+      for (size_t i = 0; i < (sizeof (css_styler_colormap) / sizeof (css_styler_colormap[0])); i++) {
+        if (g_str_equal(css_styler_colormap[i][0], value->string)) return ntk_color_new(NTK_COLOR_FORMAT_RGB_HEX, css_styler_colormap[i][1] + 1);
+      }
+      break;
+    default:
+      g_warning("Unsupported unit %d for color (%s)", value->unit, value->string);
+      return NULL;
+  }
+  return NULL;
+}
+
 static gboolean
 ntk_css_styler_entry_create(CssStyleRule* rule, CssDeclaration* declaration, NtkStylerKey** key_out, GValue** value_out) {
   NtkStylerKey* key = g_try_malloc0(sizeof(NtkStylerKey));
@@ -22,48 +54,57 @@ ntk_css_styler_entry_create(CssStyleRule* rule, CssDeclaration* declaration, Ntk
 
   size_t n_elems = 0;
   size_t n_states = 0;
-  gboolean has_input = FALSE;
-  gboolean has_input_type = FALSE;
-  gboolean has_scrollbar = FALSE;
-  gboolean has_scrollbar_type = FALSE;
   for (size_t i = 0; i < rule->selectors->length; i++) {
     CssSelector* selector = rule->selectors->data[i];
     switch (selector->match) {
       case CssSelMatchTag:
-        if (g_str_equal(selector->data->value, "input")) has_input = TRUE;
-        else if (g_str_equal(selector->data->value, "scrollbar")) has_scrollbar = TRUE;
-        n_elems++;
-        break;
-      case CssSelMatchAttrExact:
-        if (has_input && g_str_equal(selector->data->argument, "type")) {
-          if (g_str_equal(selector->data->value, "button")) {
-            has_input_type = TRUE;
+        if (g_str_equal(selector->tag->local, "input")) {
+          if (selector->tagHistory == NULL) {
             n_elems++;
-          } else if (g_str_equal(selector->data->value, "toggle")) {
-            has_input_type = TRUE;
-            n_elems++;
-          } else if (g_str_equal(selector->data->value, "text")) {
-            has_input_type = TRUE;
-            n_elems++;
-          } else if (g_str_equal(selector->data->value, "range")) {
-            has_input_type = TRUE;
-            n_elems++;
-          } else if (g_str_equal(selector->data->value, "checkbox")) {
-            has_input_type = TRUE;
-            n_elems++;
-          } else {
-            continue;
+            break;
           }
-        } else if (has_scrollbar && g_str_equal(selector->data->argument, "type")) {
-          if (g_str_equal(selector->data->value, "vertical")) {
-            has_scrollbar_type = TRUE;
-            n_elems++;
-          } else if (g_str_equal(selector->data->value, "horizontal")) {
-            has_scrollbar_type = TRUE;
-            n_elems++;
-          } else {
-            continue;
+
+          CssSelector* th = selector;
+          while ((th = th->tagHistory) != NULL) {
+            if (g_str_equal(th->data->attribute->local, "type")) {
+              if (g_str_equal(th->data->value, "button")) {
+                n_elems++;
+                break;
+              } else if (g_str_equal(th->data->value, "toggle")) {
+                n_elems++;
+                break;
+              } else if (g_str_equal(th->data->value, "text")) {
+                n_elems++;
+                break;
+              } else if (g_str_equal(th->data->value, "range")) {
+                n_elems++;
+                break;
+              } else if (g_str_equal(th->data->value, "checkbox")) {
+                n_elems++;
+                break;
+              }
+            }
           }
+        } else if (g_str_equal(selector->tag->local, "scrollbar")) {
+          if (selector->tagHistory == NULL) {
+            n_elems += 2;
+            break;
+          }
+
+          CssSelector* th = selector;
+          while ((th = th->tagHistory) != NULL) {
+            if (g_str_equal(th->data->attribute->local, "type")) {
+              if (g_str_equal(th->data->value, "vertical")) {
+                n_elems++;
+                break;
+              } else if (g_str_equal(th->data->value, "horizontal")) {
+                n_elems++;
+                break;
+              }
+            }
+          }
+        } else {
+          n_elems++;
         }
         break;
       default:
@@ -81,17 +122,14 @@ ntk_css_styler_entry_create(CssStyleRule* rule, CssDeclaration* declaration, Ntk
     }
   }
 
-  if (!has_input_type && has_input) n_elems++;
-  if (!has_scrollbar_type && has_scrollbar) n_elems += 2;
-
   key->elem = g_try_malloc0(sizeof(NtkStylerElement) * n_elems);
-  if (key->elem == NULL) {
+  if (key->elem == NULL && n_elems > 0) {
     g_free(key);
     g_return_val_if_reached(FALSE);
   }
 
   key->state = g_try_malloc0(sizeof(NtkStylerState) * n_states);
-  if (key->state == NULL) {
+  if (key->state == NULL && n_states > 0) {
     g_free(key->elem);
     g_free(key);
     g_return_val_if_reached(FALSE);
@@ -101,71 +139,69 @@ ntk_css_styler_entry_create(CssStyleRule* rule, CssDeclaration* declaration, Ntk
   for (size_t i = 0; i < rule->selectors->length; i++) {
     CssSelector* selector = rule->selectors->data[i];
     if (selector->match == CssSelMatchTag) {
-      if (g_str_equal(selector->data->value, "p")) {
+      if (g_str_equal(selector->tag->local, "p")) {
         key->elem[n_elems] = NTK_STYLER_ELEMENT_TEXT;
-      } else if (g_str_equal(selector->data->value, "button")) {
+      } else if (g_str_equal(selector->tag->local, "button")) {
         key->elem[n_elems] = NTK_STYLER_ELEMENT_BUTTON;
-      } else if (g_str_equal(selector->data->value, "input")) {
-        has_input = TRUE;
-      } else if (g_str_equal(selector->data->value, "scrollbar")) {
-        has_scrollbar = TRUE;
-      } else if (g_str_equal(selector->data->value, "progress")) {
+      } else if (g_str_equal(selector->tag->local, "input")) {
+        if (selector->tagHistory == NULL) {
+          key->elem[n_elems] = NTK_STYLER_ELEMENT_INPUT_TEXT;
+        } else {
+          CssSelector* th = selector;
+          while ((th = th->tagHistory) != NULL) {
+            if (g_str_equal(th->data->attribute->local, "type")) {
+              if (g_str_equal(th->data->value, "button")) {
+                key->elem[n_elems] = NTK_STYLER_ELEMENT_BUTTON;
+              } else if (g_str_equal(th->data->value, "toggle")) {
+                key->elem[n_elems] = NTK_STYLER_ELEMENT_INPUT_TOGGLE;
+              } else if (g_str_equal(th->data->value, "text")) {
+                key->elem[n_elems] = NTK_STYLER_ELEMENT_INPUT_TEXT;
+              } else if (g_str_equal(th->data->value, "range")) {
+                key->elem[n_elems] = NTK_STYLER_ELEMENT_INPUT_SLIDER;
+              } else if (g_str_equal(th->data->value, "checkbox")) {
+                key->elem[n_elems] = NTK_STYLER_ELEMENT_INPUT_CHECKBOX;
+              } else {
+                n_elems--;
+              }
+            }
+          }
+        }
+      } else if (g_str_equal(selector->tag->local, "scrollbar")) {
+        if (selector->tagHistory == NULL) {
+          key->elem[n_elems++] = NTK_STYLER_ELEMENT_SCROLLBAR_VERTICAL;
+          key->elem[n_elems] = NTK_STYLER_ELEMENT_SCROLLBAR_HORIZONTAL;
+        } else {
+          CssSelector* th = selector;
+          while ((th = th->tagHistory) != NULL) {
+            if (g_str_equal(th->data->attribute->local, "type")) {
+              if (g_str_equal(th->data->value, "vertical")) {
+                key->elem[n_elems] = NTK_STYLER_ELEMENT_SCROLLBAR_VERTICAL;
+              } else if (g_str_equal(th->data->value, "horizontal")) {
+                key->elem[n_elems] = NTK_STYLER_ELEMENT_SCROLLBAR_HORIZONTAL;
+              } else {
+                n_elems--;
+              }
+            }
+          }
+        }
+      } else if (g_str_equal(selector->tag->local, "progress")) {
         key->elem[n_elems] = NTK_STYLER_ELEMENT_PROGRESS;
-      } else if (g_str_equal(selector->data->value, "textarea")) {
+      } else if (g_str_equal(selector->tag->local, "textarea")) {
         key->elem[n_elems] = NTK_STYLER_ELEMENT_TEXTAREA;
-      } else if (g_str_equal(selector->data->value, "tab")) {
+      } else if (g_str_equal(selector->tag->local, "tab")) {
         key->elem[n_elems] = NTK_STYLER_ELEMENT_TAB;
-      } else if (g_str_equal(selector->data->value, "option")) {
+      } else if (g_str_equal(selector->tag->local, "option")) {
         key->elem[n_elems] = NTK_STYLER_ELEMENT_OPTION;
-      } else if (g_str_equal(selector->data->value, "window")) {
+      } else if (g_str_equal(selector->tag->local, "window")) {
         key->elem[n_elems] = NTK_STYLER_ELEMENT_WINDOW;
-      } else if (g_str_equal(selector->data->value, "window-header")) {
+      } else if (g_str_equal(selector->tag->local, "window-header")) {
         key->elem[n_elems] = NTK_STYLER_ELEMENT_WINDOW_HEADER;
       } else {
         continue;
       }
 
       n_elems++;
-    } else if (selector->match == CssSelMatchAttrExact) {
-      if (has_input && g_str_equal(selector->data->argument, "type")) {
-        if (g_str_equal(selector->data->value, "button")) {
-          key->elem[n_elems] = NTK_STYLER_ELEMENT_BUTTON;
-          has_input_type = TRUE;
-        } else if (g_str_equal(selector->data->value, "toggle")) {
-          key->elem[n_elems] = NTK_STYLER_ELEMENT_INPUT_TOGGLE;
-          has_input_type = TRUE;
-        } else if (g_str_equal(selector->data->value, "text")) {
-          key->elem[n_elems] = NTK_STYLER_ELEMENT_INPUT_TEXT;
-          has_input_type = TRUE;
-        } else if (g_str_equal(selector->data->value, "range")) {
-          key->elem[n_elems] = NTK_STYLER_ELEMENT_INPUT_SLIDER;
-          has_input_type = TRUE;
-        } else if (g_str_equal(selector->data->value, "checkbox")) {
-          key->elem[n_elems] = NTK_STYLER_ELEMENT_INPUT_CHECKBOX;
-          has_input_type = TRUE;
-        } else {
-          continue;
-        }
-        n_elems++;
-      } else if (has_scrollbar && g_str_equal(selector->data->argument, "type")) {
-        if (g_str_equal(selector->data->value, "vertical")) {
-          key->elem[n_elems] = NTK_STYLER_ELEMENT_SCROLLBAR_VERTICAL;
-          has_scrollbar_type = TRUE;
-        } else if (g_str_equal(selector->data->value, "horizontal")) {
-          key->elem[n_elems] = NTK_STYLER_ELEMENT_SCROLLBAR_HORIZONTAL;
-          has_scrollbar_type = TRUE;
-        } else {
-          continue;
-        }
-        n_elems++;
-      }
     }
-  }
-
-  if (!has_input_type && has_input) key->elem[n_elems++] = NTK_STYLER_ELEMENT_INPUT_TEXT;
-  if (!has_scrollbar_type && has_scrollbar) {
-    key->elem[n_elems++] = NTK_STYLER_ELEMENT_SCROLLBAR_VERTICAL;
-    key->elem[n_elems++] = NTK_STYLER_ELEMENT_SCROLLBAR_HORIZONTAL;
   }
 
   n_states = 0;
@@ -190,31 +226,293 @@ ntk_css_styler_entry_create(CssStyleRule* rule, CssDeclaration* declaration, Ntk
     }
   }
 
+  GValue* value = g_try_malloc0(sizeof (GValue));
+  if (value == NULL) {
+    g_free(key->state);
+    g_free(key->elem);
+    g_free(key);
+    g_return_val_if_reached(FALSE);
+  }
+
+  g_debug("Creating property %s", declaration->property);
   if (g_str_equal(declaration->property, "color")) {
     key->prop = NTK_STYLER_PROPERTY_COLOR;
+
+    if (declaration->values->length != 1) {
+      g_free(key->state);
+      g_free(key->elem);
+      g_free(key);
+      g_free(value);
+      g_return_val_if_reached(FALSE);
+    }
+
+    NtkColor* color = ntk_css_styler_new_color(declaration->values->data[0]);
+    if (color == NULL) {
+      g_free(key->state);
+      g_free(key->elem);
+      g_free(key);
+      g_free(value);
+      g_return_val_if_reached(FALSE);
+    }
+
+    g_value_init(value, NTK_TYPE_COLOR);
+    g_value_set_boxed(value, color);
   } else if (g_str_equal(declaration->property, "background-color")) {
     key->prop = NTK_STYLER_PROPERTY_BACKGROUND_COLOR;
+
+    if (declaration->values->length != 1) {
+      g_free(key->state);
+      g_free(key->elem);
+      g_free(key);
+      g_free(value);
+      g_return_val_if_reached(FALSE);
+    }
+
+    NtkColor* color = ntk_css_styler_new_color(declaration->values->data[0]);
+    if (color == NULL) {
+      g_free(key->state);
+      g_free(key->elem);
+      g_free(key);
+      g_free(value);
+      g_return_val_if_reached(FALSE);
+    }
+
+    g_value_init(value, NTK_TYPE_COLOR);
+    g_value_set_boxed(value, color);
   } else if (g_str_equal(declaration->property, "background-image")) {
     key->prop = NTK_STYLER_PROPERTY_BACKGROUND_IMAGE;
+
+    CssValue* css_value = declaration->values->data[0];
+
+    if (css_value->unit != CSS_VALUE_STRING) {
+      g_free(key->state);
+      g_free(key->elem);
+      g_free(key);
+      g_free(value);
+      g_return_val_if_reached(FALSE);
+    }
+
+    g_value_init(value, G_TYPE_STRING);
+    g_value_set_string(value, g_strdup(css_value->string));
   } else if (g_str_equal(declaration->property, "border-color")) {
     key->prop = NTK_STYLER_PROPERTY_BORDER_COLOR;
+
+    if (declaration->values->length != 1) {
+      g_free(key->state);
+      g_free(key->elem);
+      g_free(key);
+      g_free(value);
+      g_return_val_if_reached(FALSE);
+    }
+
+    NtkColor* color = ntk_css_styler_new_color(declaration->values->data[0]);
+    if (color == NULL) {
+      g_free(key->state);
+      g_free(key->elem);
+      g_free(key);
+      g_free(value);
+      g_return_val_if_reached(FALSE);
+    }
+
+    g_value_init(value, NTK_TYPE_COLOR);
+    g_value_set_boxed(value, color);
   } else if (g_str_equal(declaration->property, "spacing-top")) {
     key->prop = NTK_STYLER_PROPERTY_PADDING_TOP;
+
+    if (declaration->values->length != 1) {
+      g_free(key->state);
+      g_free(key->elem);
+      g_free(key);
+      g_free(value);
+      g_return_val_if_reached(FALSE);
+    }
+
+    CssValue* css_value = declaration->values->data[0];
+
+    if (css_value->unit != CSS_VALUE_PX) {
+      g_free(key->state);
+      g_free(key->elem);
+      g_free(key);
+      g_free(value);
+      g_return_val_if_reached(FALSE);
+    }
+
+    g_value_init(value, G_TYPE_FLOAT);
+    g_value_set_float(value, css_value->fValue);
   } else if (g_str_equal(declaration->property, "spacing-left")) {
     key->prop = NTK_STYLER_PROPERTY_PADDING_LEFT;
+
+    if (declaration->values->length != 1) {
+      g_free(key->state);
+      g_free(key->elem);
+      g_free(key);
+      g_free(value);
+      g_return_val_if_reached(FALSE);
+    }
+
+    CssValue* css_value = declaration->values->data[0];
+
+    if (css_value->unit != CSS_VALUE_PX) {
+      g_free(key->state);
+      g_free(key->elem);
+      g_free(key);
+      g_free(value);
+      g_return_val_if_reached(FALSE);
+    }
+
+    g_value_init(value, G_TYPE_FLOAT);
+    g_value_set_float(value, css_value->fValue);
   } else if (g_str_equal(declaration->property, "padding-top")) {
     key->prop = NTK_STYLER_PROPERTY_PADDING_TOP;
+
+    if (declaration->values->length != 1) {
+      g_free(key->state);
+      g_free(key->elem);
+      g_free(key);
+      g_free(value);
+      g_return_val_if_reached(FALSE);
+    }
+
+    CssValue* css_value = declaration->values->data[0];
+
+    if (css_value->unit != CSS_VALUE_PX) {
+      g_free(key->state);
+      g_free(key->elem);
+      g_free(key);
+      g_free(value);
+      g_return_val_if_reached(FALSE);
+    }
+
+    g_value_init(value, G_TYPE_FLOAT);
+    g_value_set_float(value, css_value->fValue);
   } else if (g_str_equal(declaration->property, "padding-left")) {
     key->prop = NTK_STYLER_PROPERTY_PADDING_LEFT;
+
+    if (declaration->values->length != 1) {
+      g_free(key->state);
+      g_free(key->elem);
+      g_free(key);
+      g_free(value);
+      g_return_val_if_reached(FALSE);
+    }
+
+    CssValue* css_value = declaration->values->data[0];
+
+    if (css_value->unit != CSS_VALUE_PX) {
+      g_free(key->state);
+      g_free(key->elem);
+      g_free(key);
+      g_free(value);
+      g_return_val_if_reached(FALSE);
+    }
+
+    g_value_init(value, G_TYPE_FLOAT);
+    g_value_set_float(value, css_value->fValue);
   } else if (g_str_equal(declaration->property, "border-radius")) {
     key->prop = NTK_STYLER_PROPERTY_BORDER_COLOR;
+
+    if (declaration->values->length != 1) {
+      g_free(key->state);
+      g_free(key->elem);
+      g_free(key);
+      g_free(value);
+      g_return_val_if_reached(FALSE);
+    }
+
+    CssValue* css_value = declaration->values->data[0];
+
+    if (css_value->unit != CSS_VALUE_PX) {
+      g_free(key->state);
+      g_free(key->elem);
+      g_free(key);
+      g_free(value);
+      g_return_val_if_reached(FALSE);
+    }
+
+    g_value_init(value, G_TYPE_FLOAT);
+    g_value_set_float(value, css_value->fValue);
   } else if (g_str_equal(declaration->property, "visibility")) {
     key->prop = NTK_STYLER_PROPERTY_VISIBILITY;
+
+    if (declaration->values->length != 1) {
+      g_free(key->state);
+      g_free(key->elem);
+      g_free(key);
+      g_free(value);
+      g_return_val_if_reached(FALSE);
+    }
+
+    CssValue* css_value = declaration->values->data[0];
+
+    if (css_value->unit != CSS_VALUE_IDENT) {
+      g_free(key->state);
+      g_free(key->elem);
+      g_free(key);
+      g_free(value);
+      g_return_val_if_reached(FALSE);
+    }
+
+    g_value_init(value, G_TYPE_BOOLEAN);
+
+    if (g_str_equal(css_value->string, "visible")) {
+      g_value_set_boolean(value, TRUE);
+    } else if (g_str_equal(css_value->string, "hidden")) {
+      g_value_set_boolean(value, FALSE);
+    } else {
+      g_free(key->state);
+      g_free(key->elem);
+      g_free(key);
+      g_value_unset(value);
+      g_free(value);
+      g_return_val_if_reached(FALSE);
+    }
   } else if (g_str_equal(declaration->property, "border-width")) {
     key->prop = NTK_STYLER_PROPERTY_BORDER_WIDTH;
+
+    if (declaration->values->length != 1) {
+      g_free(key->state);
+      g_free(key->elem);
+      g_free(key);
+      g_free(value);
+      g_return_val_if_reached(FALSE);
+    }
+
+    CssValue* css_value = declaration->values->data[0];
+
+    if (css_value->unit != CSS_VALUE_PX) {
+      g_free(key->state);
+      g_free(key->elem);
+      g_free(key);
+      g_free(value);
+      g_return_val_if_reached(FALSE);
+    }
+
+    g_value_init(value, G_TYPE_FLOAT);
+    g_value_set_float(value, css_value->fValue);
   } else if (g_str_equal(declaration->property, "text-align")) {
     key->prop = NTK_STYLER_PROPERTY_TEXT_ALIGN;
+
+    CssValue* css_value = declaration->values->data[0];
+
+    if (css_value->unit != CSS_VALUE_IDENT) {
+      g_free(key->state);
+      g_free(key->elem);
+      g_free(key);
+      g_free(value);
+      g_return_val_if_reached(FALSE);
+    }
+
+    g_value_init(value, G_TYPE_STRING);
+    g_value_set_string(value, g_strdup(css_value->string));
   } else {
+    g_free(key->state);
+    g_free(key->elem);
+    g_free(key);
+    g_free(value);
+    g_return_val_if_reached(FALSE);
+  }
+
+  if (G_VALUE_TYPE(value) == 0) {
     g_free(key->state);
     g_free(key->elem);
     g_free(key);
@@ -222,6 +520,7 @@ ntk_css_styler_entry_create(CssStyleRule* rule, CssDeclaration* declaration, Ntk
   }
 
   *key_out = key;
+  *value_out = value;
   return TRUE;
 }
 
@@ -249,6 +548,10 @@ static GHashTable* ntk_css_styler_export(NtkStyler* styler) {
       NtkStylerKey* key = NULL;
       GValue* value = NULL;
       if (!ntk_css_styler_entry_create(style_rule, declaration, &key, &value)) continue;
+
+      g_return_val_if_fail(key != NULL, FALSE);
+      g_return_val_if_fail(value != NULL, FALSE);
+
       g_hash_table_insert(tbl, key, value);
     }
   }
@@ -284,7 +587,7 @@ NtkStyler* ntk_css_styler_new() {
 gboolean ntk_css_styler_load(NtkCSSStyler* self, const gchar* str, size_t length, GError** error) {
   g_return_val_if_fail(NTK_CSS_IS_STYLER(self), FALSE);
   g_return_val_if_fail(str != NULL, FALSE);
-  g_return_val_if_fail(length < 0, FALSE);
+  g_return_val_if_fail(length > 0, FALSE);
 
   g_return_val_if_fail(error == NULL || *error == NULL, FALSE);
   NtkCSSStylerPrivate* priv = NTK_CSS_STYLER_PRIVATE(self);
@@ -315,6 +618,9 @@ gboolean ntk_css_styler_load(NtkCSSStyler* self, const gchar* str, size_t length
       if (!ntk_css_styler_entry_create(style_rule, declaration, &key, &value)) {
         return FALSE;
       }
+
+      g_return_val_if_fail(key != NULL, FALSE);
+      g_return_val_if_fail(value != NULL, FALSE);
 
       ntk_css_styler_default_key_free(key);
       ntk_css_styler_default_value_free(value);
