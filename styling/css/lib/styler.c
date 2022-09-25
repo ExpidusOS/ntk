@@ -1,6 +1,6 @@
 #include "styler-priv.h"
-#include <ntk/styling/css/styler.h>
 #include <ntk/color.h>
+#include <ntk/styling/css/styler.h>
 
 #define NTK_CSS_STYLER_PRIVATE(self) ((self)->priv == NULL ? ntk_css_styler_get_instance_private(self) : (self)->priv)
 
@@ -35,80 +35,103 @@ static NtkColor* ntk_css_styler_new_color(CssValue* value) {
   return NULL;
 }
 
-static gboolean
-ntk_css_styler_entry_create(CssStyleRule* rule, CssDeclaration* declaration, NtkStylerKey** key_out, GValue** value_out) {
+static gboolean ntk_css_styler_entry_create(
+  CssStyleRule* rule, CssDeclaration* declaration, CssSelector* selector, NtkStylerKey** key_out, GValue** value_out
+) {
   NtkStylerKey* key = g_try_malloc0(sizeof(NtkStylerKey));
   g_return_val_if_fail(key != NULL, FALSE);
 
   size_t n_elems = 0;
   size_t n_states = 0;
-  for (size_t i = 0; i < rule->selectors->length; i++) {
-    CssSelector* selector = rule->selectors->data[i];
-    switch (selector->match) {
-      case CssSelMatchTag:
-        if (g_str_equal(selector->tag->local, "input")) {
-          if (selector->tagHistory == NULL) {
-            n_elems++;
-            break;
-          }
-
-          CssSelector* th = selector;
-          while ((th = th->tagHistory) != NULL) {
-            if (g_str_equal(th->data->attribute->local, "type")) {
-              if (g_str_equal(th->data->value, "button")) {
+  CssSelector* th = selector;
+  g_debug("Creating entry for (rule: %p, declaration: %p, selector: %p)", rule, declaration, selector);
+  do {
+    if (th->match == CssSelMatchTag) {
+      g_debug("%p Tag #%ld: %s", th, n_elems, th->tag->local);
+      if (g_str_equal(th->tag->local, "button")) {
+        if (th->tagHistory == NULL)
+          n_elems += 3;
+        else {
+          CssSelector* sth = th;
+          while ((sth = sth->tagHistory) != NULL) {
+            if (sth->match != CssSelMatchAttrExact) continue;
+            if (g_str_equal(sth->data->attribute->local, "type")) {
+              if (g_str_equal(sth->data->value, "default")) {
                 n_elems++;
                 break;
-              } else if (g_str_equal(th->data->value, "toggle")) {
+              } else if (g_str_equal(sth->data->value, "menu")) {
                 n_elems++;
                 break;
-              } else if (g_str_equal(th->data->value, "text")) {
-                n_elems++;
-                break;
-              } else if (g_str_equal(th->data->value, "range")) {
-                n_elems++;
-                break;
-              } else if (g_str_equal(th->data->value, "checkbox")) {
+              } else if (g_str_equal(sth->data->value, "context")) {
                 n_elems++;
                 break;
               }
             }
           }
-        } else if (g_str_equal(selector->tag->local, "scrollbar")) {
-          if (selector->tagHistory == NULL) {
-            n_elems += 2;
-            break;
-          }
-
-          CssSelector* th = selector;
-          while ((th = th->tagHistory) != NULL) {
-            if (g_str_equal(th->data->attribute->local, "type")) {
-              if (g_str_equal(th->data->value, "vertical")) {
-                n_elems++;
-                break;
-              } else if (g_str_equal(th->data->value, "horizontal")) {
-                n_elems++;
-                break;
-              }
-            }
-          }
-        } else {
-          n_elems++;
         }
-        break;
-      default:
-        break;
+      } else if (g_str_equal(th->tag->local, "input")) {
+        if (th->tagHistory == NULL)
+          n_elems++;
+        else {
+          CssSelector* sth = th;
+          while ((sth = sth->tagHistory) != NULL) {
+            if (sth->match != CssSelMatchAttrExact) continue;
+            if (g_str_equal(sth->data->attribute->local, "type")) {
+              if (g_str_equal(sth->data->value, "button")) {
+                n_elems++;
+                break;
+              } else if (g_str_equal(sth->data->value, "toggle")) {
+                n_elems++;
+                break;
+              } else if (g_str_equal(sth->data->value, "text")) {
+                n_elems++;
+                break;
+              } else if (g_str_equal(sth->data->value, "range")) {
+                n_elems++;
+                break;
+              } else if (g_str_equal(sth->data->value, "checkbox")) {
+                n_elems++;
+                break;
+              }
+            }
+          }
+        }
+      } else if (g_str_equal(th->tag->local, "scrollbar")) {
+        if (th->tagHistory == NULL)
+          n_elems += 2;
+        else {
+          CssSelector* sth = th;
+          while ((sth = sth->tagHistory) != NULL) {
+            if (sth->match != CssSelMatchAttrExact) continue;
+            if (g_str_equal(sth->data->attribute->local, "type")) {
+              if (g_str_equal(sth->data->value, "vertical")) {
+                n_elems++;
+                break;
+              } else if (g_str_equal(sth->data->value, "horizontal")) {
+                n_elems++;
+                break;
+              }
+            }
+          }
+        }
+      } else {
+        n_elems++;
+      }
     }
-    switch (selector->pseudo) {
-      case CssPseudoHover:
-      case CssPseudoActive:
-      case CssPseudoSelection:
-      case CssPseudoDefault:
-        n_states++;
-        break;
-      default:
-        break;
-    }
+  } while ((th = th->tagHistory) != NULL);
+
+  switch (selector->pseudo) {
+    case CssPseudoHover:
+    case CssPseudoActive:
+    case CssPseudoSelection:
+    case CssPseudoDefault:
+      n_states++;
+      break;
+    default:
+      break;
   }
+
+  g_debug("Entry for (rule: %p, declaration: %p, selector: %p) will have %ld elements and %ld states", rule, declaration, selector, n_elems, n_states);
 
   key->elem = g_try_malloc0(sizeof(NtkStylerElement) * n_elems);
   if (key->elem == NULL && n_elems > 0) {
@@ -124,97 +147,111 @@ ntk_css_styler_entry_create(CssStyleRule* rule, CssDeclaration* declaration, Ntk
   }
 
   n_elems = 0;
-  for (size_t i = 0; i < rule->selectors->length; i++) {
-    CssSelector* selector = rule->selectors->data[i];
-    if (selector->match == CssSelMatchTag) {
-      if (g_str_equal(selector->tag->local, "p")) {
-        key->elem[n_elems] = NTK_STYLER_ELEMENT_TEXT;
-      } else if (g_str_equal(selector->tag->local, "button")) {
-        key->elem[n_elems] = NTK_STYLER_ELEMENT_BUTTON;
-      } else if (g_str_equal(selector->tag->local, "input")) {
-        if (selector->tagHistory == NULL) {
-          key->elem[n_elems] = NTK_STYLER_ELEMENT_INPUT_TEXT;
+  th = selector;
+  do {
+    if (th->match == CssSelMatchTag) {
+      g_debug("%p Tag #%ld: %s", th, n_elems, th->tag->local);
+      if (g_str_equal(th->tag->local, "p")) {
+        key->elem[n_elems++] = NTK_STYLER_ELEMENT_TEXT;
+      } else if (g_str_equal(th->tag->local, "button")) {
+        if (th->tagHistory == NULL) {
+          key->elem[n_elems++] = NTK_STYLER_ELEMENT_BUTTON;
+          key->elem[n_elems++] = NTK_STYLER_ELEMENT_BUTTON_CONTEXT;
+          key->elem[n_elems++] = NTK_STYLER_ELEMENT_BUTTON_MENU;
         } else {
-          CssSelector* th = selector;
-          while ((th = th->tagHistory) != NULL) {
-            if (g_str_equal(th->data->attribute->local, "type")) {
-              if (g_str_equal(th->data->value, "button")) {
-                key->elem[n_elems] = NTK_STYLER_ELEMENT_BUTTON;
-              } else if (g_str_equal(th->data->value, "toggle")) {
-                key->elem[n_elems] = NTK_STYLER_ELEMENT_INPUT_TOGGLE;
-              } else if (g_str_equal(th->data->value, "text")) {
-                key->elem[n_elems] = NTK_STYLER_ELEMENT_INPUT_TEXT;
-              } else if (g_str_equal(th->data->value, "range")) {
-                key->elem[n_elems] = NTK_STYLER_ELEMENT_INPUT_SLIDER;
-              } else if (g_str_equal(th->data->value, "checkbox")) {
-                key->elem[n_elems] = NTK_STYLER_ELEMENT_INPUT_CHECKBOX;
-              } else {
-                n_elems--;
+          CssSelector* sth = th;
+          while ((sth = sth->tagHistory) != NULL) {
+            if (sth->match != CssSelMatchAttrExact) continue;
+            if (g_str_equal(sth->data->attribute->local, "type")) {
+              if (g_str_equal(sth->data->value, "default")) {
+                key->elem[n_elems++] = NTK_STYLER_ELEMENT_BUTTON;
+              } else if (g_str_equal(sth->data->value, "context")) {
+                key->elem[n_elems++] = NTK_STYLER_ELEMENT_BUTTON_CONTEXT;
+              } else if (g_str_equal(sth->data->value, "menu")) {
+                key->elem[n_elems++] = NTK_STYLER_ELEMENT_BUTTON_MENU;
               }
             }
           }
         }
-      } else if (g_str_equal(selector->tag->local, "scrollbar")) {
-        if (selector->tagHistory == NULL) {
+      } else if (g_str_equal(th->tag->local, "input")) {
+        if (th->tagHistory == NULL) {
+          key->elem[n_elems++] = NTK_STYLER_ELEMENT_INPUT_TEXT;
+        } else {
+          CssSelector* sth = th;
+          while ((sth = sth->tagHistory) != NULL) {
+            if (sth->match != CssSelMatchAttrExact) continue;
+            if (g_str_equal(sth->data->attribute->local, "type")) {
+              if (g_str_equal(sth->data->value, "button")) {
+                key->elem[n_elems++] = NTK_STYLER_ELEMENT_BUTTON;
+              } else if (g_str_equal(sth->data->value, "toggle")) {
+                key->elem[n_elems++] = NTK_STYLER_ELEMENT_INPUT_TOGGLE;
+              } else if (g_str_equal(sth->data->value, "text")) {
+                key->elem[n_elems++] = NTK_STYLER_ELEMENT_INPUT_TEXT;
+              } else if (g_str_equal(sth->data->value, "range")) {
+                key->elem[n_elems++] = NTK_STYLER_ELEMENT_INPUT_SLIDER;
+              } else if (g_str_equal(sth->data->value, "checkbox")) {
+                key->elem[n_elems++] = NTK_STYLER_ELEMENT_INPUT_CHECKBOX;
+              }
+            }
+          }
+        }
+      } else if (g_str_equal(th->tag->local, "scrollbar")) {
+        if (th->tagHistory == NULL) {
           key->elem[n_elems++] = NTK_STYLER_ELEMENT_SCROLLBAR_VERTICAL;
-          key->elem[n_elems] = NTK_STYLER_ELEMENT_SCROLLBAR_HORIZONTAL;
+          key->elem[n_elems++] = NTK_STYLER_ELEMENT_SCROLLBAR_HORIZONTAL;
         } else {
-          CssSelector* th = selector;
-          while ((th = th->tagHistory) != NULL) {
-            if (g_str_equal(th->data->attribute->local, "type")) {
-              if (g_str_equal(th->data->value, "vertical")) {
-                key->elem[n_elems] = NTK_STYLER_ELEMENT_SCROLLBAR_VERTICAL;
+          CssSelector* sth = th;
+          while ((sth = sth->tagHistory) != NULL) {
+            if (sth->match != CssSelMatchAttrExact) continue;
+            if (g_str_equal(sth->data->attribute->local, "type")) {
+              if (g_str_equal(sth->data->value, "vertical")) {
+                key->elem[n_elems++] = NTK_STYLER_ELEMENT_SCROLLBAR_VERTICAL;
               } else if (g_str_equal(th->data->value, "horizontal")) {
-                key->elem[n_elems] = NTK_STYLER_ELEMENT_SCROLLBAR_HORIZONTAL;
-              } else {
-                n_elems--;
+                key->elem[n_elems++] = NTK_STYLER_ELEMENT_SCROLLBAR_HORIZONTAL;
               }
             }
           }
         }
-      } else if (g_str_equal(selector->tag->local, "progress")) {
-        key->elem[n_elems] = NTK_STYLER_ELEMENT_PROGRESS;
-      } else if (g_str_equal(selector->tag->local, "textarea")) {
-        key->elem[n_elems] = NTK_STYLER_ELEMENT_TEXTAREA;
-      } else if (g_str_equal(selector->tag->local, "tab")) {
-        key->elem[n_elems] = NTK_STYLER_ELEMENT_TAB;
-      } else if (g_str_equal(selector->tag->local, "option")) {
-        key->elem[n_elems] = NTK_STYLER_ELEMENT_OPTION;
-      } else if (g_str_equal(selector->tag->local, "window")) {
-        key->elem[n_elems] = NTK_STYLER_ELEMENT_WINDOW;
-      } else if (g_str_equal(selector->tag->local, "window-header")) {
-        key->elem[n_elems] = NTK_STYLER_ELEMENT_WINDOW_HEADER;
-      } else {
-        continue;
+      } else if (g_str_equal(th->tag->local, "progress")) {
+        key->elem[n_elems++] = NTK_STYLER_ELEMENT_PROGRESS;
+      } else if (g_str_equal(th->tag->local, "textarea")) {
+        key->elem[n_elems++] = NTK_STYLER_ELEMENT_TEXTAREA;
+      } else if (g_str_equal(th->tag->local, "tab")) {
+        key->elem[n_elems++] = NTK_STYLER_ELEMENT_TAB;
+      } else if (g_str_equal(th->tag->local, "option")) {
+        key->elem[n_elems++] = NTK_STYLER_ELEMENT_OPTION;
+      } else if (g_str_equal(th->tag->local, "window")) {
+        key->elem[n_elems++] = NTK_STYLER_ELEMENT_WINDOW;
+      } else if (g_str_equal(th->tag->local, "window-header")) {
+        key->elem[n_elems++] = NTK_STYLER_ELEMENT_WINDOW_HEADER;
       }
-
-      n_elems++;
     }
-  }
+  } while ((th = th->tagHistory) != NULL);
 
   n_states = 0;
-  for (size_t i = 0; i < rule->selectors->length; i++) {
-    CssSelector* selector = rule->selectors->data[i];
-    if (selector->match == CssSelMatchTag) n_elems++;
-    switch (selector->pseudo) {
-      case CssPseudoHover:
-        key->state[n_states++] = NTK_STYLER_STATE_HOVER;
-        break;
-      case CssPseudoActive:
-        key->state[n_states++] = NTK_STYLER_STATE_ACTIVE;
-        break;
-      case CssPseudoSelection:
-        key->state[n_states++] = NTK_STYLER_STATE_SELECTION;
-        break;
-      case CssPseudoDefault:
-        key->state[n_states++] = NTK_STYLER_STATE_NORMAL;
-        break;
-      default:
-        break;
-    }
+  switch (selector->pseudo) {
+    case CssPseudoHover:
+      key->state[n_states++] = NTK_STYLER_STATE_HOVER;
+      break;
+    case CssPseudoActive:
+      key->state[n_states++] = NTK_STYLER_STATE_ACTIVE;
+      break;
+    case CssPseudoSelection:
+      key->state[n_states++] = NTK_STYLER_STATE_SELECTION;
+      break;
+    case CssPseudoDefault:
+      key->state[n_states++] = NTK_STYLER_STATE_NORMAL;
+      break;
+    default:
+      break;
   }
 
-  GValue* value = g_try_malloc0(sizeof (GValue));
+  g_assert_cmpint(ntk_styler_element_get_depth(key->elem), ==, n_elems);
+  g_assert_cmpint(ntk_styler_state_get_depth(key->state), ==, n_states);
+
+  g_assert_cmpint(ntk_styler_element_get_depth(key->elem), >, 0);
+
+  GValue* value = g_try_malloc0(sizeof(GValue));
   if (value == NULL) {
     g_free(key->state);
     g_free(key->elem);
@@ -272,7 +309,7 @@ ntk_css_styler_entry_create(CssStyleRule* rule, CssDeclaration* declaration, Ntk
 
     CssValue* css_value = declaration->values->data[0];
 
-    if (css_value->unit != CSS_VALUE_STRING) {
+    if (css_value->unit != CSS_VALUE_URI) {
       g_free(key->state);
       g_free(key->elem);
       g_free(key);
@@ -533,14 +570,20 @@ static GHashTable* ntk_css_styler_export(NtkStyler* styler) {
       CssDeclaration* declaration = style_rule->declarations->data[c];
       if (declaration == NULL) continue;
 
-      NtkStylerKey* key = NULL;
-      GValue* value = NULL;
-      if (!ntk_css_styler_entry_create(style_rule, declaration, &key, &value)) continue;
+      for (size_t i = 0; i < style_rule->selectors->length; i++) {
+        CssSelector* selector = style_rule->selectors->data[i];
+        if (selector == NULL) continue;
+        if (selector->match != CssSelMatchTag) continue;
 
-      g_return_val_if_fail(key != NULL, FALSE);
-      g_return_val_if_fail(value != NULL, FALSE);
+        NtkStylerKey* key = NULL;
+        GValue* value = NULL;
+        if (!ntk_css_styler_entry_create(style_rule, declaration, selector, &key, &value)) continue;
 
-      g_hash_table_insert(tbl, key, value);
+        g_return_val_if_fail(key != NULL, FALSE);
+        g_return_val_if_fail(value != NULL, FALSE);
+
+        g_hash_table_insert(tbl, key, value);
+      }
     }
   }
   return tbl;
@@ -601,17 +644,23 @@ gboolean ntk_css_styler_load(NtkCSSStyler* self, const gchar* str, size_t length
       CssDeclaration* declaration = style_rule->declarations->data[c];
       if (declaration == NULL) continue;
 
-      NtkStylerKey* key = NULL;
-      GValue* value = NULL;
-      if (!ntk_css_styler_entry_create(style_rule, declaration, &key, &value)) {
-        return FALSE;
+      for (size_t i = 0; i < style_rule->selectors->length; i++) {
+        CssSelector* selector = style_rule->selectors->data[i];
+        if (selector != NULL) continue;
+        if (selector->match != CssSelMatchTag) continue;
+
+        NtkStylerKey* key = NULL;
+        GValue* value = NULL;
+        if (!ntk_css_styler_entry_create(style_rule, declaration, selector, &key, &value)) {
+          return FALSE;
+        }
+
+        g_return_val_if_fail(key != NULL, FALSE);
+        g_return_val_if_fail(value != NULL, FALSE);
+
+        ntk_css_styler_default_key_free(key);
+        ntk_css_styler_default_value_free(value);
       }
-
-      g_return_val_if_fail(key != NULL, FALSE);
-      g_return_val_if_fail(value != NULL, FALSE);
-
-      ntk_css_styler_default_key_free(key);
-      ntk_css_styler_default_value_free(value);
     }
   }
   return TRUE;

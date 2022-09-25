@@ -1,8 +1,8 @@
 #pragma once
 
+#include <gio/gio.h>
 #include <glib-object.h>
 #include <ntk/styler.h>
-#include <gio/gio.h>
 
 G_BEGIN_DECLS
 

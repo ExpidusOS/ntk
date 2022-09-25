@@ -1,22 +1,29 @@
-#include <ntk/styling/css.h>
-#include <ntk/color.h>
 #include <glib.h>
+#include <ntk/color.h>
+#include <ntk/styling/css.h>
 
-static const char BASIC_STYLING[] =
-  "window, p {\n"
-  "  background-image: \"~/path/to/image.png\";\n"
-  "}\n"
-  "input[type=\"text\"] {\n"
-  "  background-color: #a9a9a9;\n"
-  "  color: red;\n"
-  "}";
+static const char BASIC_STYLING[] = "window, p {\n"
+                                    "  background-image: url(\"~/path/to/image.png\");\n"
+                                    "}\n"
+                                    "input[type=\"text\"] {\n"
+                                    "  background-color: #a9a9a9;\n"
+                                    "  color: red;\n"
+                                    "}\n"
+                                    "button[type=\"context\"] {\n"
+                                    "  background-color: #a9a9a9;\n"
+                                    "  color: red;\n"
+                                    "}\n"
+                                    "window > window-header {\n"
+                                    "  background-color: #a9a9a9;\n"
+                                    "  color: red;\n"
+                                    "}";
 
 static void test_styler_load() {
   NtkCSSStyler* styler = NTK_CSS_STYLER(ntk_css_styler_new());
   g_assert(styler != NULL);
 
   GError* error = NULL;
-  g_assert(ntk_css_styler_load(styler, BASIC_STYLING, sizeof (BASIC_STYLING) / sizeof (char), &error));
+  g_assert(ntk_css_styler_load(styler, BASIC_STYLING, sizeof(BASIC_STYLING) / sizeof(char), &error));
   g_assert_no_error(error);
 
   GHashTable* tbl = ntk_styler_export(NTK_STYLER(styler));

@@ -3,12 +3,7 @@
 G_DEFINE_BOXED_TYPE(NtkColor, ntk_color, ntk_color_copy, ntk_color_free);
 
 static const char* ntk_colormap[][2] = {
-  { "white", "#ffffff" },
-  { "red", "#ff0000" },
-  { "green", "#00ff00" },
-  { "blue", "#0000ff" },
-  { "black", "#000000" }
-};
+  {"white", "#ffffff"}, {"red", "#ff0000"}, {"green", "#00ff00"}, {"blue", "#0000ff"}, {"black", "#000000"}};
 
 NtkColor* ntk_color_new(NtkColorFormat fmt, ...) {
   va_list ap;

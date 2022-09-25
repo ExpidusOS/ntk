@@ -26,6 +26,10 @@ const char* ntk_styler_element_to_string(NtkStylerElement elem) {
       return "Text";
     case NTK_STYLER_ELEMENT_BUTTON:
       return "Button";
+    case NTK_STYLER_ELEMENT_BUTTON_MENU:
+      return "Menu Button";
+    case NTK_STYLER_ELEMENT_BUTTON_CONTEXT:
+      return "Context Menu Button";
     case NTK_STYLER_ELEMENT_INPUT_TEXT:
       return "Input Text";
     case NTK_STYLER_ELEMENT_INPUT_TOGGLE:
@@ -235,7 +239,6 @@ static GHashTable* ntk_styler_default_export(NtkStyler* self) {
 }
 
 static gboolean ntk_styler_default_has_style_property(NtkStyler* self, NtkStylerKey key) {
-  NtkStylerPrivate* priv = NTK_STYLER_PRIVATE(self);
   GHashTable* tbl = ntk_styler_export(self);
   g_return_val_if_fail(tbl != NULL, FALSE);
 
@@ -282,7 +285,6 @@ static gboolean ntk_styler_default_has_style_property(NtkStyler* self, NtkStyler
 }
 
 static gboolean ntk_styler_default_get_style_property(NtkStyler* self, NtkStylerKey key, GValue* value) {
-  NtkStylerPrivate* priv = NTK_STYLER_PRIVATE(self);
   GHashTable* tbl = ntk_styler_export(self);
   g_return_val_if_fail(tbl != NULL, FALSE);
 
@@ -330,7 +332,6 @@ static gboolean ntk_styler_default_get_style_property(NtkStyler* self, NtkStyler
 }
 
 static gboolean ntk_styler_default_set_style_property(NtkStyler* self, NtkStylerKey key, const GValue* value) {
-  NtkStylerPrivate* priv = NTK_STYLER_PRIVATE(self);
   GHashTable* tbl = ntk_styler_export(self);
   g_return_val_if_fail(tbl != NULL, FALSE);
 
