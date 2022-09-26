@@ -1,0 +1,18 @@
+/*** BEGIN file-header ***/
+#pragma once
+
+#include <ntk/backend/gtk4/input-dispatcher.h>
+#include <ntk/backend/gtk4/renderer.h>
+#include <ntk/backend/gtk4/widget.h>
+
+G_BEGIN_DECLS
+/*** END file-header ***/
+
+/*** BEGIN file-production ***/
+/* enumerations from "@basename@" */
+/*** END file-production ***/
+
+/*** BEGIN value-header ***/
+#define @ENUMPREFIX@_TYPE_@ENUMSHORT@ @enum_name@_get_type()
+GType @enum_name@_get_type() G_GNUC_CONST;
+/*** END value-header ***/
