@@ -494,4 +494,15 @@ gboolean ntk_styler_create_chart_style(NtkStyler* self, NtkStylerElement* elems,
  */
 gboolean ntk_styler_create_combo_style(NtkStyler* self, NtkStylerElement* elems, struct nk_style_combo* style);
 
+/**
+ * ntk_styler_create_tab_style:
+ * @self: An #NtkStyler
+ * @elems: (array zero-terminated=1): A zero-terminated array of #NtkStylerElement
+ * @style: (out): The tab style for Nuklear
+ *
+ * Since: 0.1.0
+ * Returns: True if the style was created
+ */
+gboolean ntk_styler_create_tab_style(NtkStyler* self, NtkStylerElement* elems, struct nk_style_tab* style);
+
 G_END_DECLS

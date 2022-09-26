@@ -631,6 +631,7 @@ gboolean ntk_styler_apply(NtkStyler* self, NtkContext* ctx) {
   g_return_val_if_fail(ntk_styler_create_srollbar_style(self, (NtkStylerElement[]){NTK_STYLER_ELEMENT_SCROLLBAR_HORIZONTAL, NTK_STYLER_ELEMENT_NONE}, &styles.scrollh), FALSE);
   g_return_val_if_fail(ntk_styler_create_edit_style(self, NULL, &styles.edit), FALSE);
   g_return_val_if_fail(ntk_styler_create_chart_style(self, NULL, &styles.chart), FALSE);
+  g_return_val_if_fail(ntk_styler_create_combo_style(self, NULL, &styles.combo), FALSE);
   return ntk_styler_apply_internal(self, ctx, styles);
 }
 
