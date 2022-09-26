@@ -147,6 +147,10 @@ const char* ntk_styler_property_to_string(NtkStylerProperty prop) {
       return "Padding Left";
     case NTK_STYLER_PROPERTY_BORDER_RADIUS:
       return "Border Radius";
+    case NTK_STYLER_PROPERTY_WIDTH:
+      return "Width";
+    case NTK_STYLER_PROPERTY_HEIGHT:
+      return "Height";
     case NTK_STYLER_PROPERTY_VISIBILITY:
       return "Visibility";
     case NTK_STYLER_PROPERTY_BORDER_WIDTH:
@@ -619,6 +623,7 @@ gboolean ntk_styler_apply(NtkStyler* self, NtkContext* ctx) {
     FALSE
   );
   g_return_val_if_fail(ntk_styler_create_selectable_style(self, NULL, &styles.selectable), FALSE);
+  g_return_val_if_fail(ntk_styler_create_slider_style(self, NULL, &styles.slider), FALSE);
   return ntk_styler_apply_internal(self, ctx, styles);
 }
 
