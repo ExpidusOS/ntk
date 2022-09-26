@@ -476,11 +476,22 @@ gboolean ntk_styler_create_edit_style(NtkStyler* self, NtkStylerElement* elems, 
  * ntk_styler_create_chart_style:
  * @self: An #NtkStyler
  * @elems: (array zero-terminated=1): A zero-terminated array of #NtkStylerElement
- * @style: (out): The char style for Nuklear
+ * @style: (out): The chart style for Nuklear
  *
  * Since: 0.1.0
  * Returns: True if the style was created
  */
 gboolean ntk_styler_create_chart_style(NtkStyler* self, NtkStylerElement* elems, struct nk_style_chart* style);
+
+/**
+ * ntk_styler_create_combo_style:
+ * @self: An #NtkStyler
+ * @elems: (array zero-terminated=1): A zero-terminated array of #NtkStylerElement
+ * @style: (out): The combo style for Nuklear
+ *
+ * Since: 0.1.0
+ * Returns: True if the style was created
+ */
+gboolean ntk_styler_create_combo_style(NtkStyler* self, NtkStylerElement* elems, struct nk_style_combo* style);
 
 G_END_DECLS

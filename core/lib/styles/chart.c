@@ -9,7 +9,7 @@ gboolean ntk_styler_create_chart_style(NtkStyler* self, NtkStylerElement* elems,
     ntk_styler_element_extend(elems, (NtkStylerElement[]){NTK_STYLER_ELEMENT_CHART, NTK_STYLER_ELEMENT_NONE});
   g_return_val_if_fail(full_elems != NULL, FALSE);
 
-  if (!ntk_styler_create_item_style(self, (NtkStylerState[]){NTK_STYLER_STATE_NORMAL, NTK_STYLER_STATE_NONE}, &style->background)) {
+  if (!ntk_styler_create_item_style(self, full_elems, (NtkStylerState[]){NTK_STYLER_STATE_NORMAL, NTK_STYLER_STATE_NONE}, &style->background)) {
     g_free(full_elems);
     g_return_val_if_reached(FALSE);
   }
