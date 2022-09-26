@@ -460,4 +460,15 @@ gboolean ntk_styler_create_progress_style(NtkStyler* self, NtkStylerElement* ele
  */
 gboolean ntk_styler_create_srollbar_style(NtkStyler* self, NtkStylerElement* elems, struct nk_style_scrollbar* style);
 
+/**
+ * ntk_styler_create_edit_style:
+ * @self: An #NtkStyler
+ * @elems: (array zero-terminated=1): A zero-terminated array of #NtkStylerElement
+ * @style: (out): The edit style for Nuklear
+ *
+ * Since: 0.1.0
+ * Returns: True if the style was created
+ */
+gboolean ntk_styler_create_edit_style(NtkStyler* self, NtkStylerElement* elems, struct nk_style_edit* style);
+
 G_END_DECLS

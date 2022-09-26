@@ -6,8 +6,8 @@ configure_file(input: 'data/Ntk-custom.vala.in', output: 'Ntk-@0@-custom.vala'.f
   configuration: conf_data)
 
 libntk_src = ['lib/color.c', 'lib/context.c', 'lib/error.c', 'lib/input-dispatcher.c', 'lib/renderer.c', 'lib/styler.c', 'lib/utils.c',
-  'lib/font/object.c', 'lib/font/user.c', 'lib/styles/button.c', 'lib/styles/item.c', 'lib/styles/progress.c', 'lib/styles/scrollbar.c',
-  'lib/styles/selectable.c', 'lib/styles/slider.c', 'lib/styles/text.c', 'lib/styles/toggle.c']
+  'lib/font/object.c', 'lib/font/user.c', 'lib/styles/button.c', 'lib/styles/edit.c', 'lib/styles/item.c', 'lib/styles/progress.c',
+  'lib/styles/scrollbar.c', 'lib/styles/selectable.c', 'lib/styles/slider.c', 'lib/styles/text.c', 'lib/styles/toggle.c']
 libntk_headers = ['include/ntk/ntk.h', 'include/ntk/color.h', 'include/ntk/context.h', 'include/ntk/error.h', 'include/ntk/font.h', 'include/ntk/input-dispatcher.h',
   'include/ntk/renderer.h', 'include/ntk/styler.h', 'include/ntk/utils.h',
   'include/ntk/font/object.h', 'include/ntk/font/user.h']
