@@ -1,5 +1,3 @@
-pangoft2 = dependency('pangoft2', required: false)
-
 libntk_pango_conf = configuration_data()
 libntk_pango_conf.merge_from(conf_data)
 libntk_pango_conf.set('NTK_PANGO_HAS_FT2', pangoft2.found())

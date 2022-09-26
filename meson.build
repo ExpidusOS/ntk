@@ -48,10 +48,15 @@ endif
 
 glib = [dependency('glib-2.0'), dependency('gio-2.0')]
 gobject = dependency('gobject-2.0')
-pango = dependency('pango')
+pango = dependency('pango', required: false)
 libmath = meson.get_compiler('c').find_library('m', required: false)
 libdrm = dependency('libdrm', required: get_option('drm'))
 cssparser = dependency('cssparser', required: get_option('styling_css'))
+cairo = dependency('cairo', required: get_option('cairo'))
+pangoft2 = dependency('pangoft2', required: false)
+gles2 = dependency('glesv2', required: get_option('gles2').require(pangoft2.found()))
+egl = dependency('egl', required: get_option('egl').require(not get_option('gles2').disabled()))
+gtk4 = dependency('gtk4', required: get_option('gtk4'))
 
 conf_data = configuration_data()
 conf_data.set('PREFIX', prefix)

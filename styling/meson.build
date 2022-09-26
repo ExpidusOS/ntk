@@ -1,1 +1,1 @@
-subdir('css')
+subdir('css', if_found: [cssparser])
