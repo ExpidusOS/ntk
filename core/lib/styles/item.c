@@ -3,14 +3,18 @@
 
 gboolean
 ntk_styler_create_item_style(NtkStyler* self, NtkStylerElement* elems, NtkStylerState* state, struct nk_style_item* style) {
-  g_return_val_if_fail(NTK_IS_STYLER(self), FALSE);
-  g_return_val_if_fail(style != NULL, FALSE);
-
   NtkStylerKey key = {};
   key.elem = elems;
   key.state = state;
-  key.prop = NTK_STYLER_PROPERTY_BACKGROUND_IMAGE;
+  return ntk_styler_create_item_style_for_key(self, key, style);
+}
 
+gboolean
+ntk_styler_create_item_style_for_key(NtkStyler* self, NtkStylerKey key, struct nk_style_item* style) {
+  g_return_val_if_fail(NTK_IS_STYLER(self), FALSE);
+  g_return_val_if_fail(style != NULL, FALSE);
+
+  key.prop = NTK_STYLER_PROPERTY_BACKGROUND_IMAGE;
   if (ntk_styler_has_style_property(self, key)) {
     g_warning(
       "Not implemented yet, refer to comment in "__FILE__

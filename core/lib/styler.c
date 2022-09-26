@@ -625,6 +625,8 @@ gboolean ntk_styler_apply(NtkStyler* self, NtkContext* ctx) {
   g_return_val_if_fail(ntk_styler_create_selectable_style(self, NULL, &styles.selectable), FALSE);
   g_return_val_if_fail(ntk_styler_create_slider_style(self, NULL, &styles.slider), FALSE);
   g_return_val_if_fail(ntk_styler_create_progress_style(self, NULL, &styles.progress), FALSE);
+  g_return_val_if_fail(ntk_styler_create_srollbar_style(self, (NtkStylerElement[]){NTK_STYLER_ELEMENT_SCROLLBAR_VERTICAL, NTK_STYLER_ELEMENT_NONE}, &styles.scrollv), FALSE);
+  g_return_val_if_fail(ntk_styler_create_srollbar_style(self, (NtkStylerElement[]){NTK_STYLER_ELEMENT_SCROLLBAR_HORIZONTAL, NTK_STYLER_ELEMENT_NONE}, &styles.scrollh), FALSE);
   return ntk_styler_apply_internal(self, ctx, styles);
 }
 

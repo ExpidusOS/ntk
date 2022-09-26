@@ -361,6 +361,18 @@ gboolean
 ntk_styler_create_item_style(NtkStyler* self, NtkStylerElement* elems, NtkStylerState* state, struct nk_style_item* style);
 
 /**
+ * ntk_styler_create_item_style_for_key:
+ * @self: An #NtkStyler
+ * @key: The styler key
+ * @style: (out): The item style for Nuklear
+ *
+ * Since: 0.1.0
+ * Returns: True if the style was created
+ */
+gboolean
+ntk_styler_create_item_style_for_key(NtkStyler* self, NtkStylerKey key, struct nk_style_item* style);
+
+/**
  * ntk_styler_create_text_style:
  * @self: An #NtkStyler
  * @elems: (array zero-terminated=1): A zero-terminated array of #NtkStylerElement
@@ -381,6 +393,17 @@ gboolean ntk_styler_create_text_style(NtkStyler* self, NtkStylerElement* elems, 
  * Returns: True if the style was created
  */
 gboolean ntk_styler_create_button_style(NtkStyler* self, NtkStylerElement* elems, struct nk_style_button* style);
+
+/**
+ * ntk_styler_create_button_style_for_key:
+ * @self: An #NtkStyler
+ * @key: The style key to use
+ * @style: (out): The button style for Nuklear
+ *
+ * Since: 0.1.0
+ * Returns: True if the style was created
+ */
+gboolean ntk_styler_create_button_style_for_key(NtkStyler* self, NtkStylerKey key, struct nk_style_button* style);
 
 /**
  * ntk_styler_create_toggle_style:
@@ -425,5 +448,16 @@ gboolean ntk_styler_create_slider_style(NtkStyler* self, NtkStylerElement* elems
  * Returns: True if the style was created
  */
 gboolean ntk_styler_create_progress_style(NtkStyler* self, NtkStylerElement* elems, struct nk_style_progress* style);
+
+/**
+ * ntk_styler_create_scrollbar_style:
+ * @self: An #NtkStyler
+ * @elems: (array zero-terminated=1): A zero-terminated array of #NtkStylerElement
+ * @style: (out): The scrollbar style for Nuklear
+ *
+ * Since: 0.1.0
+ * Returns: True if the style was created
+ */
+gboolean ntk_styler_create_srollbar_style(NtkStyler* self, NtkStylerElement* elems, struct nk_style_scrollbar* style);
 
 G_END_DECLS

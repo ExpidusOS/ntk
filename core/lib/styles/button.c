@@ -2,33 +2,41 @@
 #include <ntk/styler.h>
 
 gboolean ntk_styler_create_button_style(NtkStyler* self, NtkStylerElement* elems, struct nk_style_button* style) {
-  g_return_val_if_fail(NTK_IS_STYLER(self), FALSE);
-  g_return_val_if_fail(style != NULL, FALSE);
-
-  g_return_val_if_fail(
-    ntk_styler_create_item_style(
-      self, elems, (NtkStylerState[]){NTK_STYLER_STATE_NORMAL, NTK_STYLER_STATE_NONE}, &style->normal
-    ),
-    FALSE
-  );
-  g_return_val_if_fail(
-    ntk_styler_create_item_style(
-      self, elems, (NtkStylerState[]){NTK_STYLER_STATE_HOVER, NTK_STYLER_STATE_NONE}, &style->hover
-    ),
-    FALSE
-  );
-  g_return_val_if_fail(
-    ntk_styler_create_item_style(
-      self, elems, (NtkStylerState[]){NTK_STYLER_STATE_ACTIVE, NTK_STYLER_STATE_NONE}, &style->active
-    ),
-    FALSE
-  );
-
   NtkStylerKey key = {};
   key.elem = elems;
   key.state = (NtkStylerState[]){NTK_STYLER_STATE_NORMAL, NTK_STYLER_STATE_NONE};
-  key.prop = NTK_STYLER_PROPERTY_BORDER_COLOR;
+  return ntk_styler_create_button_style_for_key(self, key, style);
+}
 
+gboolean ntk_styler_create_button_style_for_key(NtkStyler* self, NtkStylerKey key, struct nk_style_button* style) {
+  g_return_val_if_fail(NTK_IS_STYLER(self), FALSE);
+  g_return_val_if_fail(style != NULL, FALSE);
+
+  key.state = (NtkStylerState[]){NTK_STYLER_STATE_NORMAL, NTK_STYLER_STATE_NONE};
+  g_return_val_if_fail(
+    ntk_styler_create_item_style_for_key(
+      self, key, &style->normal
+    ),
+    FALSE
+  );
+
+  key.state = (NtkStylerState[]){NTK_STYLER_STATE_HOVER, NTK_STYLER_STATE_NONE};
+  g_return_val_if_fail(
+    ntk_styler_create_item_style_for_key(
+      self, key, &style->hover
+    ),
+    FALSE
+  );
+
+  key.state = (NtkStylerState[]){NTK_STYLER_STATE_ACTIVE, NTK_STYLER_STATE_NONE};
+  g_return_val_if_fail(
+    ntk_styler_create_item_style_for_key(
+      self, key, &style->active
+    ),
+    FALSE
+  );
+
+  key.state = (NtkStylerState[]){NTK_STYLER_STATE_NORMAL, NTK_STYLER_STATE_NONE};
   if (ntk_styler_has_style_property(self, key)) {
     GValue value = G_VALUE_INIT;
     g_return_val_if_fail(ntk_styler_get_style_property(self, key, &value), FALSE);
