@@ -64,6 +64,8 @@ static gboolean ntk_css_styler_entry_select(NtkStylerKey* key, const CssSelector
       ntk_styler_key_build_element(key, NTK_STYLER_ELEMENT_PROGRESS, n_elems);
     } else if (g_str_equal(selector->tag->local, "textarea")) {
       ntk_styler_key_build_element(key, NTK_STYLER_ELEMENT_TEXTAREA, n_elems);
+    } else if (g_str_equal(selector->tag->local, "chart")) {
+      ntk_styler_key_build_element(key, NTK_STYLER_ELEMENT_CHART, n_elems);
     } else if (g_str_equal(selector->tag->local, "tab")) {
       ntk_styler_key_build_element(key, NTK_STYLER_ELEMENT_TAB, n_elems);
     } else if (g_str_equal(selector->tag->local, "option")) {

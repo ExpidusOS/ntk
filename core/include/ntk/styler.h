@@ -28,6 +28,7 @@ typedef enum _NtkStylerElement {
   NTK_STYLER_ELEMENT_SCROLLBAR_HORIZONTAL,
   NTK_STYLER_ELEMENT_TEXTAREA,
   NTK_STYLER_ELEMENT_TAB,
+  NTK_STYLER_ELEMENT_CHART,
   NTK_STYLER_ELEMENT_OPTION,
   NTK_STYLER_ELEMENT_WINDOW,
   NTK_STYLER_ELEMENT_WINDOW_HEADER,
@@ -470,5 +471,16 @@ gboolean ntk_styler_create_srollbar_style(NtkStyler* self, NtkStylerElement* ele
  * Returns: True if the style was created
  */
 gboolean ntk_styler_create_edit_style(NtkStyler* self, NtkStylerElement* elems, struct nk_style_edit* style);
+
+/**
+ * ntk_styler_create_chart_style:
+ * @self: An #NtkStyler
+ * @elems: (array zero-terminated=1): A zero-terminated array of #NtkStylerElement
+ * @style: (out): The char style for Nuklear
+ *
+ * Since: 0.1.0
+ * Returns: True if the style was created
+ */
+gboolean ntk_styler_create_chart_style(NtkStyler* self, NtkStylerElement* elems, struct nk_style_chart* style);
 
 G_END_DECLS

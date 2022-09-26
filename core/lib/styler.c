@@ -82,6 +82,8 @@ const char* ntk_styler_element_to_string(NtkStylerElement elem) {
       return "Text Area";
     case NTK_STYLER_ELEMENT_TAB:
       return "Tab";
+    case NTK_STYLER_ELEMENT_CHART:
+      return "Chart";
     case NTK_STYLER_ELEMENT_OPTION:
       return "Option";
     case NTK_STYLER_ELEMENT_WINDOW:
@@ -628,6 +630,7 @@ gboolean ntk_styler_apply(NtkStyler* self, NtkContext* ctx) {
   g_return_val_if_fail(ntk_styler_create_srollbar_style(self, (NtkStylerElement[]){NTK_STYLER_ELEMENT_SCROLLBAR_VERTICAL, NTK_STYLER_ELEMENT_NONE}, &styles.scrollv), FALSE);
   g_return_val_if_fail(ntk_styler_create_srollbar_style(self, (NtkStylerElement[]){NTK_STYLER_ELEMENT_SCROLLBAR_HORIZONTAL, NTK_STYLER_ELEMENT_NONE}, &styles.scrollh), FALSE);
   g_return_val_if_fail(ntk_styler_create_edit_style(self, NULL, &styles.edit), FALSE);
+  g_return_val_if_fail(ntk_styler_create_chart_style(self, NULL, &styles.chart), FALSE);
   return ntk_styler_apply_internal(self, ctx, styles);
 }
 
