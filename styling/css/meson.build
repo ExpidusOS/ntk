@@ -8,12 +8,14 @@ configure_file(input: 'data/NtkCSS-custom.vala.in', output: 'NtkCSS-@0@-custom.v
 libntk_css_src = ['lib/error.c', 'lib/styler.c']
 libntk_css_headers = ['include/ntk/styling/css.h', 'include/ntk/styling/css/error.h', 'include/ntk/styling/css/styler.h']
 
+subdir('include/ntk/styling')
+
 libntk_css_inc = include_directories('include')
 libntk_css_deps = [libntk, cssparser]
 
 libntk_css_cflags = ['-I @0@'.format(join_paths(meson.current_build_dir(), 'include'))]
 
-libntk_css_shlib = shared_library('ntk-css', libntk_css_src,
+libntk_css_shlib = shared_library('ntk-css', libntk_css_src, libntk_css_enums,
   c_args: [libntk_css_cflags, '-DG_LOG_DOMAIN="NtkCSS"'],
   version: shortver.split('-')[0],
   include_directories: libntk_css_inc,
