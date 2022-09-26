@@ -1,8 +1,5 @@
 gtk4_examples = get_option('gtk4_examples').disable_auto_if(not get_option('examples'))
 
-libtokyo = dependency('tokyo-gtk4', required: gtk4_examples)
-libadwaita = dependency('libadwaita-1', required: libtokyo.found())
-
 configure_file(input: 'data/NtkGtk4.deps.in', output: 'NtkGtk4-@0@.deps'.format(shortver.split('-')[0]),
   configuration: conf_data)
 configure_file(input: 'data/NtkGtk4.metadata.in', output: 'NtkGtk4-@0@.metadata'.format(shortver.split('-')[0]),
@@ -43,8 +40,8 @@ pkg.generate(libntk_gtk4_shlib, description: 'GTK4 widget, input dispatcher, and
   url: 'https://github.com/ExpidusOS/ntk',
   version: longver)
 
-if libtokyo.found()
+if not gtk4_examples.disabled()
   executable('ntk-gtk4-example-basic', ['examples/basic/main.vala'],
     vala_args: ['--vapidir', meson.current_build_dir(), '--vapidir', join_paths(meson.project_source_root(), 'fonts', 'pango', 'vapi')],
-    dependencies: [libtokyo, libadwaita, nuklear, nuklear_vapi, libntk, libntk_vapi, libntk_gtk4, libntk_gtk4_vapi, libntk_pango, libntk_pango_vapi, libntk_cairo, libntk_cairo_vapi])
+    dependencies: [nuklear, nuklear_vapi, libntk, libntk_vapi, libntk_gtk4, libntk_gtk4_vapi, libntk_pango, libntk_pango_vapi, libntk_cairo, libntk_cairo_vapi])
 endif

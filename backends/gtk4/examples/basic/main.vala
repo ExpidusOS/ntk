@@ -1,5 +1,5 @@
 namespace NtkExampleGtkBasic {
-  public class Window : TokyoGtk.ApplicationWindow {
+  public class Window : Gtk.ApplicationWindow {
     private NtkGtk4.Widget widget;
     private Ntk.InputDispatcher input;
     private Ntk.Context ntk;
@@ -12,7 +12,7 @@ namespace NtkExampleGtkBasic {
       this.widget = new NtkGtk4.Widget();
       this.widget.set_hexpand(true);
       this.widget.set_vexpand(true);
-      this.get_box().append(this.widget);
+      this.child = this.widget;
 
       this.input = new NtkGtk4.InputDispatcher(this.widget);
 
@@ -71,7 +71,7 @@ namespace NtkExampleGtkBasic {
     }
   }
 
-  public class Application : TokyoGtk.Application {
+  public class Application : Gtk.Application {
     public Application() {
       Object(application_id: "com.expidus.ntk.example.basic", flags: GLib.ApplicationFlags.FLAGS_NONE);
     }
