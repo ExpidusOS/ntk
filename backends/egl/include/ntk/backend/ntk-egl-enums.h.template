@@ -2,6 +2,7 @@
 #pragma once
 
 #include <ntk/backend/egl/error.h>
+#include <ntk/backend/egl/renderer.h>
 
 G_BEGIN_DECLS
 /*** END file-header ***/

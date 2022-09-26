@@ -1,5 +1,6 @@
 /*** BEGIN file-header ***/
 #include <ntk/backend/egl/error.h>
+#include <ntk/backend/egl/renderer.h>
 /*** END file-header ***/
 
 /*** BEGIN file-production ***/

@@ -14,7 +14,7 @@ libntk_egl_deps = [egl, libntk, libntk_hw, libntk_gles2]
 
 subdir('include/ntk/backend')
 
-libntk_egl_shlib = shared_library('ntk-egl', libntk_egl_src,
+libntk_egl_shlib = shared_library('ntk-egl', libntk_egl_src, libntk_egl_enums,
   c_args: ['-DG_LOG_DOMAIN="NtkEGL"'],
   include_directories: libntk_egl_inc,
   version: shortver.split('-')[0],
