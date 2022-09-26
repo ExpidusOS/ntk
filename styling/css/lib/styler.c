@@ -41,7 +41,7 @@ static NtkColor* ntk_css_styler_new_color(CssValue* value) {
   return NULL;
 }
 
-static gboolean ntk_css_styler_entry_select(NtkStylerKey* key, CssSelector* parent, CssSelector* selector, size_t* n_elems, size_t* n_states, size_t* n_classes) {
+static gboolean ntk_css_styler_entry_select(NtkStylerKey* key, const CssSelector* parent, const CssSelector* selector, size_t* n_elems, size_t* n_states, size_t* n_classes) {
   if (selector->match == CssSelMatchTag) {
     if (g_str_equal(selector->tag->local, "p")) {
       ntk_styler_key_build_element(key, NTK_STYLER_ELEMENT_TEXT, n_elems);
@@ -519,7 +519,7 @@ static gboolean ntk_css_styler_entry_create(
 
   const gchar* key_str = ntk_styler_key_to_string(key);
   g_debug("Created key: %s", key_str);
-  if (key_str != NULL) g_free(key_str);
+  if (key_str != NULL) g_free((void*)key_str);
 
   g_assert_cmpint(counted_n_elems, ==, n_elems);
   g_assert_cmpint(counted_n_states, ==, n_states);

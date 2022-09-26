@@ -624,6 +624,7 @@ gboolean ntk_styler_apply(NtkStyler* self, NtkContext* ctx) {
   );
   g_return_val_if_fail(ntk_styler_create_selectable_style(self, NULL, &styles.selectable), FALSE);
   g_return_val_if_fail(ntk_styler_create_slider_style(self, NULL, &styles.slider), FALSE);
+  g_return_val_if_fail(ntk_styler_create_progress_style(self, NULL, &styles.progress), FALSE);
   return ntk_styler_apply_internal(self, ctx, styles);
 }
 

@@ -415,4 +415,15 @@ gboolean ntk_styler_create_selectable_style(NtkStyler* self, NtkStylerElement* e
  */
 gboolean ntk_styler_create_slider_style(NtkStyler* self, NtkStylerElement* elems, struct nk_style_slider* style);
 
+/**
+ * ntk_styler_create_progress_style:
+ * @self: An #NtkStyler
+ * @elems: (array zero-terminated=1): A zero-terminated array of #NtkStylerElement
+ * @style: (out): The progress style for Nuklear
+ *
+ * Since: 0.1.0
+ * Returns: True if the style was created
+ */
+gboolean ntk_styler_create_progress_style(NtkStyler* self, NtkStylerElement* elems, struct nk_style_progress* style);
+
 G_END_DECLS
