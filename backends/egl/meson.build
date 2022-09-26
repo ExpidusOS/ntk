@@ -11,6 +11,9 @@ libntk_egl_src = ['lib/error.c', 'lib/renderer.c']
 libntk_egl_headers = ['include/ntk/backend/egl.h', 'include/ntk/backend/egl/error.h', 'include/ntk/backend/egl/renderer.h']
 libntk_egl_inc = include_directories('include')
 libntk_egl_deps = [egl, libntk, libntk_hw, libntk_gles2]
+
+subdir('include/ntk/backend')
+
 libntk_egl_shlib = shared_library('ntk-egl', libntk_egl_src,
   c_args: ['-DG_LOG_DOMAIN="NtkEGL"'],
   include_directories: libntk_egl_inc,
