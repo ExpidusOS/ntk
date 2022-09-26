@@ -15,11 +15,13 @@ libntk_cairo_headers = ['include/ntk/backend/cairo.h', 'include/ntk/backend/cair
 libntk_cairo_inc = include_directories('include')
 libntk_cairo_deps = [cairo, libntk, pangocairo, libntk_pango]
 
+subdir('include/ntk/backend')
+
 if cairo_gobject.found()
   libntk_cairo_deps += [cairo_gobject]
 endif
 
-libntk_cairo_shlib = shared_library('ntk-cairo', libntk_cairo_src,
+libntk_cairo_shlib = shared_library('ntk-cairo', libntk_cairo_src, libntk_cairo_enums,
   c_args: ['-DG_LOG_DOMAIN="NtkCairo"'],
   include_directories: libntk_cairo_inc,
   version: shortver.split('-')[0],
