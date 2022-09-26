@@ -14,7 +14,10 @@ libntk_gles2_src = ['lib/error.c', 'lib/font.c', 'lib/pixel-format.c', 'lib/rend
 libntk_gles2_headers = ['include/ntk/backend/gles2.h', 'include/ntk/backend/gles2/error.h', 'include/ntk/backend/gles2/font.h', 'include/ntk/backend/gles2/renderer.h']
 libntk_gles2_inc = include_directories('include')
 libntk_gles2_deps = [gles2, libntk, libntk_pango, libntk_hw]
-libntk_gles2_shlib = shared_library('ntk-gles2', libntk_gles2_src,
+
+subdir('include/ntk/backend')
+
+libntk_gles2_shlib = shared_library('ntk-gles2', libntk_gles2_src, libntk_gles2_enums,
   c_args: ['-DG_LOG_DOMAIN="NtkGLES2"'],
   include_directories: libntk_gles2_inc,
   version: shortver.split('-')[0],
