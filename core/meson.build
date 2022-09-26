@@ -5,8 +5,6 @@ configure_file(input: 'data/Ntk.metadata.in', output: 'Ntk-@0@.metadata'.format(
 configure_file(input: 'data/Ntk-custom.vala.in', output: 'Ntk-@0@-custom.vala'.format(shortver.split('-')[0]),
   configuration: conf_data)
 
-subdir('include/ntk')
-
 libntk_src = ['lib/color.c', 'lib/context.c', 'lib/error.c', 'lib/input-dispatcher.c', 'lib/renderer.c', 'lib/styler.c', 'lib/utils.c',
   'lib/font/object.c', 'lib/font/user.c', 'lib/styles/button.c', 'lib/styles/item.c', 'lib/styles/progress.c', 'lib/styles/selectable.c',
   'lib/styles/slider.c', 'lib/styles/text.c', 'lib/styles/toggle.c']
@@ -14,16 +12,17 @@ libntk_headers = ['include/ntk/ntk.h', 'include/ntk/color.h', 'include/ntk/conte
   'include/ntk/renderer.h', 'include/ntk/styler.h', 'include/ntk/utils.h',
   'include/ntk/font/object.h', 'include/ntk/font/user.h']
 
+subdir('include/ntk')
+
 libntk_inc = [include_directories('include')]
 libntk_deps = [glib, gobject, nuklear]
 
-libntk_cflags = ['-I', join_paths(meson.current_build_dir(), 'include')]
-libntk_enums = gnome.mkenums('ntk-enums', sources: libntk_headers)
-
+libntk_cflags = ['-I' + join_paths(meson.current_build_dir(), 'include'), '-I' + join_paths(meson.current_source_dir(), 'include')]
 libntk_shlib = shared_library('ntk', libntk_src, libntk_enums,
   c_args: [libntk_cflags, '-DG_LOG_DOMAIN="Ntk"'],
   version: shortver.split('-')[0],
   include_directories: libntk_inc,
+  implicit_include_directories: true,
   dependencies: libntk_deps,
   install: true)
 
