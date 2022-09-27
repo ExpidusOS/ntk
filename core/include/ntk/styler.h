@@ -505,4 +505,26 @@ gboolean ntk_styler_create_combo_style(NtkStyler* self, NtkStylerElement* elems,
  */
 gboolean ntk_styler_create_tab_style(NtkStyler* self, NtkStylerElement* elems, struct nk_style_tab* style);
 
+/**
+ * ntk_styler_create_window_header_style_for_key:
+ * @self: An #NtkStyler
+ * @key: The style key to use
+ * @style: (out): The window header style for Nuklear
+ *
+ * Since: 0.1.0
+ * Returns: True if the style was created
+ */
+gboolean ntk_styler_create_window_header_style_for_key(NtkStyler* self, NtkStylerKey key, struct nk_style_window_header* style);
+
+/**
+ * ntk_styler_create_window_style:
+ * @self: An #NtkStyler
+ * @elems: (array zero-terminated=1): A zero-terminated array of #NtkStylerElement
+ * @style: (out): The window style for Nuklear
+ *
+ * Since: 0.1.0
+ * Returns: True if the style was created
+ */
+gboolean ntk_styler_create_window_style(NtkStyler* self, NtkStylerElement* elems, struct nk_style_window* style);
+
 G_END_DECLS

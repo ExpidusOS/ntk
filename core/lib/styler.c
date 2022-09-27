@@ -632,6 +632,7 @@ gboolean ntk_styler_apply(NtkStyler* self, NtkContext* ctx) {
   g_return_val_if_fail(ntk_styler_create_edit_style(self, NULL, &styles.edit), FALSE);
   g_return_val_if_fail(ntk_styler_create_chart_style(self, NULL, &styles.chart), FALSE);
   g_return_val_if_fail(ntk_styler_create_combo_style(self, NULL, &styles.combo), FALSE);
+  g_return_val_if_fail(ntk_styler_create_window_style(self, NULL, &styles.window), FALSE);
   return ntk_styler_apply_internal(self, ctx, styles);
 }
 
