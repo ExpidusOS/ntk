@@ -74,6 +74,8 @@ const char* ntk_styler_element_to_string(NtkStylerElement elem) {
       return "Input Checkbox";
     case NTK_STYLER_ELEMENT_PROGRESS:
       return "Progress";
+    case NTK_STYLER_ELEMENT_SCROLLBAR:
+      return "Scrollbar";
     case NTK_STYLER_ELEMENT_SCROLLBAR_VERTICAL:
       return "Vertical Scrollbar";
     case NTK_STYLER_ELEMENT_SCROLLBAR_HORIZONTAL:

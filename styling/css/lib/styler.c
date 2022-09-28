@@ -57,6 +57,7 @@ static gboolean ntk_css_styler_entry_select(NtkStylerKey* key, const CssSelector
       }
     } else if (g_str_equal(selector->tag->local, "scrollbar")) {
       if (selector->tagHistory == NULL) {
+        ntk_styler_key_build_element(key, NTK_STYLER_ELEMENT_SCROLLBAR, n_elems);
         ntk_styler_key_build_element(key, NTK_STYLER_ELEMENT_SCROLLBAR_VERTICAL, n_elems);
         ntk_styler_key_build_element(key, NTK_STYLER_ELEMENT_SCROLLBAR_HORIZONTAL, n_elems);
       }
@@ -136,8 +137,10 @@ static gboolean ntk_css_styler_entry_select(NtkStylerKey* key, const CssSelector
             } else if (g_str_equal(selector->tag->local, "scrollbar")) {
               if (g_str_equal(cs->data->attribute->local, "type")) {
                 if (g_str_equal(cs->data->value, "vertical")) {
+                  ntk_styler_key_build_element(key, NTK_STYLER_ELEMENT_SCROLLBAR, n_elems);
                   ntk_styler_key_build_element(key, NTK_STYLER_ELEMENT_SCROLLBAR_VERTICAL, n_elems);
                 } else if (g_str_equal(cs->data->value, "horizontal")) {
+                  ntk_styler_key_build_element(key, NTK_STYLER_ELEMENT_SCROLLBAR, n_elems);
                   ntk_styler_key_build_element(key, NTK_STYLER_ELEMENT_SCROLLBAR_HORIZONTAL, n_elems);
                 }
               }
