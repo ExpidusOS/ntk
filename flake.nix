@@ -6,7 +6,12 @@
     inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, cssparser, ... }:
+  inputs.expidus-sdk = {
+    url = github:ExpidusOS/sdk;
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+
+  outputs = { self, nixpkgs, cssparser, expidus-sdk, ... }:
     let
       supportedSystems = [
         "aarch64-linux"
@@ -24,6 +29,7 @@
         let
           pkgs = nixpkgsFor.${system};
           cssparser-pkg = cssparser.packages.${system}.default;
+          expidus-sdk-pkg = expidus-sdk.packages.${system}.default;
 
           linuxPackages = {
             default = with pkgs; [
@@ -88,7 +94,7 @@
 
             mesonFlags = mesonFlags ++ ["-Dexamples=false" "-Dcairo_examples=disabled" "-Dgtk4_examples=disabled" "-Degl_examples=disabled"];
             enableParallelBuilding = true;
-            nativeBuildInputs = with pkgs; [ meson vala ninja pkg-config gobject-introspection ];
+            nativeBuildInputs = with pkgs; [ meson vala ninja pkg-config gobject-introspection expidus-sdk-pkg ];
 
             meta = with pkgs.lib; {
               homepage = "https://github.com/ExpidusOS/ntk";
@@ -144,6 +150,7 @@
         let
           pkgs = nixpkgsFor.${system};
           cssparser-pkg = cssparser.packages.${system}.default;
+          expidus-sdk-pkg = expidus-sdk.packages.${system}.default;
 
           linuxPackages = {
             default = with pkgs; [
@@ -176,7 +183,6 @@
         in {
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
-              clang_14
               gdb
               gobject-introspection
               meson
@@ -188,12 +194,12 @@
               libadwaita
               libglvnd
               cssparser-pkg
+              expidus-sdk-pkg
             ] ++ packagesForSystem.default;
           };
           minimal = pkgs.mkShell {
             buildInputs = with pkgs; [
               pango
-              clang_14
               gdb
               gobject-introspection
               meson
@@ -202,6 +208,7 @@
               glib
               vala
               cssparser-pkg
+              expidus-sdk-pkg
             ] ++ packagesForSystem.default;
           };
         });
