@@ -99,7 +99,7 @@
             meta = with pkgs.lib; {
               homepage = "https://github.com/ExpidusOS/ntk";
               license = with licenses; [ gpl3Only ];
-              maintainers = [ "Tristan Ross" ];
+              maintainers = with expidus-sdk.lib.maintainers; [ TheComputerGuy ];
             };
           });
         in {
