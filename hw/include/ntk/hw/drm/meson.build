@@ -1,3 +1,3 @@
 install_headers([
     'render.h'
-  ], install_dir: subdir(libntk_hw_inc_installdir, 'drm'))
+  ], install_dir: join_paths(libntk_hw_inc_installdir, 'drm'))
