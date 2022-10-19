@@ -15,7 +15,7 @@ libntk_headers = ['include/ntk/ntk.h', 'include/ntk/color.h', 'include/ntk/conte
 subdir('include/ntk')
 
 libntk_inc = [include_directories('include')]
-libntk_deps = [glib, gobject, nuklear]
+libntk_deps = [glib, gobject, nuklear, libntk_enums_dep]
 
 libntk_cflags = ['-I' + join_paths(meson.current_build_dir(), 'include'), '-I' + join_paths(meson.current_source_dir(), 'include')]
 libntk_shlib = shared_library('ntk', libntk_src, libntk_enums,

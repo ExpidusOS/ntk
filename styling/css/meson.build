@@ -11,7 +11,7 @@ libntk_css_headers = ['include/ntk/styling/css.h', 'include/ntk/styling/css/erro
 subdir('include/ntk/styling')
 
 libntk_css_inc = include_directories('include')
-libntk_css_deps = [libntk, cssparser]
+libntk_css_deps = [libntk, cssparser, libntk_css_enums_dep]
 
 libntk_css_cflags = ['-I @0@'.format(join_paths(meson.current_build_dir(), 'include'))]
 

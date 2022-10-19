@@ -4,11 +4,14 @@ libntk_headers_rel = []
 foreach hdr : libntk_headers
   libntk_headers_rel += hdr.replace('include/ntk/', meson.current_source_dir() + '/')
 endforeach
+
 libntk_enums = gnome.mkenums('ntk-enums', sources: libntk_headers_rel,
   c_template: 'ntk-enums.c.template',
   h_template: 'ntk-enums.h.template',
   install_header: true,
   install_dir: libntk_inc_installdir)
+
+libntk_enums_dep = declare_dependency(sources: [libntk_enums])
 
 install_headers([
     'color.h',

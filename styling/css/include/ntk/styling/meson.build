@@ -15,4 +15,6 @@ libntk_css_enums = gnome.mkenums('ntk-css-enums', sources: libntk_css_headers_re
   install_header: true,
   install_dir: join_paths(prefix, 'include', 'ntk-css-@0@'.format(shortver), 'ntk', 'styling'))
 
+libntk_css_enums_dep = declare_dependency(sources: [libntk_css_enums])
+
 subdir('css')

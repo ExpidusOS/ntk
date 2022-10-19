@@ -11,6 +11,7 @@ libntk_hw_cflags = ['-I @0@'.format(join_paths(meson.current_build_dir(), 'inclu
 libntk_hw_vala_extra = ''
 
 subdir('include/ntk')
+libntk_hw_deps += [libntk_hw_enums_dep]
 
 if libdrm.found()
   libntk_hw_deps += [libdrm]
@@ -26,7 +27,7 @@ libntk_hw_conf.set('HW_EXTRA_VALA', libntk_hw_vala_extra)
 configure_file(input: 'data/NtkHW-custom.vala.in', output: 'NtkHW-@0@-custom.vala'.format(shortver.split('-')[0]),
   configuration: libntk_hw_conf)
 
-libntk_hw_shlib = shared_library('ntk-hw', libntk_hw_src, libntk_hw_enums,
+libntk_hw_shlib = shared_library('ntk-hw', libntk_hw_enums, libntk_hw_src,
   c_args: [libntk_hw_cflags, '-DG_LOG_DOMAIN="NtkHW"'],
   version: shortver.split('-')[0],
   include_directories: libntk_hw_inc,
