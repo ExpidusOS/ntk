@@ -5,5 +5,5 @@
     url = github:ExpidusOS/sdk;
   };
 
-  outputs = { self, expidus-sdk }: expidus-sdk.libExpidus.mkFlake { inherit self; name = "ntk"; };
+  outputs = { self, expidus-sdk }: expidus-sdk.lib.expidus.flake.makeOverride { inherit self; name = "ntk"; };
 }
