@@ -2,11 +2,11 @@
   "nodes": {
     "expidus-sdk": {
       "locked": {
-        "lastModified": 1668904617,
-        "narHash": "sha256-p7oBdxQZIrYmayvAYNXBlyNdRExvdyQrrNl9DEh/Kw8=",
+        "lastModified": 1669931793,
+        "narHash": "sha256-KJUYt4Y6409NEom2JbOjKKZOMeasW04jvaW9hsi8fYE=",
         "owner": "ExpidusOS",
         "repo": "sdk",
-        "rev": "c35204d9e9c1b8e055e8c063d20aa7d234fc48c9",
+        "rev": "e89af2f14a66d07fa3b8385ff6c630a7739e9ad1",
         "type": "github"
       },
       "original": {
@@ -15,9 +15,26 @@
         "type": "github"
       }
     },
+    "nuklear": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1669841297,
+        "narHash": "sha256-N8ZgyybwQMXT2w3ZNRE91L7p/ymXMa+4YzgTTsHeUag=",
+        "owner": "Immediate-Mode-UI",
+        "repo": "Nuklear",
+        "rev": "776893ef7b0f73ec22807e210abc10851803d69e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Immediate-Mode-UI",
+        "repo": "Nuklear",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
-        "expidus-sdk": "expidus-sdk"
+        "expidus-sdk": "expidus-sdk",
+        "nuklear": "nuklear"
       }
     }
   },

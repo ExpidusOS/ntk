@@ -5,5 +5,17 @@
     url = github:ExpidusOS/sdk;
   };
 
-  outputs = { self, expidus-sdk }: expidus-sdk.lib.expidus.flake.makeOverride { inherit self; name = "ntk"; };
+  inputs.nuklear = {
+    url = github:Immediate-Mode-UI/Nuklear;
+    flake = false;
+  };
+
+  outputs = { self, expidus-sdk, nuklear }:
+    with expidus-sdk.lib;
+    expidus.flake.makeOverride {
+      self = expidus.flake.makeSubmodules self {
+        "nuklear/src/nuklear" = nuklear;
+      };
+      name = "ntk";
+    };
 }
